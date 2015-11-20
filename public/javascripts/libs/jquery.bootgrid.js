@@ -498,6 +498,7 @@
                 // Row count selection
 
                 renderAddIcon.call(this, actions);
+                renderRemoveIcon.call(this, actions);
 
                 renderRowCountSelection.call(this, actions);
 
@@ -666,7 +667,7 @@
                         var $this = $(this);
                         var listType = $this.data('listType');
                         var lines = $('#addLinesHolder').val();
-                        var linesArr = lines.split('\n');
+                        var linesArr = lines.split('\n').filter(function(item){return item.length});
                         if (linesArr.length) {
                             switch (listType) {
                                 case 'person':
@@ -721,6 +722,24 @@
                     selector.modal('show');
                 });
         actions.append(add);
+    }
+
+    function renderRemoveIcon(actions) {
+        var that = this,
+            css = this.options.css,
+            tpl = this.options.templates;
+
+        var removeIcon = tpl.icon.resolve(getParams.call(this, {iconCss: css.iconRemove})),
+            remove = $(tpl.actionButton.resolve(getParams.call(this,
+                {content: removeIcon, text: this.options.labels.removeSelected})))
+                .on("click" + namespace, function (e) {
+                    e.stopPropagation();
+                    if (that.selectedRows.length)
+                        that.remove(that.selectedRows, function(){
+                            that.reload();
+                        });
+                });
+        actions.append(remove);
     }
 
     function renderRowCountSelection(actions) {
@@ -1383,6 +1402,7 @@
             iconSearch: "glyphicon-search",
             iconUp: "glyphicon-chevron-up",
             iconAdd: "glyphicon-plus",
+            iconRemove: "glyphicon-trash",
             infos: "infos", // must be a unique class name or constellation of class names within the header and footer,
             left: "text-left",
             pagination: "pagination", // must be a unique class name or constellation of class names within the header and footer
@@ -1688,12 +1708,23 @@
      * @param [rowsIds] {Array} An array of rows ids to remove
      * @chainable
      **/
-    Grid.prototype.remove = function (rowIds) {
+    Grid.prototype.remove = function (rowIds, callback) {
         if (this.identifier != null) {
             var that = this;
 
             if (this.options.ajax) {
-                // todo: implement ajax DELETE
+                $.ajax({
+                    method: 'DELETE',
+                    data: {
+                        options: JSON.stringify({
+                            listType: that.listType,
+                            ids: (rowIds || this.selectedRows)
+                        })
+                    },
+                    url: '/grid'
+                }).always(function () {
+                    callback();
+                })
             }
             else {
                 rowIds = rowIds || this.selectedRows;
