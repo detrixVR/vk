@@ -1,14 +1,5 @@
 <component name="libraryTable">
   <library name="Generated files" type="javaScript">
-    <properties>
-      <sourceFilesUrls>
-        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
-        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/module.js" />
-        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/ьщвгду.js" />
-        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
-        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/entry.js" />
-      </sourceFilesUrls>
-    </properties>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/public/javascripts/libs/bootstrap.min-compiled.js" />
       <root url="file://$PROJECT_DIR$/public/javascripts/libs/jasny-bootstrap.min-compiled.js" />

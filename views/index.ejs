@@ -1,78 +1,104 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
 
-  <title>Off Canvas Reveal Menu Template for Bootstrap</title>
+    <title>Off Canvas Reveal Menu Template for Bootstrap</title>
 
-  <!-- Bootstrap core CSS -->
-  <link href="stylesheets/libs/bootstrap.min.css" rel="stylesheet">
-  <link href="stylesheets/libs/jasny-bootstrap.min.css" rel="stylesheet">
-  <link href="stylesheets/libs/jquery.bootgrid.min.css" rel="stylesheet">
-  <link href="stylesheets/style.css" rel="stylesheet">
+    <!-- Bootstrap core CSS -->
+    <link href="stylesheets/libs/bootstrap.min.css" rel="stylesheet">
+    <link href="stylesheets/libs/jasny-bootstrap.min.css" rel="stylesheet">
+    <link href="stylesheets/libs/jquery.bootgrid.min.css" rel="stylesheet">
+    <link href="stylesheets/style.css" rel="stylesheet">
 
-  <!-- Just for debugging purposes. Don't actually copy this line! -->
-  <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]>
+    <script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
-  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-  <![endif]-->
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
 </head>
 
 <body>
 
-<div class="hidden" id="pageId"><%=pageId%></div>
+<div class="hidden" id="pageId"><%= pageId %></div>
 
 
 <div class="navmenu navmenu-default navmenu-fixed-left">
-  <a class="navmenu-brand" href="#">Project name</a>
-  <ul class="nav navmenu-nav">
-    <li><a href="../navmenu/">Slide in</a></li>
-    <li><a href="../navmenu-push/">Push</a></li>
-    <li class="active"><a href="./">Reveal</a></li>
-    <li><a href="../navbar-offcanvas/">Off canvas navbar</a></li>
-  </ul>
-  <ul class="nav navmenu-nav">
-    <li><a href="#">Link</a></li>
-    <li><a href="#">Link</a></li>
-    <li><a href="#">Link</a></li>
-    <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-      <ul class="dropdown-menu navmenu-nav">
-        <li><a href="#">Action</a></li>
-        <li><a href="#">Another action</a></li>
-        <li><a href="#">Something else here</a></li>
-        <li class="divider"></li>
-        <li class="dropdown-header">Nav header</li>
-        <li><a href="#">Separated link</a></li>
-        <li><a href="#">One more separated link</a></li>
-      </ul>
-    </li>
-  </ul>
+    <a class="navmenu-brand" href="#">Project name</a>
+    <ul class="nav navmenu-nav">
+        <li><a href="../navmenu/">ПРОКСИ<span class="glyphicon glyphicon-globe pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="../navmenu-push/">АККАУНТЫ<span class="glyphicon glyphicon-user pull-right" aria-hidden="true"></span></a></li>
+    </ul>
+    <ul class="nav navmenu-nav">
+        <li><a href="#">ЛЮДИ<span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">ГРУППЫ<span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">СПИСКИ<span class="glyphicon glyphicon-list pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">ЗАДАНИЯ<span class="glyphicon glyphicon-briefcase pull-right" aria-hidden="true"></span></a></li>
+
+    </ul>
 </div>
 
 <div class="canvas">
-  <div class="navbar navbar-default navbar-fixed-top">
-    <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-recalc="false" data-target=".navmenu" data-canvas=".canvas">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-  </div>
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-recalc="false"
+                        data-target=".navmenu" data-canvas=".canvas">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-  <div class="container-fluid">
-    <%- include templates/proxyGrid.ejs %>
-  </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="well well-sm">
+                    <button class="btn btn-default">start</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="well well-sm">
+                    <%- include templates/proxyGrid.ejs %>
+                </div>
+            </div>
+            <div class="col-xs-12  col-lg-4"></div>
+        </div>
+
+
+    </div>
 </div>
-
 
 
 <script src="javascripts/libs/jquery-2.1.4.min.js"></script>
@@ -84,19 +110,6 @@
 
 <script src="javascripts/app.js"></script>
 
-
-<!--<script>
-  $("#grid-data").bootgrid({
-    ajax: true,
-    url: "/grid",
-    formatters: {
-      "link": function(column, row)
-      {
-        return "<a href=\"#\">" + column.id + ": " + row.id + "</a>";
-      }
-    }
-  });
-</script>-->
 
 <%- include templates/modalInput.ejs %>
 </body>

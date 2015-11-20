@@ -1,0 +1,55 @@
+@import "palette";
+
+.navbar {
+  border-radius: 0;
+  border: none;
+
+  &.navbar-default {
+   // border-bottom: 1px solid @palette-Grey-400;
+    background-color: @palette-Blue-400;
+
+    .nav {
+      &.navbar-nav {
+
+        li {
+
+          &:first-child {
+            border-left: 1px solid #ffffff;
+          }
+          & > a {
+            color: #ffffff;
+            border-right: 1px solid #ffffff;
+
+            &:hover {
+              background-color: @palette-Blue-200
+            }
+          }
+          &.active > a {
+            background-color: @palette-Blue-500;
+          }
+
+        }
+      }
+    }
+
+    .navbar-toggle {
+      border-color: #fff;
+      box-shadow: 0 0px 2px rgba(0, 0, 0, .1);
+
+      &:hover,
+      &:focus {
+        box-shadow: 0 0px 2px rgba(0, 0, 0, .5);
+        background-color: transparent;
+      }
+      .icon-bar {
+        background-color: #fff;
+      }
+    }
+  }
+}
+
+.well {
+  background-color: #ffffff;
+  box-shadow: 0 0px 2px rgba(0, 0, 0, .1);
+  border-radius: 0;
+}
