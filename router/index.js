@@ -11,6 +11,10 @@ function nocache(req, res, next) {
 module.exports = function (app) {
     app.get('/',            require('./index').get);
 
+    app.get('/grid', require('./grid').get);
+    app.post('/grid', require('./grid').post);
+    app.put('/grid', require('./grid').put);
+    app.delete('/grid', require('./grid').delete);
 
 
     app.use(function (req, res, next) {

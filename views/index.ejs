@@ -17,9 +17,6 @@
   <link href="stylesheets/libs/jquery.bootgrid.min.css" rel="stylesheet">
   <link href="stylesheets/style.css" rel="stylesheet">
 
-  <!-- Custom styles for this template -->
-  <link href="navmenu-reveal.css" rel="stylesheet">
-
   <!-- Just for debugging purposes. Don't actually copy this line! -->
   <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
@@ -71,17 +68,8 @@
     </button>
   </div>
 
-  <div class="container">
-    <table id="grid-data" class="table table-condensed table-hover table-striped">
-      <thead>
-      <tr>
-        <th  data-column-id="id" data-type="numeric">ID</th>
-        <th  data-column-id="sender">Sender</th>
-        <th  data-header-css-class="hidden-xs hidden-sm" data-column-id="received" data-order="desc">Received</th>
-        <th  data-header-css-class="hidden-xs hidden-sm hidden-md" data-column-id="link" data-formatter="link" data-sortable="false">Link</th>
-      </tr>
-      </thead>
-    </table>
+  <div class="container-fluid">
+    <%- include templates/proxyGrid.ejs %>
   </div>
 </div>
 
@@ -97,17 +85,10 @@
 <script src="javascripts/app.js"></script>
 
 
-<script>
+<!--<script>
   $("#grid-data").bootgrid({
     ajax: true,
-    post: function ()
-    {
-      /* To accumulate custom parameter with the request object */
-      return {
-        id: "b0df282a-0d67-40e5-8558-c9e93b7befed"
-      };
-    },
-    url: "/api/data/basic",
+    url: "/grid",
     formatters: {
       "link": function(column, row)
       {
@@ -115,6 +96,8 @@
       }
     }
   });
-</script>
+</script>-->
+
+<%- include templates/modalInput.ejs %>
 </body>
 </html>

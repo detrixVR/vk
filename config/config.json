@@ -1,0 +1,22 @@
+﻿{
+    "client_id": "5012978",
+    "proxy": "http://159.8.54.34:3128",
+    "mongoose": {
+        "uri_local": "mongodb://127.0.0.1:27017/vkbot",
+        "uri_heroku": "mongodb://admin:pussycat473@ds047020.mongolab.com:47020/heroku_app32881352",
+        "options": {
+            "server": {
+                "socketOptions": {
+                    "keepAlive": 1
+                }
+            }
+        }
+    },
+    "default_request_options": {
+        "method": "GET",
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36"
+        }
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36"
+}
