@@ -1,0 +1,51 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
+        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/module.js" />
+        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/ьщвгду.js" />
+        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
+        <item url="file://$PROJECT_DIR$/sources/javascripts/compiled/entry.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/public/javascripts/libs/bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/libs/jasny-bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/libs/bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/libs/jasny-bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/Point-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/webpack.config-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/Point-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/bootstrap.min-compiled.js" />
+      <root url="file://$PROJECT_DIR$/webpack.config-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/main-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/main-compiled.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/main-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/proxyChecker/index-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/index-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/main-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/proxyChecker/index-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/index-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/main-compiled.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/socket.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/main.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/index.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/entry.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/main.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/socket.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/index.js" />
+      <root url="file://$PROJECT_DIR$/public/javascripts/entry.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/main.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/ьщвгду.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/module.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/ьщвгду.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/socket.js" />
+      <root url="file://$PROJECT_DIR$/sources/javascripts/compiled/entry.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
