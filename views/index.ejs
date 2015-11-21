@@ -13,6 +13,7 @@
     <link href="stylesheets/libs/bootstrap.min.css" rel="stylesheet">
     <link href="stylesheets/libs/jasny-bootstrap.min.css" rel="stylesheet">
     <link href="stylesheets/libs/jquery.bootgrid.min.css" rel="stylesheet">
+    <link href="stylesheets/libs/bootstrap-select.min.css" rel="stylesheet">
     <link href="stylesheets/style.css" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy this line! -->
@@ -84,6 +85,12 @@
             <div class="col-xs-12">
                 <div class="well well-sm">
                     <button class="btn btn-default">start</button>
+
+                    <select class="selectpicker" id="selector">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -106,10 +113,15 @@
 <script src="javascripts/libs/jasny-bootstrap.min.js"></script>
 <script src="javascripts/libs/jquery.bootgrid.js"></script>
 <script src="javascripts/libs/socket.io-1.3.7.js"></script>
+<script src="javascripts/libs/bootstrap-select.min.js"></script>
 
 
 <script src="javascripts/app.js"></script>
 
+
+<script>
+    $('.selectpicker').selectpicker();
+</script>
 
 <%- include templates/modalInput.ejs %>
 </body>
