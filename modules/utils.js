@@ -225,6 +225,23 @@ function getLocation(href) {
         }
 }
 
+function validateIPaddress(ipaddress) {
+
+    function validateNum(input, min, max) {
+        var num = +input;
+        return num >= min && num <= max && input === num.toString();
+    }
+
+    var parts = ipaddress.split(":");
+    var ip = parts[0].split(".");
+    var port = parts[1];
+    return validateNum(port, 1, 65535) &&
+        ip.length == 4 &&
+        ip.every(function (segment) {
+            return validateNum(segment, 0, 255);
+        });
+}
+
 function extend(target) {
     var sources = [].slice.call(arguments, 1);
     sources.forEach(function (source) {
@@ -262,3 +279,4 @@ module.exports.getLocation = getLocation;
 module.exports.validateIPaddress = validateIPaddress;
 module.exports.extend = extend;
 module.exports.getCase = getCase;
+module.exports.validateIPaddress = validateIPaddress;

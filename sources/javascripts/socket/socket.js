@@ -46,6 +46,11 @@ class Socket {
                 console.log(state);
                 utils.setState(state);
             });
+
+            this.socket.on('gridRowEvent', function (data) {
+                console.log(data);
+               // utils.setState(state);
+            });
             this.socket.on('disconnect',function(){
                 console.log('disconnect');
             });
