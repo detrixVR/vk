@@ -78,6 +78,17 @@
         loadData.call(this);
 
         this.element.trigger("initialized" + namespace);
+
+        var that = this;
+
+        this.element.bind('gridRowEvent', function (event, data) {
+            that.refreshRow(data);
+        });
+
+        this.element.bind('gridRowEdit', function(event, id) {
+            that.editRow(id);
+            console.log('gridRowEdit');
+        });
     }
 
     function highlightAppendedRows(rows) {
@@ -667,7 +678,9 @@
                         var $this = $(this);
                         var listType = $this.data('listType');
                         var lines = $('#addLinesHolder').val();
-                        var linesArr = lines.split('\n').filter(function(item){return item.length});
+                        var linesArr = lines.split('\n').filter(function (item) {
+                            return item.length
+                        });
                         if (linesArr.length) {
                             switch (listType) {
                                 case 'person':
@@ -693,9 +706,9 @@
 
                                     break;
                             }
-                           that.append(linesArr, function(){
-                               that.reload();
-                           });
+                            that.append(linesArr, function () {
+                                that.reload();
+                            });
                         }
                     });
                     selector.on('.shown.bs.modal', function () {
@@ -735,7 +748,7 @@
                 .on("click" + namespace, function (e) {
                     e.stopPropagation();
                     if (that.selectedRows.length)
-                        that.remove(that.selectedRows, function(){
+                        that.remove(that.selectedRows, function () {
                             that.reload();
                         });
                 });
@@ -1393,8 +1406,8 @@
             dropDownMenu: "dropdown btn-group", // must be a unique class name or constellation of class names within the actionDropDown
             dropDownMenuItems: "dropdown-menu pull-right", // must be a unique class name or constellation of class names within the actionDropDown
             dropDownMenuText: "dropdown-text", // must be a unique class name or constellation of class names within the actionDropDown
-            footer: "bootgrid-footer container-fluid",
-            header: "bootgrid-header container-fluid",
+            footer: "bootgrid-footer",
+            header: "bootgrid-header",
             icon: "icon glyphicon",
             iconColumns: "glyphicon-th-list",
             iconDown: "glyphicon-chevron-down",
@@ -1449,21 +1462,26 @@
          * @since 1.0.0
          **/
         formatters: {
+
+            //const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
+
             status: function (column, row) {
-                switch (row.valid) {
+                switch (row.status) {
                     case 0:
-                        return '<span class="label label-default">Не проверен</span>';
-                    case 1:
-                        return '<span class="label label-success">Валидный</span>';
-                    case 2:
-                        return '<span class="label label-warning">Невалидный</span>';
-                    case 3:
                         return '<span class="label label-info">Проверяется</span>';
+                    case 1:
+                        return '<span class="label label-default">Не проверен</span>';
+                    case 2:
+                        return '<span class="label label-warning">Неверный прокси</span>';
+                    case 3:
+                        return '<span class="label label-success">Валидный</span>';
+                    case 4:
+                        return '<span class="label label-danger">Невалидный</span>';
                 }
             },
             commandsAll: function (column, row) {
-                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-edit\" data-row-_id=\"" + row._id + "\"><span class=\"fa fa-pencil\"></span></button> " +
-                    "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"fa fa-trash-o\"></span></button>";
+                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-edit\" data-row-_id=\"" + row._id + "\" onclick=\"var $this = $(this); $this.closest('[data-toggle=bootgrid]').trigger('gridRowEdit', $this.data('row-_id'));\"><span class=\"glyphicon glyphicon-pencil\"></span></button>" +
+                    " <button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
             },
             commandsNotAll: function (column, row) {
                 return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"fa fa-trash-o\"></span></button>";
@@ -1526,7 +1544,7 @@
              * @type String
              * @for statusMapping
              **/
-            0: "success",
+            0: "info",
 
             /**
              * Specifies a neutral informative change or action.
@@ -1553,7 +1571,9 @@
              * @type String
              * @for statusMapping
              **/
-            3: "danger"
+            3: "success",
+
+            4: "danger"
         },
 
         /**
@@ -1571,8 +1591,8 @@
             actions: "<div class=\"{{css.actions}}\"></div>",
             body: "<tbody></tbody>",
             cell: "<td class=\"{{ctx.css}}\" style=\"{{ctx.style}}\">{{ctx.content}}</td>",
-            footer: "<div id=\"{{ctx.id}}\" class=\"{{css.footer}}\"><div class=\"row\"><div class=\"col-sm-6\"><p class=\"{{css.pagination}}\"></p></div><div class=\"col-sm-6 infoBar\"><p class=\"{{css.infos}}\"></p></div></div></div>",
-            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"row\"><div class=\"col-sm-12 actionBar\"><p class=\"{{css.search}}\"></p><p class=\"{{css.actions}}\"></p></div></div></div>",
+            footer: "<div id=\"{{ctx.id}}\" class=\"{{css.footer}}\"><div><p class=\"{{css.pagination}}\"></p></div><div class=\"infoBar pull-right\"><p class=\"{{css.infos}}\"></p></div></div>",
+            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"actionBar\"><p class=\"{{css.search}}\"></p><p class=\"{{css.actions}}\"></p></div></div>",
             headerCell: "<th data-column-id=\"{{ctx.column.id}}\" class=\"{{ctx.css}}\" style=\"{{ctx.style}}\"><a href=\"javascript:void(0);\" class=\"{{css.columnHeaderAnchor}} {{ctx.sortable}}\"><span class=\"{{css.columnHeaderText}}\">{{ctx.column.text}}</span>{{ctx.icon}}</a></th>",
             icon: "<span class=\"{{css.icon}} {{ctx.iconCss}}\"></span>",
             infos: "<div class=\"{{css.infos}}\">{{lbl.infos}}</div>",
@@ -1595,24 +1615,65 @@
      * @chainable
      **/
     /*Grid.prototype.append = function (rows) {
-        if (this.options.ajax) {
-            // todo: implement ajax PUT
+     if (this.options.ajax) {
+     // todo: implement ajax PUT
+     }
+     else {
+     var appendedRows = [];
+     for (var i = 0; i < rows.length; i++) {
+     if (appendRow.call(this, rows[i])) {
+     appendedRows.push(rows[i]);
+     }
+     }
+     sortRows.call(this);
+     highlightAppendedRows.call(this, appendedRows);
+     loadData.call(this);
+     this.element.trigger("appended" + namespace, [appendedRows]);
+     }
+
+     return this;
+     };*/
+
+    Grid.prototype.refreshRow = function (data) {
+        var findedItem = this.currentRows.find(function (item) {
+            return item._id === data.id
+        });
+        if (findedItem) {
+            data.columns.forEach(function (item, i) {
+                findedItem[item] = data.values[i];
+            });
+            renderRows.call(this, this.currentRows);
         }
-        else {
-            var appendedRows = [];
-            for (var i = 0; i < rows.length; i++) {
-                if (appendRow.call(this, rows[i])) {
-                    appendedRows.push(rows[i]);
+    };
+
+
+    Grid.prototype.editRow = function (id) {
+        var content = '';
+
+        var rowData = this.currentRows.find(function (item) {
+            return item._id === id
+        });
+
+        if (rowData) {
+            for (var k in rowData) {
+                if (rowData.hasOwnProperty(k)) {
+                    var column = this.columns.find(function (item) {
+                        return item.id === k;
+                    });
+                    if (column && column.editable) {
+                        content += '<div class="form-group">' +
+                            '<input class="form-control input-sm" id="contentEdit" value="' + rowData[k] + '"/>' +
+                            '</div>';
+                    }
+
                 }
             }
-            sortRows.call(this);
-            highlightAppendedRows.call(this, appendedRows);
-            loadData.call(this);
-            this.element.trigger("appended" + namespace, [appendedRows]);
+            //$('#modalEdit .modal-body').html(content);
+            //$('#modalEdit .modal-body')[0].rowId = _id;
+            //$('#modalEdit').modal();
+            console.log(content);
         }
-
-        return this;
-    };*/
+    };
 
     Grid.prototype.append = function (rows, callback) {
         var that = this;
@@ -2199,6 +2260,8 @@
 // GRID DATA-API
 // ============
 
-    $("[data-toggle=\"bootgrid\"]").bootgrid();
+    $("[data-toggle=\"bootgrid\"]").each(function(){
+        $(this).bootgrid();
+    });
 })
 (jQuery, window);

@@ -1,8 +1,8 @@
 import utils from '../utils'
 
 class Socket {
-    constructor(pageId) {
-        this.pageId = pageId;
+    constructor(page) {
+        this.page = page,
         this.manager = io;
         this.socket = null;
         this.state = 0;
@@ -13,7 +13,7 @@ class Socket {
         if (this.socket && this.socket.connected) {
 
             var process = {
-                pageId: this.pageId,
+                pageId: this.page.pageId,
                 processId: processId,
                 event: event,
                 settings: utils.getSettings()
@@ -37,20 +37,20 @@ class Socket {
             });
             this.socket.on('connect', function () {
                 console.log('connect');
+              //  getProcess
+
 
             });
             this.socket.on('time', function (data) {
                 console.log(data);
             });
-            this.socket.on('setState', function (state) {
-                console.log(state);
-                utils.setState(state);
-            });
+
 
             this.socket.on('gridRowEvent', function (data) {
                 console.log(data);
-               // utils.setState(state);
+                $('[data-toggle=bootgrid]').trigger('gridRowEvent', data);
             });
+
             this.socket.on('disconnect',function(){
                 console.log('disconnect');
             });
@@ -61,11 +61,7 @@ class Socket {
         this.socket.disconnect();
     }
 
-    setState(state) {
-        console.log(state);
-        var state = getState(this.pageId);
-        this.socket.emit('setState', state);
-    }
+
 
     toString() {
         // return `(${this.x},${this.y})`;

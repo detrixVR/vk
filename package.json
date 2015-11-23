@@ -22,6 +22,7 @@
     "factor-bundle": "^2.5.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.0",
+    "gulp-concat": "^2.6.0",
     "gulp-eslint": "^1.0.0",
     "gulp-less": "^3.0.3",
     "gulp-ng-annotate": "^1.1.0",

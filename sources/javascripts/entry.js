@@ -1,17 +1,13 @@
-import Socket from './socket/socket.js';
+import Page from './page/page.js';
 import utils from './utils'
 
+var pageId = $('#pageId').text();
+var page = new Page(pageId);
 
-var socket = new Socket('001');
-
-window.socket = socket;
+page.init();
 
 
-socket.listen();
 
-$('button').on('click', function () {
-    socket.setProcess('test', 'start');
-});
 
 
 

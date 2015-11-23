@@ -38,3 +38,22 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalAccounts">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Выбрать</h4>
+            </div>
+            <div class="modal-body">
+                <%- include accountGrid.ejs %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="$(this).closest('#modalAccounts').trigger('selectAccount')">Выбрать</button>
+            </div>
+        </div>
+    </div>
+</div>

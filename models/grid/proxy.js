@@ -10,10 +10,10 @@ var schema = new Schema({
         type: String,
         required: true
     },
-    valid: {
+    status: {
         type: Number,
         required: false,
-        default: 0
+        default: 1
     },
     created: {
         type: Date,

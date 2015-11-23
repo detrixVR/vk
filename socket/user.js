@@ -23,7 +23,7 @@ class User {
     setProcess(process) {
         if (process.pageId) {
             var currentProcess = this.findProcessById(process.pageId);
-            console.log(process)
+           // console.log(process)
             switch (process.event) {
                 case 'start':
                     if (currentProcess) {
@@ -37,12 +37,15 @@ class User {
                         var newProcess = new Process(this, options);
                         this.processes.push(newProcess);
                         newProcess.start();
-                        console.log(options);
+                      //  console.log(options);
                     }
                     break;
                 case 'pause':
                     break;
                 case 'stop':
+                    console.log('stop process');
+                    this.processes.splice(this.processes.indexOf(currentProcess),1);
+                    console.log(this.processes);
                     break;
             }
         }

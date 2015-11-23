@@ -36,27 +36,40 @@ class Process {
                     console.log('start test process');
                     var that = this;
                     validateProxy(this, {}, function (err, data) {
-                        console.log('callback1');
-                        switch(data.type) {
-                           case 'gridRowEvent':
-                                that.user.socket.emit('gridRowEvent', data);
-                                break;
+                        if (err) {
+                            that.stop();
+                        } else {
+                            console.log('callback');
+                            switch(data.type) {
+                                case 'gridRowEvent':
+                                    that.user.socket.emit('gridRowEvent', data);
+                                    break;
+                                case 'done':
+                                    that.stop();
+                                    that.user.socket.emit('eventMsg', {
+                                        msg: 'Процесс успешно завершен'
+                                    });
+                                    break;
+                                default :
+                                    that.stop();
+                            }
                         }
-
                     });
                     break;
             }
 
-            setTimeout(function(){
-                that.stop();
-            },200);
         } else {
             console.log('can\'t start process twice');
         }
     }
 
     stop() {
+        console.log('stop');
         this.state = 0;
+        /*this.user.setProcess({
+            event: 'stop',
+            pageId: this.pageId
+        })*/
     }
 
     pause() {

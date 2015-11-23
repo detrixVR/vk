@@ -1,4 +1,4 @@
-
+var loadAccounts = require('../modules/loadAccounts');
 
 
 function nocache(req, res, next) {
@@ -9,7 +9,7 @@ function nocache(req, res, next) {
 }
 
 module.exports = function (app) {
-    app.get('/',            require('./index').get);
+    app.get('/', loadAccounts, require('./index').get);
 
     app.get('/grid', require('./grid').get);
     app.post('/grid', require('./grid').post);
@@ -51,8 +51,12 @@ module.exports = function (app) {
 
 module.exports.get = function (req, res) {
 
-        res.render('index',{
-            pageId: '001'
-        });
+
+
+
+    res.render('index', {
+        pageId: '001',
+        account: req.account
+    });
 
 };

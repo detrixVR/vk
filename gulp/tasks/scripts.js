@@ -9,6 +9,7 @@ import stringify from 'stringify';
 import sourcemaps from 'gulp-sourcemaps';
 import source from 'vinyl-source-stream';
 import eslint from 'gulp-eslint';
+import concat  from 'gulp-concat';
 
 import config from '../config.js';
 import wrapPipe from '../utils.js';
@@ -21,7 +22,7 @@ import wrapPipe from '../utils.js';
         .pipe(eslint.failAfterError());
 });
 */
-gulp.task('scripts', wrapPipe((success, error) => {
+gulp.task('scripts', ['concat-libs-js'], wrapPipe((success, error) => {
     return browserify(['./sources/javascripts/entry.js'], {debug: true})
        /* .transform(stringify({
             extensions: ['.html'],
@@ -33,4 +34,17 @@ gulp.task('scripts', wrapPipe((success, error) => {
         })).bundle().on('error', error)
         .pipe(source('app.js'))
         .pipe(gulp.dest(config.build.scripts));
+}));
+
+gulp.task('concat-libs-js', wrapPipe((success, error) => {
+    return gulp.src([
+            './public/javascripts/libs/jquery-2.1.4.min.js',
+            './public/javascripts/libs/socket.io-1.3.7.js',
+            './public/javascripts/libs/bootstrap.min.js',
+            './public/javascripts/libs/jasny-bootstrap.min.js',
+            './public/javascripts/libs/bootstrap-select.min.js',
+            './public/javascripts/libs/jquery.bootgrid.js'
+        ])
+        .pipe(concat('libs.js'))
+        .pipe(gulp.dest('./public/javascripts/'));
 }));

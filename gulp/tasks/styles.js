@@ -8,15 +8,24 @@ import gulp from 'gulp';
 import sourcemaps from 'gulp-sourcemaps';
 import source from 'vinyl-source-stream';
 import less from 'gulp-less';
+import concat  from 'gulp-concat';
 
 import config from '../config.js';
 import wrapPipe from '../utils.js';
 
-gulp.task('styles', wrapPipe(function (success, error) {
+gulp.task('styles', ['concat-libs-css'], wrapPipe(function (success, error) {
     return gulp.src(['./sources/stylesheets/style.less'])
         .pipe(sourcemaps.init())
         .pipe(less()).on('error', error)
         //.pipe(postcss([]))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(config.build.styles));
+}));
+
+gulp.task('concat-libs-css', wrapPipe((success, error) => {
+    return gulp.src([
+        './public/stylesheets/libs/*.css'
+    ])
+        .pipe(concat('libs.css'))
+        .pipe(gulp.dest('./public/stylesheets/'));
 }));

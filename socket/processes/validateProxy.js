@@ -3,25 +3,28 @@ var utils = require('../../modules/utils');
 var async = require('async');
 var request = require('request');
 
+//request.setMaxListeners(0);
+
 
 const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
 
 var checkProxy = function (host, port, options, callback) {
     var proxyRequest = request.defaults({
-        proxy: 'http://' + host + ':' + port
-    });
+        proxy: 'http://' + host + ':' + port,
+        timeout: 1500
+    });//.setMaxListeners(0);
     proxyRequest(options.url, function (err, res) {
         var testText = 'content="Yelp"';
         if (err) {
-            callback(host, port, false, -1, err);
+            return callback(host, port, false, -1, err);
         } else if (res.statusCode != 200) {
-            callback(host, port, false, res.statusCode, err);
+            return callback(host, port, false, res.statusCode, err);
             // } else if( !res.body || (options.regex && !options.regex.exec(res.body)) ) {
             // callback(host, port, false, res.statusCode, "Body doesn't match the regex " + options.regex + ".");
         } else {
-            callback(host, port, true, res.statusCode);
+            return callback(host, port, true, res.statusCode);
         }
-    });
+    }).setMaxListeners(0);
 };
 
 
@@ -34,13 +37,14 @@ var validateProxy = function (process, settings, callback) {
     }, function (err, docs) {
 
         async.eachSeries(docs, function (item, done) {
+            console.log(item);
             if (process.getState()) {
 
                 callback(null, {
                     type: 'gridRowEvent',
                     id: item._id,
                     columns: ['status'],
-                    values: [STATUSES[0]]
+                    values: [0]
                 });
 
                 if (!utils.validateIPaddress(item.content)) {
@@ -57,7 +61,7 @@ var validateProxy = function (process, settings, callback) {
                                 type: 'gridRowEvent',
                                 id: item._id,
                                 columns: ['status'],
-                                values: [STATUSES[2]]
+                                values: [2]
                             });
 
                             return done();
@@ -81,7 +85,7 @@ var validateProxy = function (process, settings, callback) {
                                         type: 'gridRowEvent',
                                         id: item._id,
                                         columns: ['status'],
-                                        values: [STATUSES[3]]
+                                        values: [3]
                                     });
 
                                     return done();
@@ -103,7 +107,7 @@ var validateProxy = function (process, settings, callback) {
                                         type: 'gridRowEvent',
                                         id: item._id,
                                         columns: ['status'],
-                                        values: [STATUSES[4]]
+                                        values: [4]
                                     });
 
                                     return done();
@@ -125,7 +129,7 @@ var validateProxy = function (process, settings, callback) {
                 return callback(err);
             }
             return callback(null, {
-                done: true
+                type: 'done'
             })
         })
 
