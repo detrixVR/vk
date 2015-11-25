@@ -78,17 +78,6 @@
         loadData.call(this);
 
         this.element.trigger("initialized" + namespace);
-
-        var that = this;
-
-        this.element.bind('gridRowEvent', function (event, data) {
-            that.refreshRow(data);
-        });
-
-        this.element.bind('gridRowEdit', function(event, id) {
-            that.editRow(id);
-            console.log('gridRowEdit');
-        });
     }
 
     function highlightAppendedRows(rows) {
@@ -124,6 +113,7 @@
                     searchable: !(data.searchable === false), // default: true
                     sortable: !(data.sortable === false), // default: true
                     visible: !(data.visible === false), // default: true
+                    editable: data.editable || false,
                     visibleInSelection: !(data.visibleInSelection === false), // default: true
                     width: ($.isNumeric(data.width)) ? data.width + "px" :
                         (typeof(data.width) === "string") ? data.width : null
@@ -146,109 +136,6 @@
         });
         /*jshint +W018*/
     }
-
-    /*
-     response = {
-     current: 1,
-     rowCount: 10,
-     rows: [{}, {}],
-     sort: [{ "columnId": "asc" }],
-     total: 101
-     }
-     */
-
-    /*function loadData_Old() {
-     var that = this;
-
-     this.element._bgBusyAria(true).trigger("load" + namespace);
-     showLoading.call(this);
-
-     function containsPhrase(row) {
-     var column,
-     searchPattern = new RegExp(that.searchPhrase, (that.options.caseSensitive) ? "g" : "gi");
-
-     for (var i = 0; i < that.columns.length; i++) {
-     column = that.columns[i];
-     if (column.searchable && column.visible &&
-     column.converter.to(row[column.id]).search(searchPattern) > -1) {
-     return true;
-     }
-     }
-
-     return false;
-     }
-
-     function update(rows, total) {
-     that.currentRows = rows;
-     setTotals.call(that, total);
-
-     if (!that.options.keepSelection) {
-     that.selectedRows = [];
-     }
-
-     renderRows.call(that, rows);
-     renderInfos.call(that);
-     renderPagination.call(that);
-
-     that.element._bgBusyAria(false).trigger("loaded" + namespace);
-     }
-
-     if (this.options.ajax) {
-     var request = getRequest.call(this),
-     url = getUrl.call(this);
-
-     if (url == null || typeof url !== "string" || url.length === 0) {
-     throw new Error("Url setting must be a none empty string or a function that returns one.");
-     }
-
-     // aborts the previous ajax request if not already finished or failed
-     if (this.xqr) {
-     this.xqr.abort();
-     }
-
-     var settings = {
-     url: url,
-     data: request,
-     success: function (response) {
-     that.xqr = null;
-
-     if (typeof (response) === "string") {
-     response = $.parseJSON(response);
-     }
-
-     response = that.options.responseHandler(response);
-
-     that.current = response.current;
-     update(response.rows, response.total);
-     },
-     error: function (jqXHR, textStatus, errorThrown) {
-     that.xqr = null;
-
-     if (textStatus !== "abort") {
-     renderNoResultsRow.call(that); // overrides loading mask
-     that.element._bgBusyAria(false).trigger("loaded" + namespace);
-     }
-     }
-     };
-     settings = $.extend(this.options.ajaxSettings, settings);
-
-     this.xqr = $.ajax(settings);
-     }
-     else {
-     var rows = (this.searchPhrase.length > 0) ? this.rows.where(containsPhrase) : this.rows,
-     total = rows.length;
-     if (this.rowCount !== -1) {
-     rows = rows.page(this.current, this.rowCount);
-     }
-
-     // todo: improve the following comment
-     // setTimeout decouples the initialization so that adding event handlers happens before
-     window.setTimeout(function () {
-     update(rows, total);
-     }, 10);
-     }
-     }*/
-
 
     function loadData() {
         var that = this;
@@ -279,7 +166,7 @@
                 that.selectedRows = [];
             }
 
-            renderRows.call(that, rows);
+            that.renderRows(rows);
             renderInfos.call(that);
             renderPagination.call(that);
 
@@ -347,88 +234,6 @@
             }, 10);
         }
     }
-
-    /*function loadData() {
-     var that = this;
-
-     this.element._bgBusyAria(true).trigger("load" + namespace);
-     showLoading.call(this);
-
-     function containsPhrase(row) {
-     var column,
-     searchPattern = new RegExp(that.searchPhrase, (that.options.caseSensitive) ? "g" : "gi");
-
-     for (var i = 0; i < that.columns.length; i++) {
-     column = that.columns[i];
-     if (column.searchable && column.visible &&
-     column.converter.to(row[column.id]).search(searchPattern) > -1) {
-     return true;
-     }
-     }
-
-     return false;
-     }
-
-
-     if (this.options.ajax) {
-     var request = getRequest.call(this),
-     url = getUrl.call(this);
-
-     if (url == null || typeof url !== "string" || url.length === 0) {
-     throw new Error("Url setting must be a none empty string or a function that returns one.");
-     }
-
-     // aborts the previous ajax request if not already finished or failed
-     if (this.xqr) {
-     this.xqr.abort();
-     }
-
-     var that = this;
-     var settings = {
-     url: url,
-     data: {
-     options: JSON.stringify(request)
-     },
-     success: function (response) {
-     that.xqr = null;
-
-     if (typeof (response) === "string") {
-     response = $.parseJSON(response);
-     }
-
-     response = that.options.responseHandler(response);
-
-     that.current = response.current;
-     update.apply(that, [response.rows, response.total]);
-
-     },
-     error: function (jqXHR, textStatus, errorThrown) {
-     that.xqr = null;
-
-     if (textStatus !== "abort") {
-     renderNoResultsRow.call(that); // overrides loading mask
-     that.element._bgBusyAria(false).trigger("loaded" + namespace);
-     }
-     }
-     };
-     settings = $.extend(this.options.ajaxSettings, settings);
-
-     this.xqr = $.ajax(settings);
-     }
-     else {
-     var rows = (this.searchPhrase.length > 0) ? this.rows.where(containsPhrase) : this.rows,
-     total = rows.length;
-     if (this.rowCount !== -1) {
-     rows = rows.page(this.current, this.rowCount);
-     }
-
-     // todo: improve the following comment
-     // setTimeout decouples the initialization so that adding event handlers happens before
-     window.setTimeout(function () {
-     update.apply(this, [rows, total]);
-     }, 10);
-     }
-     }*/
 
     function loadRows() {
         if (!this.options.ajax) {
@@ -577,17 +382,6 @@
         }
     }
 
-    function renderNoResultsRow() {
-        var tbody = this.element.children("tbody").first(),
-            tpl = this.options.templates,
-            count = this.columns.where(isVisible).length;
-
-        if (this.selection) {
-            count = count + 1;
-        }
-        tbody.html(tpl.noResults.resolve(getParams.call(this, {columns: count})));
-    }
-
     function renderPagination() {
         if (this.options.navigation !== 0) {
             var selector = getCssSelector(this.options.css.pagination),
@@ -672,67 +466,7 @@
                 {content: addIcon, text: this.options.labels.add})))
                 .on("click" + namespace, function (e) {
                     e.stopPropagation();
-                    var selector = $('#modalInput');
-                    selector.data('listType', that.listType);
-                    selector.off().on('hidden.bs.modal', function () {
-                        var $this = $(this);
-                        var listType = $this.data('listType');
-                        var lines = $('#addLinesHolder').val();
-                        var linesArr = lines.split('\n').filter(function (item) {
-                            return item.length
-                        });
-                        if (linesArr.length) {
-                            switch (listType) {
-                                case 'person':
-
-                                    break;
-                                case 'proxy':
-                                    linesArr = linesArr.map(function (item) {
-                                        if (item) {
-                                            return {
-                                                content: $.trim(item)
-                                            };
-                                        } else {
-                                            return false;
-                                        }
-                                    }).filter(function (item) {
-                                        return item.content
-                                    });
-                                    break;
-                                case 'account':
-
-                                    break;
-                                case 'group':
-
-                                    break;
-                            }
-                            that.append(linesArr, function () {
-                                that.reload();
-                            });
-                        }
-                    });
-                    selector.on('.shown.bs.modal', function () {
-                        var $this = $(this);
-                        var listType = $this.data('listType');
-                        var text = null;
-                        switch (listType) {
-                            case 'person':
-                                text = 'Скопируйте сюда <b>id</b> пользователей';
-                                break;
-                            case 'proxy':
-                                text = 'Скопируйте сюда <b>HTTP(S)</b> прокси';
-                                break;
-                            case 'account':
-                                text = 'Скопируйте сюда аккаунты с паролями в формате <b>login:password</b> и нажмите <b>Добавить</b>';
-                                break;
-                            case 'group':
-                                text = 'Скопируйте сюда <b>id</b> групп';
-                                break;
-                        }
-                        if (text)
-                            selector.find('[role=alert]').html(text);
-                    });
-                    selector.modal('show');
+                    $(this).closest('.well').find('[data-toggle=bootgrid]').trigger('gridAdd', this);
                 });
         actions.append(add);
     }
@@ -747,10 +481,7 @@
                 {content: removeIcon, text: this.options.labels.removeSelected})))
                 .on("click" + namespace, function (e) {
                     e.stopPropagation();
-                    if (that.selectedRows.length)
-                        that.remove(that.selectedRows, function () {
-                            that.reload();
-                        });
+                    $(this).closest('.well').find('[data-toggle=bootgrid]').trigger('gridDelete', this);
                 });
         actions.append(remove);
     }
@@ -798,117 +529,6 @@
             });
             actions.append(dropDown);
         }
-    }
-
-    function renderRows(rows) {
-        if (rows.length > 0) {
-            var that = this,
-                css = this.options.css,
-                tpl = this.options.templates,
-                tbody = this.element.children("tbody").first(),
-                allRowsSelected = true,
-                html = "";
-
-            $.each(rows, function (index, row) {
-                var cells = "",
-                    rowAttr = " data-row-id=\"" + ((that.identifier == null) ? index : row[that.identifier]) + "\"",
-                    rowCss = "";
-
-                if (that.selection) {
-                    var selected = ($.inArray(row[that.identifier], that.selectedRows) !== -1),
-                        selectBox = tpl.select.resolve(getParams.call(that,
-                            {type: "checkbox", value: row[that.identifier], checked: selected}));
-                    cells += tpl.cell.resolve(getParams.call(that, {content: selectBox, css: css.selectCell}));
-                    allRowsSelected = (allRowsSelected && selected);
-                    if (selected) {
-                        rowCss += css.selected;
-                        rowAttr += " aria-selected=\"true\"";
-                    }
-                }
-
-                var status = row.status != null && that.options.statusMapping[row.status];
-                if (status) {
-                    rowCss += status;
-                }
-
-                $.each(that.columns, function (j, column) {
-                    if (column.visible) {
-                        var value = ($.isFunction(column.formatter)) ?
-                                column.formatter.call(that, column, row) :
-                                column.converter.to(row[column.id]),
-                            cssClass = (column.cssClass.length > 0) ? " " + column.cssClass : "";
-                        cells += tpl.cell.resolve(getParams.call(that, {
-                            content: (value == null || value === "") ? "&nbsp;" : value,
-                            css: ((column.align === "right") ? css.right : (column.align === "center") ?
-                                css.center : css.left) + cssClass,
-                            style: (column.width == null) ? "" : "width:" + column.width + ";"
-                        }));
-                    }
-                });
-
-                if (rowCss.length > 0) {
-                    rowAttr += " class=\"" + rowCss + "\"";
-                }
-                html += tpl.row.resolve(getParams.call(that, {attr: rowAttr, cells: cells}));
-            });
-
-            // sets or clears multi selectbox state
-            that.element.find("thead " + getCssSelector(that.options.css.selectBox))
-                .prop("checked", allRowsSelected);
-
-            tbody.html(html);
-
-            registerRowEvents.call(this, tbody);
-        }
-        else {
-            renderNoResultsRow.call(this);
-        }
-    }
-
-    function registerRowEvents(tbody) {
-        var that = this,
-            selectBoxSelector = getCssSelector(this.options.css.selectBox);
-
-        if (this.selection) {
-            tbody.off("click" + namespace, selectBoxSelector)
-                .on("click" + namespace, selectBoxSelector, function (e) {
-                    e.stopPropagation();
-
-                    var $this = $(this),
-                        id = that.converter.from($this.val());
-
-                    if ($this.prop("checked")) {
-                        that.select([id]);
-                    }
-                    else {
-                        that.deselect([id]);
-                    }
-                });
-        }
-
-        tbody.off("click" + namespace, "> tr")
-            .on("click" + namespace, "> tr", function (e) {
-                e.stopPropagation();
-
-                var $this = $(this),
-                    id = (that.identifier == null) ? $this.data("row-id") :
-                        that.converter.from($this.data("row-id") + ""),
-                    row = (that.identifier == null) ? that.currentRows[id] :
-                        that.currentRows.first(function (item) {
-                            return item[that.identifier] === id;
-                        });
-
-                if (that.selection && that.options.rowSelect) {
-                    if ($this.hasClass(that.options.css.selected)) {
-                        that.deselect([id]);
-                    }
-                    else {
-                        that.select([id]);
-                    }
-                }
-
-                that.element.trigger("click" + namespace, [that.columns, row]);
-            });
     }
 
     function renderSearchField() {
@@ -1453,14 +1073,7 @@
             table: "bootgrid-table table"
         },
 
-        /**
-         * A dictionary of formatters.
-         *
-         * @property formatters
-         * @type Object
-         * @for defaults
-         * @since 1.0.0
-         **/
+
         formatters: {
 
             //const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
@@ -1480,8 +1093,8 @@
                 }
             },
             commandsAll: function (column, row) {
-                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-edit\" data-row-_id=\"" + row._id + "\" onclick=\"var $this = $(this); $this.closest('[data-toggle=bootgrid]').trigger('gridRowEdit', $this.data('row-_id'));\"><span class=\"glyphicon glyphicon-pencil\"></span></button>" +
-                    " <button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
+                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-edit\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridRowEdit', this);\"><span class=\"glyphicon glyphicon-pencil\"></span></button>" +
+                    " <button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
             },
             commandsNotAll: function (column, row) {
                 return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"fa fa-trash-o\"></span></button>";
@@ -1509,13 +1122,6 @@
             }
         },
 
-        /**
-         * Contains all labels.
-         *
-         * @property labels
-         * @type Object
-         * @for defaults
-         **/
         labels: {
             all: "Все",
             infos: "Показаны {{ctx.start}} - {{ctx.end}} из {{ctx.total}} записей",
@@ -1528,61 +1134,14 @@
             save: 'Сохранить'
         },
 
-        /**
-         * Specifies the mapping between status and contextual classes to color rows.
-         *
-         * @property statusMapping
-         * @type Object
-         * @for defaults
-         * @since 1.2.0
-         **/
         statusMapping: {
-            /**
-             * Specifies a successful or positive action.
-             *
-             * @property 0
-             * @type String
-             * @for statusMapping
-             **/
             0: "info",
-
-            /**
-             * Specifies a neutral informative change or action.
-             *
-             * @property 1
-             * @type String
-             * @for statusMapping
-             **/
             1: "info",
-
-            /**
-             * Specifies a warning that might need attention.
-             *
-             * @property 2
-             * @type String
-             * @for statusMapping
-             **/
             2: "warning",
-
-            /**
-             * Specifies a dangerous or potentially negative action.
-             *
-             * @property 3
-             * @type String
-             * @for statusMapping
-             **/
             3: "success",
-
             4: "danger"
         },
 
-        /**
-         * Contains all templates.
-         *
-         * @property templates
-         * @type Object
-         * @for defaults
-         **/
         templates: {
             actionButton: "<button class=\"btn btn-default\" type=\"button\" title=\"{{ctx.text}}\">{{ctx.content}}</button>",
             actionDropDown: "<div class=\"{{css.dropDownMenu}}\"><button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>",
@@ -1607,53 +1166,134 @@
         }
     };
 
-    /**
-     * Appends rows.
-     *
-     * @method append
-     * @param rows {Array} An array of rows to append
-     * @chainable
-     **/
-    /*Grid.prototype.append = function (rows) {
-     if (this.options.ajax) {
-     // todo: implement ajax PUT
-     }
-     else {
-     var appendedRows = [];
-     for (var i = 0; i < rows.length; i++) {
-     if (appendRow.call(this, rows[i])) {
-     appendedRows.push(rows[i]);
-     }
-     }
-     sortRows.call(this);
-     highlightAppendedRows.call(this, appendedRows);
-     loadData.call(this);
-     this.element.trigger("appended" + namespace, [appendedRows]);
-     }
+    Grid.prototype.renderRows = function(rows) {
+        if (rows.length > 0) {
+            var that = this,
+                css = this.options.css,
+                tpl = this.options.templates,
+                tbody = this.element.children("tbody").first(),
+                allRowsSelected = true,
+                html = "";
 
-     return this;
-     };*/
+            $.each(rows, function (index, row) {
+                var cells = "",
+                    rowAttr = " data-row-id=\"" + ((that.identifier == null) ? index : row[that.identifier]) + "\"",
+                    rowCss = "";
 
-    Grid.prototype.refreshRow = function (data) {
-        var findedItem = this.currentRows.find(function (item) {
-            return item._id === data.id
-        });
-        if (findedItem) {
-            data.columns.forEach(function (item, i) {
-                findedItem[item] = data.values[i];
+                if (that.selection) {
+                    var selected = ($.inArray(row[that.identifier], that.selectedRows) !== -1),
+                        selectBox = tpl.select.resolve(getParams.call(that,
+                            {type: "checkbox", value: row[that.identifier], checked: selected}));
+                    cells += tpl.cell.resolve(getParams.call(that, {content: selectBox, css: css.selectCell}));
+                    allRowsSelected = (allRowsSelected && selected);
+                    if (selected) {
+                        rowCss += css.selected;
+                        rowAttr += " aria-selected=\"true\"";
+                    }
+                }
+
+                var status = row.status != null && that.options.statusMapping[row.status];
+                if (status) {
+                    rowCss += status;
+                }
+
+                $.each(that.columns, function (j, column) {
+                    if (column.visible) {
+                        var value = ($.isFunction(column.formatter)) ?
+                                column.formatter.call(that, column, row) :
+                                column.converter.to(row[column.id]),
+                            cssClass = (column.cssClass.length > 0) ? " " + column.cssClass : "";
+                        cells += tpl.cell.resolve(getParams.call(that, {
+                            content: (value == null || value === "") ? "&nbsp;" : value,
+                            css: ((column.align === "right") ? css.right : (column.align === "center") ?
+                                css.center : css.left) + cssClass,
+                            style: (column.width == null) ? "" : "width:" + column.width + ";"
+                        }));
+                    }
+                });
+
+                if (rowCss.length > 0) {
+                    rowAttr += " class=\"" + rowCss + "\"";
+                }
+                html += tpl.row.resolve(getParams.call(that, {attr: rowAttr, cells: cells}));
             });
-            renderRows.call(this, this.currentRows);
+
+            // sets or clears multi selectbox state
+            that.element.find("thead " + getCssSelector(that.options.css.selectBox))
+                .prop("checked", allRowsSelected);
+
+            tbody.html(html);
+
+            this.registerRowEvents(tbody);
         }
+        else {
+            this.renderNoResultsRow();
+        }
+    };
+
+    Grid.prototype.renderNoResultsRow = function() {
+        var tbody = this.element.children("tbody").first(),
+            tpl = this.options.templates,
+            count = this.columns.where(isVisible).length;
+
+        if (this.selection) {
+            count = count + 1;
+        }
+        tbody.html(tpl.noResults.resolve(getParams.call(this, {columns: count})));
+    };
+
+    Grid.prototype.registerRowEvents = function(tbody) {
+        var that = this,
+            selectBoxSelector = getCssSelector(this.options.css.selectBox);
+
+        if (this.selection) {
+            tbody.off("click" + namespace, selectBoxSelector)
+                .on("click" + namespace, selectBoxSelector, function (e) {
+                    e.stopPropagation();
+
+                    var $this = $(this),
+                        id = that.converter.from($this.val());
+
+                    if ($this.prop("checked")) {
+                        that.select([id]);
+                    }
+                    else {
+                        that.deselect([id]);
+                    }
+                });
+        }
+
+        tbody.off("click" + namespace, "> tr")
+            .on("click" + namespace, "> tr", function (e) {
+                e.stopPropagation();
+
+                var $this = $(this),
+                    id = (that.identifier == null) ? $this.data("row-id") :
+                        that.converter.from($this.data("row-id") + ""),
+                    row = (that.identifier == null) ? that.currentRows[id] :
+                        that.currentRows.first(function (item) {
+                            return item[that.identifier] === id;
+                        });
+
+                if (that.selection && that.options.rowSelect) {
+                    if ($this.hasClass(that.options.css.selected)) {
+                        that.deselect([id]);
+                    }
+                    else {
+                        that.select([id]);
+                    }
+                }
+
+                that.element.trigger("click" + namespace, [that.columns, row]);
+            });
     };
 
 
     Grid.prototype.editRow = function (id) {
         var content = '';
-
         var rowData = this.currentRows.find(function (item) {
             return item._id === id
         });
-
         if (rowData) {
             for (var k in rowData) {
                 if (rowData.hasOwnProperty(k)) {
@@ -1662,18 +1302,41 @@
                     });
                     if (column && column.editable) {
                         content += '<div class="form-group">' +
-                            '<input class="form-control input-sm" id="contentEdit" value="' + rowData[k] + '"/>' +
+                            '<input class="form-control" data-column="'+k+'" value="' + rowData[k] + '"/>' +
                             '</div>';
                     }
-
                 }
             }
-            //$('#modalEdit .modal-body').html(content);
-            //$('#modalEdit .modal-body')[0].rowId = _id;
-            //$('#modalEdit').modal();
-            console.log(content);
+            if (content) {
+                var that = this;
+                var selector = $('#modalEdit');
+                $('.modal-body', selector).html(content);
+                selector.modal('show');
+                var bindFunction = function () {
+                    console.log('saaaaaaaaaaa');
+                    var $this = $(this);
+                    var inputs = $this.find('.modal-body').find('input');
+                    var columns = [];
+                    var values = [];
+                    inputs.each(function () {
+                        var $this = $(this);
+                        var columnName = $this.data('column');
+                        if (columnName) {
+                            columns.push(columnName);
+                            values.push($this.val());
+                        }
+                    });
+                    that.refreshRow({
+                        id: id,
+                        columns: columns,
+                        values: values
+                    }, true);
+                };
+                selector.unbind('editRow').bind('editRow', bindFunction);
+            }
         }
     };
+
 
     Grid.prototype.append = function (rows, callback) {
         var that = this;
@@ -1687,8 +1350,10 @@
                     })
                 },
                 url: '/grid'
-            }).always(function () {
+            }).done(function () {
                 return callback();
+            }).fail(function(fail){
+                return callback(fail);
             })
         }
         else {
@@ -1756,7 +1421,7 @@
      * @chainable
      **/
     Grid.prototype.reload = function () {
-        this.current = 1; // reset
+        //this.current = 1; // reset
         loadData.call(this);
 
         return this;
@@ -1779,12 +1444,14 @@
                     data: {
                         options: JSON.stringify({
                             listType: that.listType,
-                            ids: (rowIds || this.selectedRows)
+                            ids: rowIds
                         })
                     },
                     url: '/grid'
-                }).always(function () {
+                }).done(function () {
                     callback();
+                }).fail(function(fail){
+                    callback(fail);
                 })
             }
             else {
@@ -2260,7 +1927,7 @@
 // GRID DATA-API
 // ============
 
-    $("[data-toggle=\"bootgrid\"]").each(function(){
+    $("[data-toggle=\"bootgrid\"]").each(function () {
         $(this).bootgrid();
     });
 })

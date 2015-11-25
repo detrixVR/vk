@@ -34,6 +34,18 @@ var sio = function (http) {
         socket.on('setProcess', function(process){
             that.setProcess('huyax', process);
         });
+
+        socket.on('startPauseProcess', function(){
+            console.log('here');
+            that.start = !that.start ;
+            socket.emit('startPauseProcess', that.start);
+        });
+
+        socket.on('getCurrentProcess', function(options) {
+            var process = that.getCurrentProcess('huyax', options);
+            socket.emit('getCurrentProcess', process);
+            console.log(options);
+        });
     });
 
 
@@ -71,6 +83,20 @@ sio.prototype.setProcess = function(username, process) {
     if (user) {
         user.setProcess(process)
     }
+};
+
+sio.prototype.getCurrentProcess = function(username, options) {
+    var process = null;
+    var user = this.findUserByName(username);
+    if (user) {
+        for (var i = 0; i < user.processes.length; i++) {
+            if (user.processes[i].pageId === options.pageId) {
+                process = user.processes[i];
+                break;
+            }
+        }
+    }
+    return null;
 };
 
 module.exports.sio = sio;

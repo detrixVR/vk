@@ -1,6 +1,6 @@
-<div class="accountHolder">
-    <div class="img-thumbnail avatarHolder" style="background-image: url('<%=account.photo_50%>');"></div>
-    <div class="accountInfo">
+<div id="accountHolder">
+    <div class="img-thumbnail avatarHolder" onclick="$(this).closest('body').trigger('selectAccount')" style="background-image: url('<%=account.photo_50%>');"></div>
+    <div class="accountInfo" >
         <a href="/config?account=<%= account.id%>" class="btn btn-default">
             <span class="fio"><%= account.last_name%> <%= account.first_name%></span><br>
             <span class="id text-muted"><%= account.id%></span>

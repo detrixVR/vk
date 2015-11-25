@@ -41,6 +41,7 @@ gulp.task('concat-libs-js', wrapPipe((success, error) => {
             './public/javascripts/libs/jquery-2.1.4.min.js',
             './public/javascripts/libs/socket.io-1.3.7.js',
             './public/javascripts/libs/bootstrap.min.js',
+            './public/javascripts/libs/bootstrap-notify.min.js',
             './public/javascripts/libs/jasny-bootstrap.min.js',
             './public/javascripts/libs/bootstrap-select.min.js',
             './public/javascripts/libs/jquery.bootgrid.js'

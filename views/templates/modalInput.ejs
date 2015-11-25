@@ -8,32 +8,17 @@
                 <h4 class="modal-title">Выбрать</h4>
             </div>
             <div class="modal-body">
-                <div class="alert alert-info" role="alert">
-                    Скопируйте сюда аккаунты с паролями в формате <b>login:password</b> и нажмите Добавить
-                </div>
+                <div class="alert alert-info" role="alert"></div>
                 <div class="form-group ">
-                    <textarea class="form-control" rows="15" id="addLinesHolder"></textarea>
+                    <textarea class="form-control" rows="15"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-
-                <div class="row">
-                    <% if (pageId === 'group' || pageId === 'person') { %>
-                    <div class="col-xs-9">
-                        <div class="checkbox">
-                            <input type="checkbox" id="loadInfo" checked/>
-                            <label for="loadInfo">
-                                Загрузить информацию
-                            </label>
-                        </div>
-                    </div>
-                    <% } %>
-                    <div class="col-xs-3 <% if (pageId !== 'group' || pageId !== 'person') { %> col-xs-offset-9 <% } %>">
-                        <button type="button" class="btn btn-primary btn-sm full-width" id="addLinesButton"
-                                data-dismiss="modal">Добавить
-                        </button>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary"
+                        data-dismiss="modal"
+                        onclick="$(this).closest('.modal').trigger('addOk')">Добавить
+                </button>
             </div>
         </div>
     </div>
@@ -52,7 +37,57 @@
                 <%- include accountGrid.ejs %>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" onclick="$(this).closest('#modalAccounts').trigger('selectAccount')">Выбрать</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary"
+                        data-dismiss="modal"
+                        onclick="$(this).closest('.modal').trigger('selectOk')">Выбрать
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdit">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Подтвердите действие</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary"
+                        data-dismiss="modal"
+                        onclick="$(this).closest('.modal').trigger('editOk')">Изменить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalConfirm">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Выбрать</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary"
+                        data-dismiss="modal"
+                        onclick="$(this).closest('.modal').trigger('confirmOk')">Удалить
+                </button>
             </div>
         </div>
     </div>

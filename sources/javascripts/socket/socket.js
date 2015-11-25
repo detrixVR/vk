@@ -2,7 +2,7 @@ import utils from '../utils'
 
 class Socket {
     constructor(page) {
-        this.page = page,
+        this.page = page;
         this.manager = io;
         this.socket = null;
         this.state = 0;
@@ -31,23 +31,32 @@ class Socket {
     }
 
     listen() {
+        var that = this;
+
         if (!this.socket || !this.socket.connected) {
             this.socket = this.manager.connect({
                  reconnect: true
             });
             this.socket.on('connect', function () {
                 console.log('connect');
-              //  getProcess
-
-
             });
+
             this.socket.on('time', function (data) {
                 console.log(data);
             });
 
+            this.socket.on('startPauseProcess', function (start) {
+                console.log(start);
+            });
+
+            this.socket.on('getCurrentProcess', function(process){
+                console.log(process);
+                if(process) {
+                    that.page.ui.applyProcess(process);
+                }
+            });
 
             this.socket.on('gridRowEvent', function (data) {
-                console.log(data);
                 $('[data-toggle=bootgrid]').trigger('gridRowEvent', data);
             });
 
