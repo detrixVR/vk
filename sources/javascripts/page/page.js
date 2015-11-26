@@ -23,6 +23,8 @@ class Page {
         console.log(this.pageId);
         console.log(this.accountId);
 
+        this.ui.overlay('Инициализация');
+
         this.socket.socket.emit('getCurrentProcess', {
             pageId: this.pageId,
             accountId: this.accountId

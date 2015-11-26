@@ -3,13 +3,24 @@
 var validateProxy = require('./processes/validateProxy');
 var request = require('request');
 
+function start() {
 
-function start(user) {
-    // console.log('live');
-    user.socket.emit('time', 'live');
-    setTimeout(function () {
-        start(user)
-    }, 1000);
+    if (this.state == 1) {
+        this.user.socket.emit('time', 'live');
+    } else if (this.state == 2) {
+        console.log('here');
+        this.user.socket.emit('setState', 2);
+    }
+
+    var that = this;
+
+    if (this.state !== 0) {
+        setTimeout(function () {
+            start.call(that);
+        }, 1000);
+    } else {
+        this.user.socket.emit('setState', 0);
+    }
 }
 
 class Process {
@@ -18,6 +29,7 @@ class Process {
         this.pageId = options.pageId;
         this.processId = options.processId;
         this.settings = options.settings;
+        this.messages = [];
         this.state = null;
     }
 
@@ -26,50 +38,34 @@ class Process {
     }
 
     start() {
-
-        if (!this.getState()) {
-
+        this.user.socket.emit('setState', 3);
+        if (!this.state) {
             this.state = 1;
-
             switch (this.processId) {
                 case 'test':
-                    console.log('start test process');
-                    var that = this;
-                    validateProxy(this, {}, function (err, data) {
-                        if (err) {
-                            that.stop();
-                        } else {
-                            console.log('callback');
-                            switch(data.type) {
-                                case 'gridRowEvent':
-                                    that.user.socket.emit('gridRowEvent', data);
-                                    break;
-                                case 'done':
-                                    that.stop();
-                                    that.user.socket.emit('eventMsg', {
-                                        msg: 'Процесс успешно завершен'
-                                    });
-                                    break;
-                                default :
-                                    that.stop();
-                            }
-                        }
-                    });
+                    start.call(this);
+                    this.messages.push({time: Date.now(), msg: 'Старт', type: 0, clear: true});
+                    this.user.socket.emit('setState', 1);
                     break;
             }
-
-        } else {
-            console.log('can\'t start process twice');
+        } else if (this.state === 1) { //pause
+            this.messages.push({time: Date.now(), msg: 'Пауза'});
+            this.state = 2;
+        } else if (this.state === 2) {
+            this.state = 1;
+            this.messages.push({time: Date.now(), msg: 'Старт'});
+            this.user.socket.emit('setState', 1);
         }
     }
 
     stop() {
-        console.log('stop');
-        this.state = 0;
-        /*this.user.setProcess({
-            event: 'stop',
-            pageId: this.pageId
-        })*/
+        this.user.socket.emit('setState', 3);
+        this.messages.push({time: Date.now(), msg: 'Стоп'});
+        //this.state = 0; //???
+        this.user.archiveProcess({
+            pageId : this.pageId
+        });
+        console.log(this.user.processes)
     }
 
     pause() {

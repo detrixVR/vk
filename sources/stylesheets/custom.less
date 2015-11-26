@@ -1,3 +1,5 @@
+@import "palette";
+
 
 .box-shadow {
   box-shadow: 0 4px 4px -4px #232323;
@@ -31,7 +33,7 @@
     cursor: pointer;
   }
 
-  .accountInfo{
+  .accountInfo {
     .btn {
       max-height: 50px;
       padding: 4px 12px;
@@ -41,4 +43,39 @@
 
 .full-width {
   width: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: @palette-Grey-400;;
+  width: 100%;
+  z-index: 1000;
+  margin-top: 50px;
+  background-image: url('/images/loader.gif');
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+
+  .textContainer {
+
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    .textHolder {
+      text-align: center;
+      width: 300px;
+      height: 100px;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      color: white;
+    }
+  }
+
 }

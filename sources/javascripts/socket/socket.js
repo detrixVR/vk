@@ -34,9 +34,11 @@ class Socket {
         var that = this;
 
         if (!this.socket || !this.socket.connected) {
+
             this.socket = this.manager.connect({
                  reconnect: true
             });
+
             this.socket.on('connect', function () {
                 console.log('connect');
             });
@@ -45,15 +47,15 @@ class Socket {
                 console.log(data);
             });
 
-            this.socket.on('startPauseProcess', function (start) {
-                console.log(start);
+            this.socket.on('setState', function (state) {
+                that.page.ui.setState(state);
             });
 
-            this.socket.on('getCurrentProcess', function(process){
+            this.socket.on('setProcess', function(process){
                 console.log(process);
-                if(process) {
-                    that.page.ui.applyProcess(process);
-                }
+
+                    that.page.ui.setProcess(process);
+
             });
 
             this.socket.on('gridRowEvent', function (data) {

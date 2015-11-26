@@ -1,54 +1,52 @@
 "use strict"
 
 var Process = require('./process');
+var dbProcess = require('../models/process');
 
 class User {
-    constructor(user){
+    constructor(user) {
         this.username = user.username;
         this.socket = user.socket;
         this.processes = [];
     }
 
-    findProcessById(pageId) {
-        var process = null;
+    archiveProcess(options) {
+
+        var processIndex = -1;
+
         for (var i = 0; i < this.processes.length; i++) {
-            if (this.processes[i].pageId === pageId) {
-                process = this.processes[i];
+            if (this.processes[i].pageId === options.pageId) {
+                processIndex = i;
                 break;
             }
         }
-        return process;
-    }
 
-    setProcess(process) {
-        if (process.pageId) {
-            var currentProcess = this.findProcessById(process.pageId);
-           // console.log(process)
-            switch (process.event) {
-                case 'start':
-                    if (currentProcess) {
-                        currentProcess.start();
-                    } else {
-                        var options = {
-                            pageId: process.pageId,
-                            processId: process.processId,
-                            settings: process.settings
-                        };
-                        var newProcess = new Process(this, options);
-                        this.processes.push(newProcess);
-                        newProcess.start();
-                      //  console.log(options);
+        if (processIndex > -1) {
+
+            this.processes.splice(processIndex, 1);
+
+            /*
+            dbProcess.findAndModify({
+                    username: this.username,
+                    pageId: options.pageId,
+                    accountId: options.accountId
+                }, {
+                    $set: {
+                        settings: options.settings,
+                        messages: options.messages
                     }
-                    break;
-                case 'pause':
-                    break;
-                case 'stop':
-                    console.log('stop process');
-                    this.processes.splice(this.processes.indexOf(currentProcess),1);
-                    console.log(this.processes);
-                    break;
-            }
+                }, {
+                    new: true,
+                    upsert: true
+                },
+                function (err, doc) {
+                    if (err) throw err;
+                    console.log(doc);
+                })*/
+
         }
+
+
     }
 }
 
