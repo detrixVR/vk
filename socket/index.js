@@ -1,9 +1,10 @@
-"use strict"
+"use strict";
 
 var io = require('socket.io');
 
 var User = require('./user');
 var Process = require('./process');
+var async = require('async');
 
 
 var sio = function (http) {
@@ -24,7 +25,6 @@ var sio = function (http) {
         });
 
         if (user) {
-            console.log(that.users[0].processes);
 
             socket.on('disconnect', function () {
                 console.log(' disconnected');
@@ -39,25 +39,25 @@ var sio = function (http) {
             });
 
             socket.on('getCurrentProcess', function (options) {
-                var process = that.getCurrentProcess(user, options);
+                async.waterfall([function (callback) {
+                    return callback(null, that.getCurrentProcess(user, options));
+                }, function (process, callback) {
+                    if (!process) {
+                        user.getArchivedProcess(options, function (err, process) {
+                            return callback(err ? err : null, process);
+                        })
+                    } else {
+                        return callback(null, process);
+                    }
+                }], function (err, process ) {
+                    if (err) {
 
-                socket.emit('setProcess', process ? {
-                    state: process.state,
-                    settings: process.settings,
-                    messages: process.messages
-                } : process);
+                    }
+                    socket.emit('setProcess', process ? (process.options ? process.options : process) : null);
+                });
             });
         }
-
-
     });
-
-
-    /*setInterval(function () {
-     console.log('time');
-     s.sockets.emit('time', Date());
-     }, 5000);*/
-
 };
 
 sio.prototype.addUser = function (user) {
@@ -85,7 +85,7 @@ sio.prototype.findUserByName = function (username) {
 sio.prototype.getCurrentProcess = function (user, options) {
     var process = null;
     for (var i = 0; i < user.processes.length; i++) {
-        if (user.processes[i].pageId === options.pageId) {
+        if (user.processes[i].options.pageId === options.pageId) {
             process = user.processes[i];
             break;
         }
@@ -107,6 +107,7 @@ sio.prototype.startPauseProcess = function (user, options) {
 sio.prototype.stopProcess = function (user, options) {
     var process = this.getCurrentProcess(user, options);
     if (process) {
+        console.log('here');
         process.stop();
     }
 };

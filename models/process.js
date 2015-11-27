@@ -30,3 +30,4 @@ var schema = new Schema({
 });
 
 exports.Process = mongoose.model('Process', schema);
+exports.db = mongoose.connection;

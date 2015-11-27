@@ -1,7 +1,7 @@
 "use strict"
 
 var Process = require('./process');
-var dbProcess = require('../models/process');
+var dbProcess = require('../models/process').Process;
 
 class User {
     constructor(user) {
@@ -10,12 +10,12 @@ class User {
         this.processes = [];
     }
 
-    archiveProcess(options) {
+    archiveProcess(options, callback) {
 
         var processIndex = -1;
 
         for (var i = 0; i < this.processes.length; i++) {
-            if (this.processes[i].pageId === options.pageId) {
+            if (this.processes[i].options.pageId === options.pageId) {
                 processIndex = i;
                 break;
             }
@@ -25,8 +25,7 @@ class User {
 
             this.processes.splice(processIndex, 1);
 
-            /*
-            dbProcess.findAndModify({
+            dbProcess.update({
                     username: this.username,
                     pageId: options.pageId,
                     accountId: options.accountId
@@ -40,13 +39,24 @@ class User {
                     upsert: true
                 },
                 function (err, doc) {
-                    if (err) throw err;
-                    console.log(doc);
-                })*/
+                    return callback(err ? err : null, doc);
+                })
 
+        } else {
+            return callback();
         }
 
 
+    }
+
+    getArchivedProcess(options, callback) {
+        dbProcess.findOne({
+            username: this.username,
+            pageId: options.pageId,
+           // accountId: options.accountId //TODO
+        }, function (err, doc) {
+            return callback(err ? err : null, doc);
+        })
     }
 }
 

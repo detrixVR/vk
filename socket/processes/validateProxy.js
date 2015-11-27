@@ -12,15 +12,12 @@ var checkProxy = function (host, port, options, callback) {
     var proxyRequest = request.defaults({
         proxy: 'http://' + host + ':' + port,
         timeout: 1500
-    });//.setMaxListeners(0);
+    });
     proxyRequest(options.url, function (err, res) {
-        var testText = 'content="Yelp"';
         if (err) {
             return callback(host, port, false, -1, err);
         } else if (res.statusCode != 200) {
             return callback(host, port, false, res.statusCode, err);
-            // } else if( !res.body || (options.regex && !options.regex.exec(res.body)) ) {
-            // callback(host, port, false, res.statusCode, "Body doesn't match the regex " + options.regex + ".");
         } else {
             return callback(host, port, true, res.statusCode);
         }
@@ -28,20 +25,29 @@ var checkProxy = function (host, port, options, callback) {
 };
 
 
-var validateProxy = function (process, settings, callback) {
+var validateProxy = function (settings, callback) {
+
+    callback(null, {
+        cbType: 1,
+        msg: this.createMsg({msg: 'Старт'})
+    });
+
 
     var username = 'huyax';
+    var that = this;
 
     ProxyGrid.find({
         username: username
     }, function (err, docs) {
 
+
+
         async.eachSeries(docs, function (item, done) {
-            console.log(item);
-            if (process.getState()) {
+
+            var processItem = function (item, back) {
 
                 callback(null, {
-                    type: 'gridRowEvent',
+                    cbType: 4,
                     id: item._id,
                     columns: ['status'],
                     values: [0]
@@ -49,26 +55,26 @@ var validateProxy = function (process, settings, callback) {
 
                 if (!utils.validateIPaddress(item.content)) {
 
-
                     item.status = 2;
 
                     item.save(function (err) {
                         if (err) {
-                            return done(err);
+                            return back(err);
                         } else {
 
                             callback(null, {
-                                type: 'gridRowEvent',
+                                cbType: 4,
                                 id: item._id,
                                 columns: ['status'],
                                 values: [2]
                             });
 
-                            return done();
+                            return back();
                         }
                     });
                 } else {
                     var arr = item.content.split(':');
+
                     checkProxy(arr[0], arr[1], {
                         url: 'http://vk.com'
                     }, function (host, port, ok, statusCode, err) {
@@ -78,20 +84,19 @@ var validateProxy = function (process, settings, callback) {
 
                             item.save(function (err) {
                                 if (err) {
-                                    return done(err);
+                                    return back(err);
                                 } else {
 
                                     callback(null, {
-                                        type: 'gridRowEvent',
+                                        cbType: 4,
                                         id: item._id,
                                         columns: ['status'],
                                         values: [3]
                                     });
 
-                                    return done();
+                                    return back();
                                 }
                             });
-
 
 
                         } else {
@@ -100,39 +105,64 @@ var validateProxy = function (process, settings, callback) {
 
                             item.save(function (err) {
                                 if (err) {
-                                    return done(err);
+                                    return back(err);
                                 } else {
 
                                     callback(null, {
-                                        type: 'gridRowEvent',
+                                        cbType: 4,
                                         id: item._id,
                                         columns: ['status'],
                                         values: [4]
                                     });
 
-                                    return done();
+                                    return back();
                                 }
                             });
                         }
                     })
                 }
-            } else {
-                callback(null, {
-                    type: 'eventMsg',
-                    value: 'Выполнение'
-                });
 
-                //TODO:
+            };
+
+            switch (that.state.state) {
+                case 1:
+                    processItem(item, function (err) {
+                        return done(err ? err : null);
+                    });
+                    break;
+                case 2:
+
+                    callback(null, {
+                        cbType: 2,
+                        msg: that.createMsg({msg: 'Пауза'})
+                    });
+
+                    var d = null;
+                    var delay = function () {
+                        console.log('delay');
+                        if (that.state.state === 2) {
+                            d = setTimeout(delay, 100);
+                        } else {
+                            clearTimeout(d);
+                            processItem(item, function (err) {
+                                return done(err ? err : null);
+                            });
+                        }
+                    };
+                    delay();
+                    break;
+                case 0:
+                    return done(true);
+                default :
+                    return done();
             }
-        }, function (err) {
-            if (err) {
-                return callback(err);
-            }
+        }, function(err){
+
             return callback(null, {
-                type: 'done'
+                cbType: 0,
+                msg: that.createMsg({msg: 'Стоп'})
             })
         })
-
     })
 };
 

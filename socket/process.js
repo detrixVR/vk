@@ -2,74 +2,148 @@
 
 var validateProxy = require('./processes/validateProxy');
 var request = require('request');
+var extend = require('extend');
 
-function start() {
 
-    if (this.state == 1) {
-        this.user.socket.emit('time', 'live');
-    } else if (this.state == 2) {
-        console.log('here');
-        this.user.socket.emit('setState', 2);
-    }
+var CALLBACK_TYPES = [
+    'stop', //0
+    'start', //1
+    'pause', //2
+    'msg', //3
+    'refreshRow', //4
+];
+
+function start(callback) {
+
+    callback(null, {
+        cbType: 3,
+        msg: this.createMsg({msg: 'live'})
+    });
+
+    var d = null;
+
 
     var that = this;
 
-    if (this.state !== 0) {
-        setTimeout(function () {
-            start.call(that);
-        }, 1000);
+    if (this.state.state !== 0) {
+
+        if (this.state.state !== 2) {
+            setTimeout(function () {
+                start.apply(that, [callback]);
+            }, 1000);
+        } else {
+            var d = null;
+            callback(null, {
+                cbType: 2,
+                msg: that.createMsg({msg: 'Пауза'})
+            });
+            var delay = function () {
+                console.log('delay');
+                if (that.state.state === 2) {
+                    d = setTimeout(delay, 1000);
+                } else {
+                    clearTimeout(d);
+                    start.apply(that, [callback]);
+                }
+            };
+            delay();
+
+        }
+
+
     } else {
-        this.user.socket.emit('setState', 0);
+
+        return callback(null, {
+            cbType: 0,
+            msg: this.createMsg({msg: 'Стоп'})
+        });
     }
 }
 
 class Process {
+
     constructor(user, options) {
+
+        this.options = extend({
+            messages: []
+        }, options);
+
         this.user = user;
-        this.pageId = options.pageId;
-        this.processId = options.processId;
-        this.settings = options.settings;
-        this.messages = [];
-        this.state = null;
+        this.state = {
+            state: 0
+        };
     }
 
-    getState() {
-        return this.state
+    createMsg(options) {
+
+        var defOptions = {
+            time: Date.now(),
+            msg: 'text',
+            type: 0,
+            clear: false
+        };
+
+        return extend(defOptions, options);
     }
 
     start() {
         this.user.socket.emit('setState', 3);
-        if (!this.state) {
-            this.state = 1;
-            switch (this.processId) {
-                case 'test':
-                    start.call(this);
-                    this.messages.push({time: Date.now(), msg: 'Старт', type: 0, clear: true});
-                    this.user.socket.emit('setState', 1);
-                    break;
-            }
-        } else if (this.state === 1) { //pause
-            this.messages.push({time: Date.now(), msg: 'Пауза'});
-            this.state = 2;
-        } else if (this.state === 2) {
-            this.state = 1;
-            this.messages.push({time: Date.now(), msg: 'Старт'});
-            this.user.socket.emit('setState', 1);
+
+        switch (this.state.state) {
+            case 0:
+                this.state.state = 1;
+
+                switch (this.options.processId) {
+                    case 'test':
+                        eval('validateProxy').apply(this, [this.options.settings, (err, cbData) => {
+
+                                if (cbData.hasOwnProperty('msg')) {
+                                    this.options.messages.push(cbData.msg);
+                                }
+
+                                switch (cbData.cbType) {
+                                    case 0:
+                                        this.user.archiveProcess(this.options, (err)=> {
+                                            var obj = {state: {state: cbData.cbType}};
+                                            if (err) {
+                                                cbData.msg = this.createMsg({msg: 'Ошибка сервера'});
+                                            }
+                                            this.user.socket.emit('setState', extend(obj, cbData));
+                                        });
+                                        break;
+                                    case 1:
+                                    case 2:
+                                        this.user.socket.emit('setState', extend({
+                                            state: cbData.cbType
+                                        }, cbData));
+                                        break;
+                                    case 3:
+                                        this.user.socket.emit('printEvent', cbData.msg);
+                                        break;
+                                    case 4:
+                                        this.user.socket.emit('refreshRow', cbData);
+                                        break;
+                                }
+                            }]);
+                        break;
+                }
+                break;
+            case 1:
+                this.pause();
+                break;
+            case 2:
+                this.state.state = 1;
+                break;
         }
     }
 
-    stop() {
-        this.user.socket.emit('setState', 3);
-        this.messages.push({time: Date.now(), msg: 'Стоп'});
-        //this.state = 0; //???
-        this.user.archiveProcess({
-            pageId : this.pageId
-        });
-        console.log(this.user.processes)
-    }
 
     pause() {
-        this.state = 2;
+        this.state.state = 2;
+    }
+
+    stop() {
+        this.state.state = 0;
     }
 }
 

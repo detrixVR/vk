@@ -1,5 +1,7 @@
 import utils from '../utils'
 
+
+
 class Socket {
     constructor(page) {
         this.page = page;
@@ -48,18 +50,21 @@ class Socket {
             });
 
             this.socket.on('setState', function (state) {
+                console.log(state);
                 that.page.ui.setState(state);
             });
 
             this.socket.on('setProcess', function(process){
-                console.log(process);
-
-                    that.page.ui.setProcess(process);
-
+                that.page.ui.setProcess(process);
             });
 
-            this.socket.on('gridRowEvent', function (data) {
-                $('[data-toggle=bootgrid]').trigger('gridRowEvent', data);
+            this.socket.on('printEvent', function(data){
+                that.page.ui.printEvent(data);
+            });
+
+            this.socket.on('refreshRow', function (data) {
+                console.log('refreshRow')
+                $('[data-toggle=bootgrid]').trigger('refreshRow', data);
             });
 
             this.socket.on('disconnect',function(){

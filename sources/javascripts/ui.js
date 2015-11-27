@@ -15,13 +15,13 @@ var redrawSelector = function (selectedItem) {
     $('a', nextAccount).attr('href', '/?account=' + this.accountId + '&next=true');
 };
 
-var setState = function (state) {
+var setState = function (data) {
     // 1 start 2 pause 3 middle
 
     var stopButton = $('#stopButton');
     var startStopButton = $('#startStopButton');
 
-    switch (state) {
+    switch (data.state) {
         case 0:
             console.log('stop');
         case 1:
@@ -39,13 +39,17 @@ var setState = function (state) {
     stopButton.attr('disabled', false);
     startStopButton.attr('disabled', false);
 
-    startStopButton.find('.glyphicon').removeClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause');
-    startStopButton.find('.glyphicon').addClass(state === 1 ? 'glyphicon-pause' : 'glyphicon-play');
-    stopButton.toggleClass('hidden', state === 0);
+    startStopButton.find('.glyphicon').removeClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause');
+    startStopButton.find('.glyphicon').addClass(data.state === 1 ? 'glyphicon-pause' : 'glyphicon-play');
+    stopButton.toggleClass('hidden', data.state === 0);
+
+    if (data.hasOwnProperty('msg')) {
+        $('#eventsHolder').trigger('printEvent', [data.msg]);
+    }
 
 };
 
-var overlay = function(state) {
+var overlay = function (state) {
     var $overlay = $('.overlay');
     if (state) {
         $('.textHolder', $overlay).text(state);
@@ -130,12 +134,12 @@ var applySettings = function (settings) {
         var grid = $grid.data('.rs.jquery.bootgrid');
 
         if (grid) {
-           /* grid.setSelectedRows(settings['selectedRows']);
+            /* grid.setSelectedRows(settings['selectedRows']);
 
 
-            grid.setCurrent(settings['current']);
-            grid.setSearchPhrase(settings['searchPhrase']);
-            grid.setRowCount(settings['rowCount']);*/
+             grid.setCurrent(settings['current']);
+             grid.setSearchPhrase(settings['searchPhrase']);
+             grid.setRowCount(settings['rowCount']);*/
 
             grid.reload();
         }
@@ -178,182 +182,180 @@ var applySettings = function (settings) {
     }
 };
 
-var setProcess = function(process) {
+var setProcess = function (process) {
     if (process) {
-        setState(process.state);
-        $('#eventsHolder').trigger('printEvent', [{
-            msg: process.messages
-        }, true]);
+        if (process.state)
+            setState(process.state);
+        $('#eventsHolder').trigger('printEvent', [process.messages, true]);
         applySettings(process.settings);
     }
 
     overlay();
 };
 
+var printEvent = function (data) {
+    $('#eventsHolder').trigger('printEvent', [data, data.clear]);
+};
+
 var init = function () {
 
     var that = this;
 
-    var isArray = function(someVar) {
+    var isArray = function (someVar) {
         return Object.prototype.toString.call(someVar) === '[object Array]';
     };
 
-    $('[data-toggle=bootgrid]').bind('refreshRow', function (event, options) {
-        var $grid = $(this);
-        var grid = $grid.data('.rs.jquery.bootgrid');
-        var findedItem = grid.currentRows.find(function (item) {
-            return item._id === options.id
-        });
-        if (findedItem) {
-            options.columns.forEach(function (item, i) {
-                findedItem[item] = options.values[i];
+    $('[data-toggle=bootgrid]')
+        .bind('refreshRow', function (event, options) {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            var findedItem = grid.currentRows.find(function (item) {
+                return item._id === options.id
             });
-            if (options.update) {
-                grid.append([findedItem], function (err) {
-                    if (!err) {
-                        grid.renderRows(grid.currentRows);
-                    }
+            if (findedItem) {
+                options.columns.forEach(function (item, i) {
+                    findedItem[item] = options.values[i];
                 });
-            } else {
-                grid.renderRows(grid.currentRows);
-            }
-        }
-    });
-
-    $('[data-toggle=bootgrid]').bind('gridDelete', function (event, elem) {
-        var $elem = $(elem);
-        var rowId = $elem.data('row-_id');
-        var $grid = $(this);
-        var grid = $grid.data('.rs.jquery.bootgrid');
-        if (grid) {
-            var content = 'Удалить элемент?';
-            if (!rowId) {
-                if (!grid.selectedRows.length) {
-                    return (0);
+                if (options.update) {
+                    grid.append([findedItem], function (err) {
+                        if (!err) {
+                            grid.renderRows(grid.currentRows);
+                        }
+                    });
+                } else {
+                    grid.renderRows(grid.currentRows);
                 }
-                content = 'Удалить выделенные элементы?';
             }
-            var selector = $('#modalConfirm');
-            $('.modal-body', selector).html(content);
-
-            var bindFunc = function () {
-                var forRemove = rowId ? [rowId] : grid.selectedRows;
-                grid.remove(forRemove, function (err) {
-                    if (!err) $.notify({message: 'Успешно удалено'}, {type: 'success'});
-                    grid.reload();
-                });
-            };
-
-            selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
-        }
-    });
-
-    $('[data-toggle=bootgrid]').bind('gridRowEdit', function (event, row) {
-
-        var $row = $(row);
-        var rowId = $row.data('row-_id');
-        var $grid = $(this);
-        var grid = $grid.data('.rs.jquery.bootgrid');
-        if (rowId && grid) {
-
-            var bindFunc = function () {
-                var $this = $(this);
-                var inputs = $this.find('.modal-body').find('input');
-                var columns = [];
-                var values = [];
-                inputs.each(function () {
-                    var $this = $(this);
-                    var columnName = $this.data('column');
-                    if (columnName) {
-                        columns.push(columnName);
-                        values.push($this.val());
+        })
+        .bind('gridDelete', function (event, elem) {
+            var $elem = $(elem);
+            var rowId = $elem.data('row-_id');
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (grid) {
+                var content = 'Удалить элемент?';
+                if (!rowId) {
+                    if (!grid.selectedRows.length) {
+                        return (0);
                     }
-                });
-                $grid.trigger('refreshRow', {
-                    id: rowId,
-                    columns: columns,
-                    values: values,
-                    update: true
-                });
-            };
+                    content = 'Удалить выделенные элементы?';
+                }
+                var selector = $('#modalConfirm');
+                $('.modal-body', selector).html(content);
 
-            var content = '';
-            var rowData = grid.currentRows.find(function (item) {
-                return item._id === rowId
-            });
-            if (rowData) {
-                for (var k in rowData) {
-                    if (rowData.hasOwnProperty(k)) {
-                        var column = grid.columns.find(function (item) {
-                            return item.id === k;
-                        });
-                        if (column && column.editable) {
-                            content += '<div class="form-group"><input class="form-control" data-column="' + k + '" value="' + rowData[k] + '"/></div>';
+                var bindFunc = function () {
+                    var forRemove = rowId ? [rowId] : grid.selectedRows;
+                    grid.remove(forRemove, function (err) {
+                        if (!err) $.notify({message: 'Успешно удалено'}, {type: 'success'});
+                        grid.reload();
+                    });
+                };
+
+                selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
+            }
+        })
+        .bind('gridRowEdit', function (event, row) {
+
+            var $row = $(row);
+            var rowId = $row.data('row-_id');
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (rowId && grid) {
+
+                var bindFunc = function () {
+                    var $this = $(this);
+                    var inputs = $this.find('.modal-body').find('input');
+                    var columns = [];
+                    var values = [];
+                    inputs.each(function () {
+                        var $this = $(this);
+                        var columnName = $this.data('column');
+                        if (columnName) {
+                            columns.push(columnName);
+                            values.push($this.val());
+                        }
+                    });
+                    $grid.trigger('refreshRow', {
+                        id: rowId,
+                        columns: columns,
+                        values: values,
+                        update: true
+                    });
+                };
+
+                var content = '';
+                var rowData = grid.currentRows.find(function (item) {
+                    return item._id === rowId
+                });
+                if (rowData) {
+                    for (var k in rowData) {
+                        if (rowData.hasOwnProperty(k)) {
+                            var column = grid.columns.find(function (item) {
+                                return item.id === k;
+                            });
+                            if (column && column.editable) {
+                                content += '<div class="form-group"><input class="form-control" data-column="' + k + '" value="' + rowData[k] + '"/></div>';
+                            }
                         }
                     }
-                }
-                if (content) {
-                    var selector = $('#modalEdit');
-                    $('.modal-body', selector).html(content);
-                    selector.modal().unbind('editOk').bind('editOk', bindFunc);
-                }
-            }
-        }
-    });
-
-    $('[data-toggle=bootgrid]').bind('gridAdd', function () {
-        var $grid = $(this);
-        var grid = $grid.data('.rs.jquery.bootgrid');
-        if (grid) {
-            var selector = $('#modalInput');
-
-            switch (grid.listType) {
-                case 'proxy':
-                    $('.alert', selector).html('Скопируйте сюда прокси в формате <b>host:port</b> и нажмите Добавить');
-                    break;
-            }
-
-            var bindFunc = function () {
-                var $this = $(this);
-                var textArea = $('textarea', $this);
-                var linesArr = textArea.val().split('\n').map(function (item) {
-                    if (item) {
-                        return {
-                            content: item
-                        };
-                    } else {
-                        return false;
+                    if (content) {
+                        var selector = $('#modalEdit');
+                        $('.modal-body', selector).html(content);
+                        selector.modal().unbind('editOk').bind('editOk', bindFunc);
                     }
-                }).filter(function (item) {
-                    return item.content
-                });
-
-                if (linesArr.length) {
-                    grid.append(linesArr, function (err) {
-                        if (!err) $.notify({message: 'Успешно добавлено'}, {type: 'success'});
-                        grid.reload();
-                    })
                 }
-            };
-            selector.modal().unbind('addOk').bind('addOk', bindFunc);
-        }
-    });
+            }
+        })
+        .bind('gridAdd', function () {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (grid) {
+                var selector = $('#modalInput');
 
-    $('#eventsHolder').bind('printEvent', function (event, data, clear) {
-        var $that = $(this);
-        var list = $('.list-group', $that);
+                switch (grid.listType) {
+                    case 'proxy':
+                        $('.alert', selector).html('Скопируйте сюда прокси в формате <b>host:port</b> и нажмите Добавить');
+                        break;
+                }
 
-        var messages = data.msg;
+                var bindFunc = function () {
+                    var $this = $(this);
+                    var textArea = $('textarea', $this);
+                    var linesArr = textArea.val().split('\n').map(function (item) {
+                        if (item) {
+                            return {
+                                content: item
+                            };
+                        } else {
+                            return false;
+                        }
+                    }).filter(function (item) {
+                        return item.content
+                    });
 
-        if (!isArray(messages)) {
-            messages = [messages];
+                    if (linesArr.length) {
+                        grid.append(linesArr, function (err) {
+                            if (!err) $.notify({message: 'Успешно добавлено'}, {type: 'success'});
+                            grid.reload();
+                        })
+                    }
+                };
+                selector.modal().unbind('addOk').bind('addOk', bindFunc);
+            }
+        });
+
+    $('#eventsHolder').bind('printEvent', function (event, message, clear) {
+        var list = $('.list-group', this);
+
+        if (!isArray(message)) {
+            message = [message];
         }
 
         if (clear) {
             list.empty();
         }
 
-        messages.forEach(function(item){
+        message.forEach(function (item) {
             var subClass = '';
             switch (item.type) {
                 case 0: // info
@@ -370,52 +372,54 @@ var init = function () {
                     break;
             }
 
-            list.append('<li class="list-group-item ' + subClass + '"><span class="text-muted small">'+new Date(item.time).toLocaleString()+'</span> ' + item.msg + '</li>');
+            list.append('<li class="list-group-item ' + subClass + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
+
         })
+
+        $(this).scrollTop(this.scrollHeight);
     });
 
-    $('body').bind('selectAccount', function () {
+    $(document.body)
+        .bind('selectAccount', function () {
 
-        var bindFunc = function () {
-            var $this = $(this);
-            var $grid = $this.find('[data-toggle=bootgrid]');
-            if ($grid.length) {
-                var grid = $grid.data('.rs.jquery.bootgrid');
-                if (grid) {
-                    var selectedItemId = grid.selectedRows.length ? grid.selectedRows[0] : null;
-                    if (selectedItemId) {
-                        var selectedItem = grid.currentRows.find(function (item) {
-                            return item._id == selectedItemId
-                        });
-                        if (selectedItem) {
-                            if (that.accountId != selectedItem.id) {
-                                that.accountId = selectedItem.id;
-                                redrawSelector.apply(that, [selectedItem]);
-                                that.pageReload();
+            var bindFunc = function () {
+                var $this = $(this);
+                var $grid = $this.find('[data-toggle=bootgrid]');
+                if ($grid.length) {
+                    var grid = $grid.data('.rs.jquery.bootgrid');
+                    if (grid) {
+                        var selectedItemId = grid.selectedRows.length ? grid.selectedRows[0] : null;
+                        if (selectedItemId) {
+                            var selectedItem = grid.currentRows.find(function (item) {
+                                return item._id == selectedItemId
+                            });
+                            if (selectedItem) {
+                                if (that.accountId != selectedItem.id) {
+                                    that.accountId = selectedItem.id;
+                                    redrawSelector.apply(that, [selectedItem]);
+                                    that.pageReload();
+                                }
                             }
                         }
                     }
                 }
-            }
-        };
+            };
 
-        var selector = $('#modalAccounts');
-        selector.modal().unbind('selectOk').bind('selectOk', bindFunc);
-    });
-
-    $('body').bind('startPauseProcess', function () {
-        that.socket.socket.emit('startPauseProcess', {
-            pageId: that.pageId,
-            processId: 'test',
-            settings: getSettings()
+            var selector = $('#modalAccounts');
+            selector.modal().unbind('selectOk').bind('selectOk', bindFunc);
+        })
+        .bind('startPauseProcess', function () {
+            that.socket.socket.emit('startPauseProcess', {
+                pageId: that.pageId,
+                processId: 'test',
+                settings: getSettings()
+            });
+        })
+        .bind('stopProcess', function () {
+            that.socket.socket.emit('stopProcess', {
+                pageId: that.pageId
+            });
         });
-    });
-
-    $('body').bind('stopProcess', function(){
-        that.socket.socket.emit('stopProcess', {
-            pageId: that.pageId
-        });
-    });
 
     $.notifyDefaults({
         placement: {
@@ -479,6 +483,7 @@ var ui = {
     setState: setState,
     setProcess: setProcess,
     overlay: overlay,
+    printEvent: printEvent
 };
 
 
