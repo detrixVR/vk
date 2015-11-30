@@ -75,7 +75,7 @@
         renderTableHeader.call(this);
         renderSearchField.call(this);
         renderActions.call(this);
-        loadData.call(this);
+        //loadData.call(this);
 
         this.element.trigger("initialized" + namespace);
     }
@@ -109,7 +109,7 @@
                     cssClass: data.cssClass || "",
                     headerCssClass: data.headerCssClass || "",
                     formatter: that.options.formatters[data.formatter] || null,
-                    order: (!sorted && (data.order === "asc" || data.order === "desc")) ? data.order : null,
+                    order: (!sorted && (data.order === 1 || data.order === -1)) ? data.order : null,
                     searchable: !(data.searchable === false), // default: true
                     sortable: !(data.sortable === false), // default: true
                     visible: !(data.visible === false), // default: true
@@ -137,7 +137,7 @@
         /*jshint +W018*/
     }
 
-    function loadData() {
+    function loadData(callback) {
         var that = this;
 
         this.element._bgBusyAria(true).trigger("load" + namespace);
@@ -217,7 +217,9 @@
                 ;
             settings = $.extend(this.options.ajaxSettings, settings);
 
-            this.xqr = $.ajax(settings);
+            this.xqr = $.ajax(settings).always(function(){
+                if (callback) callback();
+            });
         }
 
         else {
@@ -594,8 +596,8 @@
         $.each(this.columns, function (index, column) {
             if (column.visible) {
                 var sortOrder = that.sortDictionary[column.id],
-                    iconCss = ((sorting && sortOrder && sortOrder === "asc") ? css.iconUp :
-                        (sorting && sortOrder && sortOrder === "desc") ? css.iconDown : ""),
+                    iconCss = ((sorting && sortOrder && sortOrder === 1) ? css.iconUp :
+                        (sorting && sortOrder && sortOrder === -1) ? css.iconDown : ""),
                     icon = tpl.icon.resolve(getParams.call(that, {iconCss: iconCss})),
                     align = column.headerAlign,
                     cssClass = (column.headerCssClass.length > 0) ? " " + column.headerCssClass : "";
@@ -651,11 +653,11 @@
             this.sortDictionary = {};
         }
 
-        if (sortOrder && sortOrder === "asc") {
-            this.sortDictionary[columnId] = "desc";
+        if (sortOrder && sortOrder === 1) {
+            this.sortDictionary[columnId] = -1;
             icon.removeClass(css.iconUp).addClass(css.iconDown);
         }
-        else if (sortOrder && sortOrder === "desc") {
+        else if (sortOrder && sortOrder === -1) {
             if (this.options.multiSort) {
                 var newSort = {};
                 for (var key in this.sortDictionary) {
@@ -667,12 +669,12 @@
                 icon.removeClass(css.iconDown);
             }
             else {
-                this.sortDictionary[columnId] = "asc";
+                this.sortDictionary[columnId] = 1;
                 icon.removeClass(css.iconDown).addClass(css.iconUp);
             }
         }
         else {
-            this.sortDictionary[columnId] = "asc";
+            this.sortDictionary[columnId] = 1;
             icon.addClass(css.iconUp);
         }
     }
@@ -1420,9 +1422,11 @@
      * @method reload
      * @chainable
      **/
-    Grid.prototype.reload = function () {
+    Grid.prototype.reload = function (callback) {
         //this.current = 1; // reset
-        loadData.call(this);
+        loadData.apply(this, [function(){
+            return callback();
+        }]);
 
         return this;
     };
@@ -1715,8 +1719,55 @@
      * @return {Object} Returns the sort dictionary.
      * @since 1.2.0
      **/
+
+    Grid.prototype.setRowCount = function (rowCount) {
+        this.rowCount = rowCount;
+        if (this.options.navigation !== 0) {
+            var that = this,
+                css = this.options.css,
+                selector = getCssSelector(css.actions),
+                actionItems = findFooterAndHeaderItems.call(this, selector),
+                menuTextSelector = getCssSelector(css.dropDownMenuText),
+                menuItemsSelector = getCssSelector(css.dropDownMenuItems),
+                menuItemSelector = getCssSelector(css.dropDownItemButton);
+            if (actionItems.length > 0) {
+                var dropDown = $($(getCssSelector(css.dropDownMenu), actionItems)[0]);
+                $(menuTextSelector, dropDown).text(this.rowCount);
+                $(menuItemsSelector, dropDown).children().each(function(){
+                    var $item = $(this),
+                        currentRowCount = $item.find(menuItemSelector).data("action");
+                    $item._bgSelectAria(currentRowCount === that.rowCount);
+                });
+            }
+        }
+    };
+
+    Grid.prototype.setSearchPhrase = function (searchPhrase) {
+        this.searchPhrase = searchPhrase;
+        if (this.options.navigation !== 0) {
+            var css = this.options.css,
+                selector = getCssSelector(css.search),
+                searchItems = findFooterAndHeaderItems.call(this, selector);
+            if (searchItems.length > 0) {
+                $(getCssSelector(css.searchField), searchItems).val(this.searchPhrase);
+            }
+        }
+    };
+
+    Grid.prototype.setSelectedRows = function (selectedRows) {
+        this.selectedRows = selectedRows;
+    };
+
+    Grid.prototype.setCurrent = function (current) {
+        this.current = current;
+    };
+
     Grid.prototype.getSortDictionary = function () {
         return $.extend({}, this.sortDictionary);
+    };
+
+    Grid.prototype.setSortDictionary = function (sortDictionary) {
+        this.sortDictionary = sortDictionary || this.sortDictionary;
     };
 
     /**

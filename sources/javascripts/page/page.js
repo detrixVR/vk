@@ -1,4 +1,3 @@
-import utils from '../utils'
 import Socket from '../socket/socket.js';
 import ui from '../ui'
 
@@ -15,7 +14,6 @@ class Page {
     init() {
         this.socket.listen();
         this.ui.init.call(this);
-        this.pageReload();
     }
 
     pageReload() {
@@ -29,10 +27,6 @@ class Page {
             pageId: this.pageId,
             accountId: this.accountId
         });
-    }
-
-    toString() {
-        // return `(${this.x},${this.y})`;
     }
 }
 

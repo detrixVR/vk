@@ -10,12 +10,23 @@ module.exports.get = function (req, res) {
     res.render('grid', {});
 };
 
+var getForGrid = function (Requester, options, callback) {
+    Requester.find({
+        username: options.username,
+        content: {"$regex": options.searchPhrase, "$options": "i"}
+    }).sort(options.sort).skip((options.current - 1) * options.rowCount).limit(options.rowCount > 0 ? options.rowCount : 0).exec(function (err, docs) {
+        return callback(err ? err : null, docs);
+    });
+};
+
 module.exports.post = function (req, res) {
 
 
     req.user = {
         username: 'huyax'
     } //TODO:
+
+
 
     var options = null;
 
@@ -34,6 +45,8 @@ module.exports.post = function (req, res) {
         });
         return (0);
     }
+
+    options.username = req.user.username;
 
     var Requester = null;
 
@@ -64,7 +77,7 @@ module.exports.post = function (req, res) {
     if (options.forAccounts && options.listType === 'proxy') {
         async.waterfall([function (callback) {
             AccountGrid.find({
-                username: req.user.username,
+                username: options.username,
                 proxy: {
                     $exists: true
                 }
@@ -81,7 +94,7 @@ module.exports.post = function (req, res) {
                     blockedProxies.push(item.proxy);
                 });
                 ProxyGrid.findOne({
-                    username: req.user.username,
+                    username: options.username,
                     content: {
                         $nin: blockedProxies
                     },
@@ -97,14 +110,10 @@ module.exports.post = function (req, res) {
             }
         })
     } else {
-        var current = options.current;
-        var rowCount = options.rowCount;
-        var searchPhrase = options.searchPhrase;
-
 
         async.waterfall([function (callback) {
             Requester.count({
-                username: req.user.username
+                username: options.username
             }, function (err, count) {
                 if (err)
                     return callback(err);
@@ -116,17 +125,17 @@ module.exports.post = function (req, res) {
                 var resp = utils.processError(err);
                 return res.status(resp.status).json(resp);
             } else {
-                Requester.find({
-                    username: req.user.username,
-                    content: {"$regex": searchPhrase, "$options": "i"}
-                }).sort(options.sort).skip((current - 1) * rowCount).limit(rowCount > 0 ? rowCount : count).exec(function (err, docs) {
+
+               // options.count = count;
+
+                getForGrid(Requester, options, function (err, docs) {
                     if (err) {
                         var resp = utils.processError(err);
                         return res.status(resp.status).json(resp);
                     } else {
                         res.status(200).json({
-                            "current": current,
-                            "rowCount": rowCount,
+                            "current": options.current,
+                            "rowCount": options.rowCount,
                             "rows": docs,
                             "total": count
                         });
@@ -303,3 +312,5 @@ module.exports.delete = function (req, res) {
         }
     })
 };
+
+module.exports.getForGrid = getForGrid;

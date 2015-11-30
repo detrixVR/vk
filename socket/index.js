@@ -85,7 +85,8 @@ sio.prototype.findUserByName = function (username) {
 sio.prototype.getCurrentProcess = function (user, options) {
     var process = null;
     for (var i = 0; i < user.processes.length; i++) {
-        if (user.processes[i].options.pageId === options.pageId) {
+        if (user.processes[i].options.pageId === options.pageId &&
+            user.processes[i].options.accountId === options.accountId) {
             process = user.processes[i];
             break;
         }
@@ -98,6 +99,20 @@ sio.prototype.startPauseProcess = function (user, options) {
     if (process) {
         process.start();
     } else {
+
+        switch (options.processId) {
+            case 'validateProxy':
+            case 'validateProxy':
+            case 'validateProxy':
+            case 'validateProxy':
+            case 'validateProxy':
+            case 'validateProxy':
+                break;
+            default :
+                console.error('Неизвестная функция');
+                return (0);
+        }
+
         var newProcess = new Process(user, options);
         user.processes.push(newProcess);
         newProcess.start();
@@ -107,7 +122,6 @@ sio.prototype.startPauseProcess = function (user, options) {
 sio.prototype.stopProcess = function (user, options) {
     var process = this.getCurrentProcess(user, options);
     if (process) {
-        console.log('here');
         process.stop();
     }
 };

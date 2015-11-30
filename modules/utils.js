@@ -41,7 +41,7 @@ function validateIPaddress(ipaddress) {
         });
 }
 
-function parseForm (form) {
+function parseForm(form) {
     var formObject = {};
     var action_index = form.indexOf('action="');
     var image_index = form.indexOf('<img ');
@@ -53,33 +53,32 @@ function parseForm (form) {
     }
     var action = '';
     if (action_index > -1) {
-        action = form.substring(action_index+8);
+        action = form.substring(action_index + 8);
         action = action.substring(0, action.indexOf('"'));
     }
     formObject['action'] = action;
     var index = form.indexOf('<input');
     while (index > -1) {
-        form = form.substring(index+6);
+        form = form.substring(index + 6);
         var name_index = form.indexOf('name="');
         if (name_index > -1) {
-            var name = form.substring(name_index+6);
+            var name = form.substring(name_index + 6);
             name = name.substring(0, name.indexOf('"'));
             var value_index = form.indexOf('value="');
             var value = '';
             if (value_index > -1) {
-                value = form.substring(value_index+7);
+                value = form.substring(value_index + 7);
                 value = value.substring(0, value.indexOf('"'));
             }
             formObject[name] = value;
         }
-        index  = form.indexOf('<input');
+        index = form.indexOf('<input');
     }
 
     return formObject;
 }
 
-
-function processError(error){
+function processError(error) {
 
     var notify = false;
     var msg = 'Ошибка сервера';
@@ -252,8 +251,7 @@ function extend(target) {
     return target;
 }
 
-function getCase(_number, _case1, _case2, _case3)
-{
+function getCase(_number, _case1, _case2, _case3) {
     var base = _number - Math.floor(_number / 100) * 100;
     var result;
 
@@ -271,12 +269,27 @@ function getCase(_number, _case1, _case2, _case3)
     return result;
 }
 
-module.exports.ruslat = ruslat;
-module.exports.processError = processError;
-module.exports.validateURL = validateURL;
-module.exports.parseForm = parseForm;
-module.exports.getLocation = getLocation;
-module.exports.validateIPaddress = validateIPaddress;
-module.exports.extend = extend;
-module.exports.getCase = getCase;
-module.exports.validateIPaddress = validateIPaddress;
+function createMsg(options) {
+
+    var defOptions = {
+        time: Date.now(),
+        msg: 'text',
+        type: 0,
+        clear: false
+    };
+
+    return extend(defOptions, options);
+};
+
+module.exports = {
+    ruslat: ruslat,
+    processError: processError,
+    validateURL: validateURL,
+    parseForm: parseForm,
+    getLocation: getLocation,
+    validateIPaddress: validateIPaddress,
+    extend: extend,
+    getCase: getCase,
+    alidateIPaddress: validateIPaddress,
+    createMsg: createMsg
+};

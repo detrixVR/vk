@@ -15,7 +15,7 @@ var schema = new Schema({
         required: true
     },
     settings: {
-        type: Array,
+        type: Object,
         required: true
     },
     messages: {

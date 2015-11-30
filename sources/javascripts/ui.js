@@ -16,36 +16,19 @@ var redrawSelector = function (selectedItem) {
 };
 
 var setState = function (data) {
-    // 1 start 2 pause 3 middle
 
     var stopButton = $('#stopButton');
-    var startStopButton = $('#startStopButton');
+    var startPauseButton = $('#startPauseButton');
 
-    switch (data.state) {
-        case 0:
-            console.log('stop');
-        case 1:
-
-            break;
-        case 2:
-            break;
-        case 3:
-            stopButton.attr('disabled', true);
-            startStopButton.attr('disabled', true);
-
-            return (0);
-    }
 
     stopButton.attr('disabled', false);
-    startStopButton.attr('disabled', false);
+    startPauseButton.attr('disabled', false);
 
-    startStopButton.find('.glyphicon').removeClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause');
-    startStopButton.find('.glyphicon').addClass(data.state === 1 ? 'glyphicon-pause' : 'glyphicon-play');
+    startPauseButton.find('.glyphicon').
+        toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+        toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+
     stopButton.toggleClass('hidden', data.state === 0);
-
-    if (data.hasOwnProperty('msg')) {
-        $('#eventsHolder').trigger('printEvent', [data.msg]);
-    }
 
 };
 
@@ -67,9 +50,10 @@ var getSettings = function () {
 
         if (grid) {
             settings['current'] = grid.current;
-            settings['selectedRows'] = grid.selectedRows;
-            settings['searchPhrase'] = grid.searchPhrase;
+            settings['selectedRows'] = grid.getSelectedRows();
+            settings['searchPhrase'] = grid.getSearchPhrase();
             settings['rowCount'] = grid.getRowCount();
+            settings['sort'] = grid.getSortDictionary();
         }
 
         return settings;
@@ -134,14 +118,14 @@ var applySettings = function (settings) {
         var grid = $grid.data('.rs.jquery.bootgrid');
 
         if (grid) {
-            /* grid.setSelectedRows(settings['selectedRows']);
+            // console.log('here')
+            grid.setSelectedRows(settings['selectedRows']);
+            grid.setCurrent(settings['current']);
+            grid.setSearchPhrase(settings['searchPhrase']);
+            grid.setRowCount(settings['rowCount']);
+            grid.setSortDictionary(settings['sortDictionary']);
 
-
-             grid.setCurrent(settings['current']);
-             grid.setSearchPhrase(settings['searchPhrase']);
-             grid.setRowCount(settings['rowCount']);*/
-
-            grid.reload();
+            // grid.reload();
         }
     }
 
@@ -190,7 +174,11 @@ var setProcess = function (process) {
         applySettings(process.settings);
     }
 
-    overlay();
+    overlay('Загрузка данных');
+
+    $('[data-toggle=bootgrid]').trigger('reload', function () {
+        setTimeout(overlay, 100)
+    });
 };
 
 var printEvent = function (data) {
@@ -220,6 +208,7 @@ var init = function () {
                     grid.append([findedItem], function (err) {
                         if (!err) {
                             grid.renderRows(grid.currentRows);
+                            $.notify({message: 'Успешно обновлено'}, {type: 'success'});
                         }
                     });
                 } else {
@@ -342,6 +331,15 @@ var init = function () {
                 };
                 selector.modal().unbind('addOk').bind('addOk', bindFunc);
             }
+        })
+        .bind('reload', function (event, callback) {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (grid) {
+                grid.reload(function () {
+                    callback();
+                });
+            }
         });
 
     $('#eventsHolder').bind('printEvent', function (event, message, clear) {
@@ -374,7 +372,7 @@ var init = function () {
 
             list.append('<li class="list-group-item ' + subClass + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
 
-        })
+        });
 
         $(this).scrollTop(this.scrollHeight);
     });
@@ -409,13 +407,30 @@ var init = function () {
             selector.modal().unbind('selectOk').bind('selectOk', bindFunc);
         })
         .bind('startPauseProcess', function () {
+
+            $('#startPauseButton').attr('disabled', true);
+
+            var processId = null;
+
+            switch (that.pageId) {
+                case '001':
+                    processId = 'validateProxy';
+                    break;
+                default :
+                    return (0);
+            }
+
             that.socket.socket.emit('startPauseProcess', {
                 pageId: that.pageId,
-                processId: 'test',
+                accountId: that.accountId,
+                processId: processId,
                 settings: getSettings()
             });
         })
         .bind('stopProcess', function () {
+
+            $('#stopButton').attr('disabled', true);
+
             that.socket.socket.emit('stopProcess', {
                 pageId: that.pageId
             });

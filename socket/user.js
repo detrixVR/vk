@@ -4,6 +4,7 @@ var Process = require('./process');
 var dbProcess = require('../models/process').Process;
 
 class User {
+
     constructor(user) {
         this.username = user.username;
         this.socket = user.socket;
@@ -15,7 +16,8 @@ class User {
         var processIndex = -1;
 
         for (var i = 0; i < this.processes.length; i++) {
-            if (this.processes[i].options.pageId === options.pageId) {
+            if (this.processes[i].options.pageId === options.pageId &&
+                this.processes[i].options.accountId === options.accountId) {
                 processIndex = i;
                 break;
             }
@@ -53,7 +55,7 @@ class User {
         dbProcess.findOne({
             username: this.username,
             pageId: options.pageId,
-           // accountId: options.accountId //TODO
+            accountId: options.accountId
         }, function (err, doc) {
             return callback(err ? err : null, doc);
         })
