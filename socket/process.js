@@ -34,8 +34,6 @@ class Process {
             case 0:
                 this.state.state = 1;
 
-
-
                 eval(this.options.processId).apply(this, [this.options.settings, (err, cbData) => {
 
                     if (cbData.hasOwnProperty('msg')) {

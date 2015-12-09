@@ -5,11 +5,13 @@ var io = require('socket.io');
 var User = require('./user');
 var Process = require('./process');
 var async = require('async');
-
+var redis  = require('socket.io-redis');
 
 var sio = function (http) {
 
     var s = io.listen(http);
+
+    s.adapter(redis({ host: 'localhost', port: 6379 }));
 
     this.users = [];
 
@@ -49,11 +51,15 @@ var sio = function (http) {
                     } else {
                         return callback(null, process);
                     }
-                }], function (err, process ) {
+                }], function (err, process) {
                     if (err) {
-
+                        that.sendNotification(socket, {
+                            notify: 'Server Error',
+                            type: 0
+                        });
+                    } else {
+                        socket.emit('setProcess', process ? (process.options ? process.options : process) : null);
                     }
-                    socket.emit('setProcess', process ? (process.options ? process.options : process) : null);
                 });
             });
         }
@@ -84,18 +90,36 @@ sio.prototype.findUserByName = function (username) {
 
 sio.prototype.getCurrentProcess = function (user, options) {
     var process = null;
-    for (var i = 0; i < user.processes.length; i++) {
-        if (user.processes[i].options.pageId === options.pageId &&
-            user.processes[i].options.accountId === options.accountId) {
-            process = user.processes[i];
-            break;
+    for (var k = 0; k < user.accounts.length; k++) {
+        for (var i = 0; i < user.accounts[k].processes.length; i++) {
+            if (user.accounts[k].processes[i].options.processId === options.processId) {
+                process = user.accounts[k].processes[i];
+                break;
+            }
         }
     }
     return process;
 };
 
+sio.prototype.getAccount = function (user, options) {
+    var account = null;
+    for (var k = 0; k < user.accounts.length; k++) {
+        if (user.accounts[k].accountId === options.accountId) {
+            account = user.accounts[k];
+            break;
+        }
+    }
+    return account;
+};
+
 sio.prototype.startPauseProcess = function (user, options) {
+
+    console.log(options.accountId);
+    console.log(options.processId);
+
+
     var process = this.getCurrentProcess(user, options);
+
     if (process) {
         process.start();
     } else {
@@ -113,8 +137,20 @@ sio.prototype.startPauseProcess = function (user, options) {
                 return (0);
         }
 
+
+        var account = this.getAccount(user, options);
+
+        if (!account) {
+            account = {
+                accountId: options.accountId,
+                processes: []
+            };
+            user.accounts.push(account);
+        }
+
+
         var newProcess = new Process(user, options);
-        user.processes.push(newProcess);
+        account.processes.push(newProcess);
         newProcess.start();
     }
 };
@@ -124,6 +160,10 @@ sio.prototype.stopProcess = function (user, options) {
     if (process) {
         process.stop();
     }
+};
+
+sio.prototype.sendNotification = function (socket, info) {
+    socket.emit('displayNotification', info);
 };
 
 module.exports.sio = sio;

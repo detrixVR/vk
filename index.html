@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+
+    socket.on('time', function(time){
+       // console.log(time);
+        socket.emit('pong', {a:1});
+    });
+</script>
+</body>
+
+</html>

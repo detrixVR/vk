@@ -1092,6 +1092,8 @@
                         return '<span class="label label-success">Валидный</span>';
                     case 4:
                         return '<span class="label label-danger">Невалидный</span>';
+                    case 5:
+                        return '<span class="label label-danger">Удален</span>';
                 }
             },
             commandsAll: function (column, row) {

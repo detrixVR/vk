@@ -4,6 +4,12 @@ function processResponse(item) {
     if (item.hasOwnProperty('msg')) {
         this.page.ui.printEvent(item.msg);
     }
+    if (item.hasOwnProperty('badFields')) {
+        this.page.ui.highLightFields(item.badFields);
+    }
+    if (item.hasOwnProperty('notify')) {
+        this.page.ui.displayNotification(item);
+    }
     return item;
 }
 
@@ -56,8 +62,12 @@ class Socket {
                 processResponse.apply(that, [data]);
             });
 
+            this.socket.on('displayNotification', function (data) {
+                processResponse.apply(that, [data]);
+            });
+
             this.socket.on('refreshRow', function (data) {
-                $('[data-toggle=bootgrid]').trigger('refreshRow', processResponse.apply(that, [data]));
+                that.page.ui.refreshRow(processResponse.apply(that, [data]));
             });
 
             this.socket.on('disconnect', function () {

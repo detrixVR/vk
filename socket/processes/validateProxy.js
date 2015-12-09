@@ -5,7 +5,7 @@ var ProxyGrid = require('../../models/grid/proxy').ProxyGrid,
     getForGrid = require('../../router/grid').getForGrid;
 
 
-const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
+const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный', 'Удален'];
 
 var checkProxy = function (host, port, options, callback) {
     var proxyRequest = request.defaults({
@@ -23,8 +23,52 @@ var checkProxy = function (host, port, options, callback) {
     }).setMaxListeners(0);
 };
 
+var validationModel = {
+    deleteIfWrong: {
+        validate: function(value){
+            return false;
+        }
+    },
+    proxyGrid: {
+        validate: function(value){
+            return false;
+        }
+    },
+    targetSelect: {
+        validate: function(value) {
+            return false;
+        }
+    },
+    timeoutInput: {
+        name: 'Таймаут',
+        validate: function(value){
+            if (!utils.isInt(value) || value < 0 || value > 5) {
+                return 'Должно быть числом от 0 до 5'
+            }
+        }
+    },
+    urlInput: {
+        name: 'Адрес проверки',
+        validate: function(value){
+            if (!utils.validateURL(value)) {
+                return 'Неверный формат адреса'
+            }
+        }
+    }
+};
+
 
 var validateProxy = function (settings, callback) {
+
+    var error = utils.validateSettings(settings, validationModel);
+
+    if (error) {
+        return callback(null, {
+            cbType: 0,
+            msg: utils.createMsg({msg: error.msg, clear: true, type: 1}),
+            badFields: error.badFields
+        })
+    }
 
     callback(null, {
         cbType: 1,
@@ -100,7 +144,7 @@ var validateProxy = function (settings, callback) {
                     var arr = item.content.split(':');
 
                     checkProxy(arr[0], arr[1], {
-                        url: 'http://vk.com',
+                        url: settings.urlInput.value,
                         timeout: settings.timeoutInput.value * 1000
                     }, function (host, port, ok, statusCode, err) {
                         if (ok) {
@@ -129,22 +173,44 @@ var validateProxy = function (settings, callback) {
 
                             item.status = 4;
 
-                            item.save(function (err) {
-                                if (err) {
-                                    return back(err);
-                                } else {
+                            if (settings.deleteIfWrong.value) {
 
-                                    callback(null, {
-                                        cbType: 4,
-                                        id: item._id,
-                                        columns: ['status'],
-                                        values: [4],
-                                        msg: utils.createMsg({msg: `${item.content} - Невалидный`, type: 3})
-                                    });
+                                item.remove(function (err) {
+                                    if (err) {
+                                        return back(err);
+                                    } else {
 
-                                    return back();
-                                }
-                            });
+                                        callback(null, {
+                                            cbType: 4,
+                                            id: item._id,
+                                            columns: ['status'],
+                                            values: [5],
+                                            msg: utils.createMsg({msg: `${item.content} - Невалидный (удален)`, type: 3})
+                                        });
+
+                                        return back();
+                                    }
+                                });
+                            } else {
+                                item.save(function (err) {
+                                    if (err) {
+                                        return back(err);
+                                    } else {
+
+                                        callback(null, {
+                                            cbType: 4,
+                                            id: item._id,
+                                            columns: ['status'],
+                                            values: [4],
+                                            msg: utils.createMsg({msg: `${item.content} - Невалидный`, type: 3})
+                                        });
+
+                                        return back();
+                                    }
+                                });
+                            }
+
+
                         }
                     })
                 }
@@ -201,8 +267,6 @@ var validateProxy = function (settings, callback) {
             msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
         })
     });
-
-
 };
 
 

@@ -167,11 +167,16 @@ var applySettings = function (settings) {
 };
 
 var setProcess = function (process) {
+
+    var eventsHolder = $('#eventsHolder');
+
     if (process) {
         if (process.state)
             setState(process.state);
-        $('#eventsHolder').trigger('printEvent', [process.messages, true]);
+        eventsHolder.trigger('printEvent', [process.messages, true]);
         applySettings(process.settings);
+    } else {
+        eventsHolder.trigger('printEvent', [[], true]);
     }
 
     overlay('Загрузка данных');
@@ -183,6 +188,43 @@ var setProcess = function (process) {
 
 var printEvent = function (data) {
     $('#eventsHolder').trigger('printEvent', [data, data.clear]);
+};
+
+var refreshRow = function (data) {
+    $('[data-toggle=bootgrid]').trigger('refreshRow', data);
+};
+
+var highLightFunc = function () {
+    $(this).closest('.form-group').toggleClass('has-error', false);
+};
+
+var highLightFields = function (badFields) {
+
+    badFields.forEach(function (item) {
+        var $field = $('#'+item);
+        $field.closest('.form-group').toggleClass('has-error', true);
+        $field.off('change', highLightFunc).on('change', highLightFunc);
+    })
+};
+
+var displayNotification = function(info) {
+
+    var type = 'info';
+
+    switch (info.type) {
+        case 2:
+            type = 'warning';
+            break;
+        case 3:
+            type = 'success';
+            break;
+        case 4:
+            type = 'danger';
+            break;
+    }
+
+
+    $.notify({message: info.notify}, {type: type});
 };
 
 var init = function () {
@@ -406,19 +448,13 @@ var init = function () {
             var selector = $('#modalAccounts');
             selector.modal().unbind('selectOk').bind('selectOk', bindFunc);
         })
-        .bind('startPauseProcess', function () {
+        .bind('startPauseProcess', function (event, processId) {
 
             $('#startPauseButton').attr('disabled', true);
 
-            var processId = null;
 
-            switch (that.pageId) {
-                case '001':
-                    processId = 'validateProxy';
-                    break;
-                default :
-                    return (0);
-            }
+            console.log(processId);
+
 
             that.socket.socket.emit('startPauseProcess', {
                 pageId: that.pageId,
@@ -498,7 +534,10 @@ var ui = {
     setState: setState,
     setProcess: setProcess,
     overlay: overlay,
-    printEvent: printEvent
+    printEvent: printEvent,
+    refreshRow: refreshRow,
+    highLightFields: highLightFields,
+    displayNotification: displayNotification,
 };
 
 

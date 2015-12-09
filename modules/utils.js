@@ -24,6 +24,48 @@ function validateURL(textval) {
     return urlregex.test(textval);
 }
 
+function isInt(n){
+    return !isNaN(+n);
+}
+
+function isFloat(n){
+    return n === Number(n) && n % 1 !== 0;
+}
+
+function validateSettings(settings, validationModel) {
+    var errors = [];
+    for (var k in settings) {
+        if (validationModel.hasOwnProperty(k) && settings[k].hasOwnProperty('value')) {
+            var result = validationModel[k].validate(settings[k].value);
+            if (result) {
+                errors.push({
+                    text: validationModel[k].name + ' - ' + result,
+                    field: k
+                });
+            }
+        } else {
+            errors.push({
+                text: 'Необходим параметр ' + validationModel[k].name
+            });
+        }
+    }
+
+    var text = 'Неверные параметры:<br>';
+    errors.forEach(function(item){
+        text += '<span class="small">'+item.text+'</small><br>';
+    });
+
+    var badFields = [];
+    errors.forEach(function(item){
+        badFields.push(item.field);
+    });
+
+    return errors.length ? {
+        msg: text,
+        badFields: badFields
+    } : null;
+}
+
 function validateIPaddress(ipaddress) {
 
     function validateNum(input, min, max) {
@@ -290,6 +332,8 @@ module.exports = {
     validateIPaddress: validateIPaddress,
     extend: extend,
     getCase: getCase,
-    alidateIPaddress: validateIPaddress,
-    createMsg: createMsg
+    createMsg: createMsg,
+    validateSettings: validateSettings,
+    isInt: isInt,
+    isFloat: isFloat,
 };

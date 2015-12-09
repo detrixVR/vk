@@ -6,11 +6,11 @@ var schema = new Schema({
         type: String,
         required: true
     },
-    pageId: {
+    accountId: {
         type: String,
         required: true
     },
-    accountId: {
+    processId: {
         type: String,
         required: true
     },

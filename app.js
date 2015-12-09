@@ -19,7 +19,41 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-require('./router')(app);
+
+app.get("/", function (req, res) {
+    console.log(__dirname + '/index.html');
+    res.sendfile(__dirname + '/index.html');
+});
+
+app.use(function (req, res, next) {
+    var err = {
+        message: 'Страница не найдена'
+    };
+    err.status = 404;
+    next(err);
+});
+
+if (app.get('env') === 'development') {
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err,
+            user: req.user
+        });
+    });
+}
+
+app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {
+            status: err.status
+        },
+        user: req.user
+    });
+});
 
 
 
