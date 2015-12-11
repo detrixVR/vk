@@ -43,6 +43,7 @@ var sio = function (server) {
         });
 
 
+
         var delay = function () {
             console.log('delay');
                 d = setTimeout(delay, 1000);
