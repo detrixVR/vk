@@ -7,7 +7,7 @@ var express = require('express')
     , server = require('http').createServer(app);
 
 
-    var Socket = require('../newsocket');
+var Socket = require('../newsocket');
 
 
 var loadAccounts = require('../modules/loadAccounts');
@@ -18,10 +18,30 @@ var workers = process.env.WORKERS || require('os').cpus().length;
 
 if (cluster.isMaster) {
     console.log('start cluster with %s workers', workers - 1);
+
+    var users = [];
+
     workers--;
     for (var i = 0; i < workers; ++i) {
         var worker = cluster.fork();
-        console.log('worker %s started.', worker.process.pid);
+        //console.log('worker %s started.', worker.process.pid);
+        worker.on('message', function (message) {
+           // console.log(arguments);
+
+            switch (message.command){
+                case 'addUser':
+                    users.push(message.data);
+                    break;
+                case 'getAllUsers':
+                    console.log('hhh')
+                    worker.send({
+                        users: users,
+                        data: message.data
+                    });
+                    break;
+            }
+
+        })
     }
 
     cluster.on('death', function (worker) {
@@ -33,6 +53,7 @@ if (cluster.isMaster) {
     server.listen(process.env.PORT || 5000);
 
     new Socket(server);
+
 
 
 

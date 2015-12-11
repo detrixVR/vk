@@ -2,6 +2,8 @@
 var io = require('socket.io');
 var redis = require('socket.io-redis');
 
+var async = require('async');
+var request = require('request');
 
 var sio = function (server) {
 
@@ -9,12 +11,47 @@ var sio = function (server) {
 
     s.adapter(redis({host: 'localhost', port: 6379}));
 
-    this.users = [];
 
     var that = this;
 
+    process.on('message', function (msg) {
+        console.log('here');
+        console.log(msg);
+        s.to(msg.data.socket).emit('message', 'for your eyes only');
+    });
+
     s.sockets.on('connection', function (socket) {
         var redisClient = socket.adapter.pubClient;
+
+
+       // console.log(process.on);
+
+        process.send({
+            command: 'addUser',
+            data: {
+                username: 'huyax1',
+                socket: socket.id
+            }
+        });
+
+
+        process.send({
+            command: 'getAllUsers',
+            data: {
+                socket: socket.id
+            }
+        });
+
+
+        var delay = function () {
+            console.log('delay');
+                d = setTimeout(delay, 1000);
+
+        };
+        delay();
+
+
+
         that.addUser(redisClient, {
             username: 'huyax1',
             socket: socket
@@ -52,10 +89,10 @@ var sio = function (server) {
                 });
 
                 socket.on('pong', function () {
-                    redisClient.lrange('users', 0, -1, function (err, users) {
-                        console.log(users);
-                    });
-                    console.log('user pong ' + process.pid);
+                    //redisClient.lrange('users', 0, -1, function (err, users) {
+                     //   console.log(users);
+                 //   });
+                   // console.log('user pong ' + process.pid);
                 });
 
                 setInterval(function () {
