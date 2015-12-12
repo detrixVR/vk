@@ -12,10 +12,18 @@
 <script>
     var socket = io();
 
-    socket.on('time', function(time){
-       // console.log(time);
-        socket.emit('pong', {a:1});
+    socket.on('getTime', function(time){
+        console.log(time);
+       // socket.emit('pong', {a:1});
     });
+    socket.on('getAllUsers', function(time){
+        console.log(time.users[0].sockets);
+       // socket.emit('pong', {a:1});
+    });
+setInterval(function(){
+    socket.emit('startPauseProcess', {a:1});
+},1000)
+
 
     socket.on('message', function(time){
         // console.log(time);

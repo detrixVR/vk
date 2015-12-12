@@ -1,7 +1,7 @@
 "use strict";
 
 var io = require('socket.io');
-
+var extend = require('extend');
 var User = require('./user');
 var Process = require('./process');
 var async = require('async');

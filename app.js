@@ -20,6 +20,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+//require('./router')(app);
+
 app.get("/", function (req, res) {
     console.log(__dirname + '/index.html');
     res.sendfile(__dirname + '/index.html');

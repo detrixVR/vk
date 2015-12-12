@@ -1,47 +1,158 @@
 #!/usr/bin/env node
 
 var cluster = require('cluster');
-
+var extend = require('extend');
+var Process = require('../newsocket/process');
 var express = require('express')
     , app = require('../app')
     , server = require('http').createServer(app);
 
-
 var Socket = require('../newsocket');
 
 
-var loadAccounts = require('../modules/loadAccounts');
+var workers = /*process.env.WORKERS*/7 || require('os').cpus().length;
 
-//io.adapter(redis({host: 'localhost', port: 6379}));
-
-var workers = process.env.WORKERS || require('os').cpus().length;
+var workersArray = [];
+var users = [];
 
 if (cluster.isMaster) {
+
     console.log('start cluster with %s workers', workers - 1);
 
-    var users = [];
+    this.broadcast = function(data) {
+        for (var i in workersArray) {
+            var worker = workersArray[i];
+            worker.send(data);
+        }
+    };
+
+    function getUserByName(username) {
+        var user = null;
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].username === username) {
+                user = users[i];
+                break;
+            }
+        }
+        return user;
+    }
+
+    function getAccountById(user, accountId) {
+        var account = null;
+        if (user.accounts) {
+            for (var i = 0; i < user.accounts.length; i++) {
+                if (user.accounts[i].accountId === accountId) {
+                    account = user.accounts[i];
+                    break;
+                }
+            }
+        }
+
+        return account;
+    }
+
+    function getProcessById(account, processId) {
+        var process = null;
+        if (account.processes) {
+            for (var k = 0; k < account.processes.length; k++) {
+                if (account.processes[k].processId === processId) {
+                    process = account.processes[k];
+                    break;
+                }
+            }
+        }
+        return process;
+    }
+
+    function addUser(data) {
+        var user = getUserByName(data.username);
+        if (user) {
+            user.sockets.push(data.socketId);
+        } else {
+            users.push({
+                username: data.username,
+                sockets: [data.socketId]
+            });
+        }
+    }
+
+    function delUser(data) {
+        var user = getUserByName(data.username);
+        if (user) {
+            if (user.sockets.length > 1) {
+                user.sockets.splice(user.sockets.indexOf(data.socketId), 1)
+            } else {
+                users.splice(users.indexOf(user), 1);
+            }
+        }
+    }
+
+    function startPauseProcess(data) {
+        var user = getUserByName(data.username);
+        if (user) {
+            var account = getAccountById(user, data.accountId);
+            if (!account) {
+                account = {
+                    accountId: data.accountId
+                };
+                if (user.accounts) {
+                    user.accounts.push(account)
+                } else {
+                    user.accounts = [account];
+                }
+            }
+            var process = getProcessById(account, data.processId);
+            if (process) {
+                process.start();
+            } else {
+                process = new Process(this, data);
+                if (account.processes) {
+                    account.processes.push(process);
+                } else {
+                    account.processes = [process];
+                }
+                process.start();
+            }
+        }
+    }
 
     workers--;
+
+
+
     for (var i = 0; i < workers; ++i) {
         var worker = cluster.fork();
-        //console.log('worker %s started.', worker.process.pid);
-        worker.on('message', function (message) {
-           // console.log(arguments);
 
-            switch (message.command){
+        worker.on('message', function (msg) {
+
+            switch (msg.command) {
                 case 'addUser':
-                    users.push(message.data);
+                    addUser(msg.data);
+                    break;
+                case 'delUser':
+                    delUser(msg.data);
+                    break;
+                case 'startPauseProcess':
+                    startPauseProcess(msg.data);
                     break;
                 case 'getAllUsers':
-                    console.log('hhh')
                     worker.send({
-                        users: users,
-                        data: message.data
+                        command: msg.command,
+                        data: extend(msg.data, {users: users})
+                    });
+                    break;
+
+                case 'getTime':
+                    worker.send({
+                        command: msg.command,
+                        data: extend(msg.data, {time: Date.now()})
                     });
                     break;
             }
 
-        })
+        });
+
+        workersArray.push(worker);
     }
 
     cluster.on('death', function (worker) {
@@ -50,14 +161,63 @@ if (cluster.isMaster) {
     });
 
 } else {
-    server.listen(process.env.PORT || 5000);
+
+    var port = normalizePort(process.env.PORT || '5000');
+
+    app.set('port', port);
+
+    server.listen(port);
+
+    server.on('error', onError);
+    server.on('listening', onListening);
 
     new Socket(server);
 
+    function onError(error) {
+        if (error.syscall !== 'listen') {
+            throw error;
+        }
 
+        var bind = typeof port === 'string'
+            ? 'Pipe ' + port
+            : 'Port ' + port;
 
+        // handle specific listen errors with friendly messages
+        switch (error.code) {
+            case 'EACCES':
+                console.error(bind + ' requires elevated privileges');
+                process.exit(1);
+                break;
+            case 'EADDRINUSE':
+                console.error(bind + ' is already in use');
+                process.exit(1);
+                break;
+            default:
+                throw error;
+        }
+    }
 
+    function onListening() {
+        var addr = server.address();
+        var bind = typeof addr === 'string'
+            ? 'pipe ' + addr
+            : 'port ' + addr.port;
+        console.log('Listening on ' + bind);
+    }
 
+    function normalizePort(val) {
+        var port = parseInt(val, 10);
+
+        if (isNaN(port)) {
+            return val;
+        }
+
+        if (port >= 0) {
+            return port;
+        }
+
+        return false;
+    }
 }
 
 /*
