@@ -9,7 +9,7 @@ function nocache(req, res, next) {
 }
 
 module.exports = function (app) {
-    app.get('/', loadAccounts, require('./index').get);
+    app.get('/',  require('./index').get);
 
     app.get('/grid', require('./grid').get);
     app.post('/grid', require('./grid').post);

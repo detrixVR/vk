@@ -41,7 +41,7 @@ class Socket {
         if (!this.socket || !this.socket.connected) {
 
             this.socket = this.manager.connect({
-                reconnect: true
+                transports: ['websocket']
             });
 
             this.socket.on('connect', function () {
@@ -77,6 +77,10 @@ class Socket {
 
             this.socket.on('reconnect',function(){
                 console.log('reconnect');
+            });
+
+            this.socket.on('getAllUsers',function(data){
+                console.log(data);
             })
         }
     }

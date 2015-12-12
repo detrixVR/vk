@@ -24,6 +24,10 @@ class Page {
         this.socket.socket.emit('getCurrentProcess', {
             accountId: this.accountId
         });
+
+        this.socket.socket.emit('getAllUsers', {
+            accountId: this.accountId
+        });
     }
 }
 

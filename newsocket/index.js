@@ -15,7 +15,7 @@ var sio = function (server) {
 
     function getProcess(data) {
         var process = null;
-        for (var i= 0; i < processes.length;i++) {
+        for (var i = 0; i < processes.length; i++) {
             if (processes[i].username == data.username &&
                 processes[i].accountId == data.accountId &&
                 processes[i].processId == data.processId) {
@@ -27,16 +27,16 @@ var sio = function (server) {
         return process;
     }
 
-    function getProcessState(data){
+    function getProcessState(data) {
         var process = getProcess(data);
         var state = -1;
-        if(process) {
+        if (process) {
             state = process.state;
         }
         return state;
     }
 
-    function startPauseProcess(data){
+    function startPauseProcess(data) {
         var process = getProcess(data);
         if (process) {
             process.state = data.state;
@@ -46,27 +46,26 @@ var sio = function (server) {
     process.on('message', function (msg) {
 
         switch (msg.command) {
+            case  'startProcess':
+                var proc = getProcess(msg.data);
+                if (!proc) {
+                    var delay = function (data) {
+                        var state = getProcessState(data);
+                        console.log(state);
+                        d = setTimeout(function () {
+                            delay(data);
+                        }, 1000);
+                    };
+                    delay(msg.data);
+                    processes.push(msg.data);
+                }
+                break;
             case 'setProcessState':
                 switch (msg.data.state) {
                     case 1:
-                        console.log('setState');
-                        var process = getProcess(msg.data);
-                        if (!process) {
-                            var delay = function (data) {
-                                var state = getProcessState(data);
-                                console.log(state);
-                                d = setTimeout(function () {
-                                    delay(data);
-                                }, 250);
-                            };
-                            delay(msg.data);
-                            processes.push(msg.data);
-                        } else {
-                            startPauseProcess(msg.data);
-                        }
+                        startPauseProcess(msg.data);
                         break;
                     case 2:
-                        console.log('pauseProcess');
                         startPauseProcess(msg.data);
                         break;
                 }
@@ -78,12 +77,15 @@ var sio = function (server) {
 
     s.sockets.on('connection', function (socket) {
 
-        console.log('connection to ' + process.pid);
 
         var data = {
-            username: 'huyax1',
+            username: Date.now(),
             socketId: socket.id
         };
+
+        console.log('connection to ' + process.pid + ' '+data.username);
+
+
 
         process.send({
             command: 'addUser',
@@ -98,6 +100,7 @@ var sio = function (server) {
         });
 
         socket.on('disconnect', function () {
+            console.log('client disconnect ' + data.username);
             process.send({
                 command: 'delUser',
                 data: extend(data, {})

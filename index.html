@@ -10,18 +10,22 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    var socket = io();
+    var socket = io.connect({
+        reconnect: true,
+        transports: ['websocket']
+    });
 
     socket.on('getTime', function(time){
         console.log(time);
        // socket.emit('pong', {a:1});
     });
     socket.on('getAllUsers', function(time){
-        console.log(time.users[0].sockets);
+        console.log(time);
        // socket.emit('pong', {a:1});
     });
-setInterval(function(){
-    socket.emit('startPauseProcess', {a:1});
+
+    setInterval(function(){
+    socket.emit('getAllUsers', {a:1});
 },1000)
 
 
@@ -29,6 +33,10 @@ setInterval(function(){
         // console.log(time);
         console.log(time);
     });
+
+    socket.on('connection', function(time){
+      console.log('connection');
+    })
 </script>
 </body>
 
