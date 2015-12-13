@@ -51,8 +51,10 @@ var sio = function (server) {
                 if (!proc) {
                     var delay = function (data) {
                         var process = getProcess(data);
-                        if (process)
-                            s.sockets.in(process.username).emit('updatechat',process);
+                        if (process) {
+                            s.sockets.in(process.username + ':' + process.accountId).emit('updatechat', process);
+                        }
+                        console.log(process);
                         d = setTimeout(function () {
                             delay(data);
                         }, 1000);
@@ -87,8 +89,7 @@ var sio = function (server) {
 
         socket.on('username', function (inData) {
             user = extend(user, inData);
-            socket.join(user.username);
-            s.sockets.in(user.username).emit('updatechat', user.username + ' has connected to this room');
+            socket.emit('username');
         });
 
         socket.on('startProcess', function (inData) {
@@ -113,32 +114,38 @@ var sio = function (server) {
                     processId: inData.processId
                 }
             });
-
         });
 
         socket.on('stopProcess', function (inData) {
             console.log(inData);
-
-
         });
 
         socket.on('join', function (inData) {
+            console.log('join to ' + inData);
             socket.join(inData);
+            s.sockets.in(inData).emit('updatechat', 'you are in');
         });
 
+        socket.on('leaveAll', function (inData) {
+            console.log('leaveAll');
+            for (var i = 0; i < socket.rooms.length; i++) {
+                socket.leave(socket.rooms[i]);
+            }
+        });
+
+        socket.on('leave', function (inData) {
+            console.log('leave '+ inData);
+            for (var i = 0; i < socket.rooms.length; i++) {
+                if (socket.rooms[i] === inData) {
+                    socket.leave(socket.rooms[i]);
+                    break;
+                }
+            }
+        });
 
         socket.on('disconnect', function (inData) {
             console.log('disconnected');
-            /*for (var i = 0 ; i < socket.rooms.length; i++) {
-                socket.leave(socket.rooms[i]);
-            }*/
-
         });
-
-        setInterval(function(){
-            console.log(s.sockets.in('gaga'))
-            s.sockets.in('gaga').emit('gaga', 'gagag');
-        },2000);
 
     })
 };

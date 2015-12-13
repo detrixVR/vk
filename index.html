@@ -5,6 +5,13 @@
     <title></title>
 </head>
 
+<select onchange="changeAccount(event)" id="selectAccount">
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+</select>
+
+
 <input type="text" value="huyax" id="username"/>
 <button onclick="connect()">connect</button>
 <br><br>
@@ -18,80 +25,79 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 
-    var s = null;
 
-    function connect() {
+    var manager = io;
 
-        var socket = s = io.connect({
-          //  reconnect: true,
-            transports: ['websocket']
-        });
+    var accounts = [{
+        username: '123',
+        processId: '123',
+        accountId: '123'
+    }, {
+        username: '123',
+        processId: '234',
+        accountId: '234'
+    }, {
+        username: '123',
+        processId: '345',
+        accountId: '345'
+    }];
 
-        socket.on('getTime', function (time) {
-            console.log(time);
-            // socket.emit('pong', {a:1});
-        });
-        socket.on('addUser', function (time) {
-            console.log(time);
-            // socket.emit('pong', {a:1});
-        });
+    var currentCredentials = null;
 
-        socket.on('getOwner', function (time) {
-            console.log(time);
-        });
+    var socket = null;
 
-        socket.on('welcome', function (time) {
-            console.log('welcome');
-            socket.emit('username', {username: username.value});
-        });
+    socket = manager.connect({
+        reconnection: false,
+        transports: ['websocket']
+    });
 
-        socket.on('updatechat', function (time) {
-            console.log(time);
-        });
+    socket.on('welcome', function (time) {
+        console.log('welcome');
+        socket.emit('username', currentCredentials);
+    });
 
-        socket.on('connected', function (time) {
-            console.log('connected');
-        });
+    socket.on('username', function (time) {
+        console.log('connected');
+    });
 
-        socket.on('startProcess', function (time) {
-            console.log('startProcess');
-        });
+    socket.on('updatechat', function (time) {
+        console.log(time);
+    });
 
-        socket.on('pauseProcess', function (time) {
-            console.log('pauseProcess');
-        });
+    socket.on('disconnect', function () {
+        console.log('Связь с сервером потеряна');
+    });
 
-        socket.on('stopProcess', function (time) {
-            console.log('stopProcess');
-        });
+    function changeCredentials(credentials) {
 
-        socket.on('gaga', function (time) {
-            console.log(new Date());
-        });
+        if (currentCredentials) {
+            socket.emit('leave', currentCredentials.username + ':' + currentCredentials.accountId);
+        }
 
-        socket.emit('join', 'gaga');
+        currentCredentials = credentials;
+
+        socket.emit('join', currentCredentials.username + ':' + currentCredentials.accountId);
+
     }
 
+    function changeAccount(e) {
+        changeCredentials(accounts[e.target.selectedIndex]);
+    }
+
+
     function start() {
-        s.emit('startProcess', {
-            processId: processId.value,
-            accountId: accountId.value,
-        });
+        socket.emit('startProcess', currentCredentials);
     }
 
     function pause() {
-        s.emit('pauseProcess', {
-            processId: processId.value,
-            accountId: accountId.value,
-        });
+        socket.emit('pauseProcess', currentCredentials);
     }
 
     function stop() {
-        s.emit('stopProcess', {
-            processId: processId.value
-        });
+        socket.emit('stopProcess', currentCredentials);
     }
 
+    selectAccount.onchange({target: selectAccount});
 
 </script>
 </body>
