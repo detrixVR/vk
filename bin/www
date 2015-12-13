@@ -10,141 +10,75 @@ var express = require('express')
 var Socket = require('../newsocket');
 
 
-var workers = /*process.env.WORKERS*/7 || require('os').cpus().length;
+var workers = /*process.env.WORKERS*/7 || require('os').cpus().length; //WEB_CONCURRENCY
 
 var workersArray = [];
 var users = [];
+var processes = [];
 
 if (cluster.isMaster) {
 
     console.log('start cluster with %s workers', workers - 1);
 
-    var broadcast = function(data) {
+    var broadcast = function (data) {
         for (var i in workersArray) {
             var worker = workersArray[i];
             worker.send(data);
         }
     };
 
-    function getUserByName(username) {
-        var user = null;
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].username === username) {
-                user = users[i];
+    function getExistingProcess(data) {
+        var process = null;
+
+        for (var k = 0; k < processes.length; k++) {
+            if (processes[k].username === data.username &&
+                processes[k].processId === data.processId &&
+                processes[k].accountId === data.accountId) {
+                process = processes[k];
                 break;
             }
         }
-        return user;
-    }
 
-    function getAccountById(user, accountId) {
-        var account = null;
-        if (user.accounts) {
-            for (var i = 0; i < user.accounts.length; i++) {
-                if (user.accounts[i].accountId === accountId) {
-                    account = user.accounts[i];
-                    break;
-                }
-            }
-        }
-
-        return account;
-    }
-
-    function getProcessById(account, processId) {
-        var process = null;
-        if (account.processes) {
-            for (var k = 0; k < account.processes.length; k++) {
-                if (account.processes[k].processId === processId) {
-                    process = account.processes[k];
-                    break;
-                }
-            }
-        }
         return process;
     }
 
-    function addUser(data) {
-        var user = getUserByName(data.username);
-        if (user) {
-            user.sockets.push(data.socketId);
-        } else {
-            users.push({
-                username: data.username,
-                sockets: [data.socketId]
-            });
-        }
-    }
-
-    function delUser(data) {
-        var user = getUserByName(data.username);
-        if (user) {
-            if (user.sockets.length > 1) {
-                user.sockets.splice(user.sockets.indexOf(data.socketId), 1)
-            } else {
-                users.splice(users.indexOf(user), 1);
-            }
-        }
-    }
-
-    function startPauseProcess(worker, data) {
-        var user = getUserByName(data.username);
-        if (user) {
-            var account = getAccountById(user, data.accountId);
-            if (!account) {
-                account = {
-                    accountId: data.accountId
-                };
-                if (user.accounts) {
-                    user.accounts.push(account)
-                } else {
-                    user.accounts = [account];
-                }
-            }
-            var process = getProcessById(account, data.processId);
-            if (process) {
-                process.start();
-            } else {
-                process = new Process(worker, broadcast, data);
-                if (account.processes) {
-                    account.processes.push(process);
-                } else {
-                    account.processes = [process];
-                }
-                process.start();
-            }
-        }
-    }
 
     workers--;
 
     for (var i = 0; i < workers; ++i) {
+
         var worker = cluster.fork();
 
         worker.on('message', function (msg) {
 
             switch (msg.command) {
-                case 'addUser':
-                    addUser(msg.data);
+                case 'startProcess':
+                    var process = getExistingProcess(msg.data);
+                    if (process) {
+                        process.start();
+                        broadcast({
+                            command: 'setProcessState',
+                            data: extend(msg.data, {state:  process.getState()})
+                        });
+                    } else {
+                        process = new Process(msg.data);
+                        processes.push(process);
+                        process.start();
+                        worker.send({
+                            command: 'startProcess',
+                            data: extend(msg.data, {state: process.getState()})
+                        });
+                    }
                     break;
-                case 'delUser':
-                    delUser(msg.data);
-                    break;
-                case 'startPauseProcess':
-                    startPauseProcess(worker, msg.data);
-                    break;
-                case 'getAllUsers':
-                    worker.send({
-                        command: msg.command,
-                        data: extend(msg.data, {users: users})
-                    });
-                    break;
-
-                case 'getTime':
-                    worker.send({
-                        command: msg.command,
-                        data: extend(msg.data, {time: Date.now()})
-                    });
+                case 'pauseProcess':
+                    var process = getExistingProcess(msg.data);
+                    if (process) {
+                        process.pause();
+                        broadcast({
+                            command: 'setProcessState',
+                            data: extend(msg.data, {state: process.getState()})
+                        });
+                    }
                     break;
             }
 

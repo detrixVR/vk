@@ -50,8 +50,9 @@ var sio = function (server) {
                 var proc = getProcess(msg.data);
                 if (!proc) {
                     var delay = function (data) {
-                        var state = getProcessState(data);
-                        console.log(state);
+                        var process = getProcess(data);
+                        if (process)
+                            s.sockets.in(process.username).emit('updatechat',process);
                         d = setTimeout(function () {
                             delay(data);
                         }, 1000);
@@ -61,36 +62,21 @@ var sio = function (server) {
                 }
                 break;
             case 'setProcessState':
-                switch (msg.data.state) {
-                    case 1:
-                        startPauseProcess(msg.data);
-                        break;
-                    case 2:
-                        startPauseProcess(msg.data);
-                        break;
-                }
+                startPauseProcess(msg.data);
                 break;
             default:
                 s.to([msg.data.socketId]).emit(msg.command, msg.data);
         }
     });
 
+
     s.sockets.on('connection', function (socket) {
 
+        console.log('connection to ' + process.pid);
 
-        var data = {
-            username: Date.now(),
-            socketId: socket.id
-        };
+        var user = {};
 
-        console.log('connection to ' + process.pid + ' '+data.username);
-
-
-
-        process.send({
-            command: 'addUser',
-            data: data
-        });
+        socket.emit('welcome');
 
         socket.on('getAllUsers', function (inData) {
             process.send({
@@ -99,24 +85,60 @@ var sio = function (server) {
             });
         });
 
-        socket.on('disconnect', function () {
-            console.log('client disconnect ' + data.username);
+        socket.on('username', function (inData) {
+            user = extend(user, inData);
+            socket.join(user.username);
+            s.sockets.in(user.username).emit('updatechat', user.username + ' has connected to this room');
+        });
+
+        socket.on('startProcess', function (inData) {
+            console.log(inData);
             process.send({
-                command: 'delUser',
-                data: extend(data, {})
+                command: 'startProcess',
+                data: {
+                    username: user.username,
+                    accountId: inData.accountId,
+                    processId: inData.processId
+                }
             });
         });
 
-        socket.on('startPauseProcess', function () {
+        socket.on('pauseProcess', function (inData) {
+            console.log(inData);
             process.send({
-                command: 'startPauseProcess',
-                data: extend(data, {
-                    accountId: '123',
-                    processId: '456'
-                })
+                command: 'pauseProcess',
+                data: {
+                    username: user.username,
+                    accountId: inData.accountId,
+                    processId: inData.processId
+                }
             });
+
         });
 
+        socket.on('stopProcess', function (inData) {
+            console.log(inData);
+
+
+        });
+
+        socket.on('join', function (inData) {
+            socket.join(inData);
+        });
+
+
+        socket.on('disconnect', function (inData) {
+            console.log('disconnected');
+            /*for (var i = 0 ; i < socket.rooms.length; i++) {
+                socket.leave(socket.rooms[i]);
+            }*/
+
+        });
+
+        setInterval(function(){
+            console.log(s.sockets.in('gaga'))
+            s.sockets.in('gaga').emit('gaga', 'gagag');
+        },2000);
 
     })
 };

@@ -4,39 +4,95 @@
     <meta charset="UTF-8">
     <title></title>
 </head>
-<body>
 
-
+<input type="text" value="huyax" id="username"/>
+<button onclick="connect()">connect</button>
+<br><br>
+<input type="text" value="123" id="accountId"/>
+<br><br>
+<input type="text" value="456" id="processId"/>
+<button onclick="start()">start</button>
+<button onclick="pause()">pause</button>
+<button onclick="stop()">stop</button>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    var socket = io.connect({
-        reconnect: true,
-        transports: ['websocket']
-    });
 
-    socket.on('getTime', function(time){
-        console.log(time);
-       // socket.emit('pong', {a:1});
-    });
-    socket.on('getAllUsers', function(time){
-        console.log(time);
-       // socket.emit('pong', {a:1});
-    });
+    var s = null;
 
-    setInterval(function(){
-    socket.emit('getAllUsers', {a:1});
-},1000)
+    function connect() {
+
+        var socket = s = io.connect({
+          //  reconnect: true,
+            transports: ['websocket']
+        });
+
+        socket.on('getTime', function (time) {
+            console.log(time);
+            // socket.emit('pong', {a:1});
+        });
+        socket.on('addUser', function (time) {
+            console.log(time);
+            // socket.emit('pong', {a:1});
+        });
+
+        socket.on('getOwner', function (time) {
+            console.log(time);
+        });
+
+        socket.on('welcome', function (time) {
+            console.log('welcome');
+            socket.emit('username', {username: username.value});
+        });
+
+        socket.on('updatechat', function (time) {
+            console.log(time);
+        });
+
+        socket.on('connected', function (time) {
+            console.log('connected');
+        });
+
+        socket.on('startProcess', function (time) {
+            console.log('startProcess');
+        });
+
+        socket.on('pauseProcess', function (time) {
+            console.log('pauseProcess');
+        });
+
+        socket.on('stopProcess', function (time) {
+            console.log('stopProcess');
+        });
+
+        socket.on('gaga', function (time) {
+            console.log(new Date());
+        });
+
+        socket.emit('join', 'gaga');
+    }
+
+    function start() {
+        s.emit('startProcess', {
+            processId: processId.value,
+            accountId: accountId.value,
+        });
+    }
+
+    function pause() {
+        s.emit('pauseProcess', {
+            processId: processId.value,
+            accountId: accountId.value,
+        });
+    }
+
+    function stop() {
+        s.emit('stopProcess', {
+            processId: processId.value
+        });
+    }
 
 
-    socket.on('message', function(time){
-        // console.log(time);
-        console.log(time);
-    });
-
-    socket.on('connection', function(time){
-      console.log('connection');
-    })
 </script>
 </body>
 
