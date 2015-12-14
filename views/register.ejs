@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ./parts/defaultHead.ejs %>
+</head>
+<body>
+<%- include ./parts/defaultNavbar.ejs %>
+<div class="container" id="mainContainer">
+
+    <div class="row">
+        <div style="margin-top:50px;" class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="panel-title">Регистрация</div>
+                </div>
+                <div style="padding-top:30px" class="panel-body">
+                    <form id="signupForm" role="form">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <div class="input-group full-width">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-user"></i>
+                        </span>
+                                        <input id="usernameOne" type="text" class="form-control" value=""
+                                               placeholder="Логин">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-group full-width">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-lock"></i>
+                        </span>
+                                        <input id="passwordOne" type="password" class="form-control"
+                                               placeholder="Пароль">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-group full-width">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-lock"></i>
+                        </span>
+                                        <input id="passwordTwo" type="password" class="form-control"
+                                               placeholder="Повторите пароль">
+                                    </div>
+                                </div>
+
+                                <%- include ./parts/captchaFormGroup.ejs %>
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-xs-offset-2 col-xs-8">
+                                            <button type="submit" class="btn btn-primary full-width">Регистрация
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<%- include ./parts/defaultScripts.ejs %>
+<script src="/javascripts/index/register.js"></script>
+</body>
+
+</html>

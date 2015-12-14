@@ -173,7 +173,7 @@ var setProcess = function (process) {
     if (process) {
         if (process.state)
             setState(process.state);
-        eventsHolder.trigger('printEvent', [process.messages, true]);
+        eventsHolder.trigger('printEvent', [process.messages || [], true]);
         applySettings(process.settings);
     } else {
         eventsHolder.trigger('printEvent', [[], true]);
@@ -457,9 +457,8 @@ var init = function () {
 
 
             that.socket.socket.emit('startPauseProcess', {
-                pageId: that.pageId,
                 accountId: that.accountId,
-                processId: processId,
+                processId: that.processId,
                 settings: getSettings()
             });
         })
@@ -524,6 +523,66 @@ var init = function () {
             message = "Unknown Error";
         }
         $.notify({message: message}, {type: 'warning'});
+    });
+
+
+    $('.selectpicker').selectpicker();
+
+    $('.spinner input').on('keydown', function (e) {
+        if (!((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105))) {
+            e.preventDefault();
+        }
+    });
+
+    $('.spinner input').on('change', function (e) {
+        if (isNaN(parseInt(this.value))) {
+            this.value = 0;
+        } else {
+            var input = $(this);
+            if (input.hasClass('hours') && this.value > 24)
+                this.value = 24;
+            else if (input.hasClass('minutes') && this.value > 60)
+                this.value = 60;
+            else if (input.hasClass('seconds') && this.value > 60)
+                this.value = 60;
+            else if (input.attr('max') && +this.value > +input.attr('max')) {
+                this.value = input.attr('max');
+            }
+        }
+    });
+
+    $('.spinner .btn:first-of-type').on('click', function () {
+        var $this = $(this);
+        var input = $this.closest('.spinner').find('input:not(:disabled)');
+        if (input) {
+            var parsedVal = parseInt(input.val(), 10) + 1;
+            var val = (parsedVal < 0 || isNaN(parsedVal)) ? 0 : parsedVal;
+            if (input.hasClass('hours') && val > 24)
+                return (0);
+            else if (input.hasClass('minutes') && val > 60)
+                return (0);
+            else if (input.hasClass('seconds') && val > 60)
+                return (0);
+            input.val(val);
+            input.trigger('change');
+        }
+    });
+
+    $('.spinner .btn:last-of-type').on('click', function () {
+        var $this = $(this);
+        var input = $this.closest('.spinner').find('input:not(:disabled)');
+        if (input) {
+            var parsedVal = parseInt(input.val(), 10) - 1;
+            var val = (parsedVal < 0 || isNaN(parsedVal)) ? 0 : parsedVal;
+            if (input.hasClass('hours') && val > 24)
+                return (0);
+            else if (input.hasClass('minutes') && val > 60)
+                return (0);
+            else if (input.hasClass('seconds') && val > 60)
+                return (0);
+            input.val(val);
+            input.trigger('change');
+        }
     });
 };
 

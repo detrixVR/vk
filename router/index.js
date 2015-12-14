@@ -1,4 +1,6 @@
 var loadAccounts = require('../modules/loadAccounts');
+var loadUser = require('../modules/loadUser');
+
 
 
 function nocache(req, res, next) {
@@ -9,54 +11,100 @@ function nocache(req, res, next) {
 }
 
 module.exports = function (app) {
-    app.get('/',  require('./index').get);
+
+    app.use(function (req, res, next) {
+        if (req.signedCookies['username'] && req.signedCookies['id']) {
+            req.session.userName = req.signedCookies['username'];
+            req.session.userId = req.signedCookies['id'];
+        }
+        return next();
+    });
+
+    app.use(loadUser.loadUser);
+
+
+    app.get('/', require('./index').get);
+
+    app.get('/proxies', require('./workplace/proxies').get);
+    //app.get('/accounts', require('./workplace/accounts').get);
+    //app.get('/peoples', require('./workplace/peoples').get);
+   // app.get('/groups', require('./workplace/groups').get);
+    //app.get('/lists', require('./workplace/lists').get);
+   // app.get('/tasks', require('./workplace/tasks').get);
+
+
+    app.get('/forgot', require('./default/forgot').get);
+    app.get('/login', require('./default/login').get);
+    app.post('/login', require('./default/login').post);
+    app.get('/register', require('./default/register').get);
+    app.post('/register', require('./default/register').post);
+
+    app.get('/captcha.png',/* nocache,*/ require('./captcha').get);
 
     app.get('/grid', require('./grid').get);
     app.post('/grid', require('./grid').post);
     app.put('/grid', require('./grid').put);
     app.delete('/grid', require('./grid').delete);
 
-
-    app.use(function (req, res, next) {
-        var err = {
-            message: 'Страница не найдена'
-        };
-        err.status = 404;
-        next(err);
-    });
-
     if (app.get('env') === 'development') {
         app.use(function (err, req, res, next) {
             res.status(err.status || 500);
-            res.render('error', {
+            console.log(err.message);
+            console.log(err.status);
+            if (req.headers["x-requested-with"] != 'XMLHttpRequest') {
+                res.render('error', {
+                    message: err.message,
+                    error: err,
+                    user: req.user
+                });
+            } else {
+                res.json({
+                    message: err.message,
+                    error: err
+                })
+            }
+
+        });
+    } else {
+        app.use(function (err, req, res, next) {
+            res.status(err.status || 500);
+            console.log(err.message);
+            console.log(err.status);
+            if (req.headers["x-requested-with"] != 'XMLHttpRequest') {
+                res.render('error', {
+                    message: err.message,
+                    error: {
+                        status: err.status
+                    },
+                    user: req.user
+                });
+            } else {
+
+            }
+            res.json({
                 message: err.message,
-                error: err,
-                user: req.user
-            });
+                error: {
+                    status: err.status
+                }
+            })
         });
     }
-
-    app.use(function (err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: {
-                status: err.status
-            },
-            user: req.user
-        });
-    });
 };
+
 
 
 module.exports.get = function (req, res) {
 
-
-
-
-    res.render('index', {
-        pageId: '001',
-        account: req.account
-    });
+    if (!req.session.userId) {
+        res.render('index', {
+            user: null,
+            page: 'index'
+        });
+    } else {
+        res.render('workplace/index', {
+            user: req.user,
+            page: 'index'
+        });
+    }
 
 };

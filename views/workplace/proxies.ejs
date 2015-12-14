@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+
+<body>
+
+<%- include ../parts/cabinetMenu.ejs %>
+
+<div class="hidden" id="accountId"><%= accounts[0].accountId %></div>
+<div class="hidden" id="processId"><%= processId %></div>
+
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+
+    <%- include ../parts/cabinetNavbar.ejs %>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="well well-sm container-fluid">
+                    <div class="row">
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Проверять</label>
+                            <select class="selectpicker" data-width="100%" id="targetSelect">
+                                <option>Все</option>
+                                <option>Загруженные</option>
+                                <option>Выделенные</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Адрес проверки</label>
+                                <input type="text" class="form-control" id="urlInput" value="http://vk.com"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Таймаут, сек</label>
+
+                            <div class="input-group spinner full-width">
+                                <input type="text" class="form-control" id="timeoutInput" value="2" max="5">
+
+                                <div class="input-group-btn-vertical">
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-up"></i></button>
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label></label>
+
+                            <div class="checkbox">
+                                <input type="checkbox" id="deleteIfWrong" data-settings="true">
+                                <label for="deleteIfWrong">
+                                    Удалять невалидные
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="well well-sm">
+                    <%- include ../templates/proxyGrid.ejs %>
+                </div>
+            </div>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm">
+                    <div class="bootgrid-header">
+                        <button id="startPauseButton" class="btn btn-default"
+                                onclick="$(this).closest('body').trigger('startPauseProcess','<%=processId%>');"><span
+                                    class="glyphicon glyphicon-play"></span></button>
+                        <button id="stopButton" class="btn btn-default hidden"
+                                onclick="$(this).closest('body').trigger('stopProcess');"><span
+                                    class="glyphicon glyphicon-stop"></span></button>
+                    </div>
+                    <div id="eventsHolder">
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-success">Dapibus ac facilisis in</li>
+                            <li class="list-group-item list-group-item-info">Cras sit amet nibh libero</li>
+                            <li class="list-group-item list-group-item-warning">Porta ac consectetur ac</li>
+                            <li class="list-group-item list-group-item-danger">Vestibulum at eros</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<%- include ../templates/modalInput.ejs %>
+
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+</body>
+</html>

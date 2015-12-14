@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ./parts/defaultHead.ejs %>
+</head>
+<body>
+<%- include ./parts/defaultNavbar.ejs %>
+<div class="container" id="mainContainer">
+
+    <div style="margin-top:50px;" class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Вход</div>
+            </div>
+            <div style="padding-top:30px" class="panel-body">
+                <form id="loginForm" role="form">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="form-group">
+                                <div class="input-group  full-width">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-user"></i>
+                        </span>
+                                    <input id="username" type="text" class="form-control" value=""
+                                           placeholder="Логин">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-group full-width">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-lock"></i>
+                        </span>
+                                    <input id="password" type="password" class="form-control" value=""
+                                           placeholder="Пароль">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="checkbox">
+                                    <input type="checkbox" id="remember">
+                                    <label for="remember">
+                                        Чужой компьютер
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button href="#" class="btn btn-primary">Войти</button>
+                                <a href="forgot" style="margin-left: 15px">Забыли пароль?</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include ./parts/defaultScripts.ejs %>
+<script src="/javascripts/index/login.js"></script>
+</body>
+</html>

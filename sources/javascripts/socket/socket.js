@@ -41,7 +41,9 @@ class Socket {
         if (!this.socket || !this.socket.connected) {
 
             this.socket = this.manager.connect({
-                transports: ['websocket']
+                transports: ['websocket'],
+                reconnection: false,
+                query: "accountId=" + this.page.accountId
             });
 
             this.socket.on('connect', function () {
@@ -55,7 +57,12 @@ class Socket {
             });
 
             this.socket.on('setProcess', function (process) {
+                console.log(process);
                 that.page.ui.setProcess(process);
+            });
+
+            this.socket.on('updatechat', function (process) {
+                console.log(process);
             });
 
             this.socket.on('printEvent', function (data) {
@@ -71,17 +78,19 @@ class Socket {
             });
 
             this.socket.on('disconnect', function () {
-                ui.overlay('Связь с сервером потеряна');
+                ui.overlay('Связь с сервером потеряна, перезагрузите страницу');
             });
 
+            this.socket.on('error', function (data) {
+                ui.displayNotification({
+                    notify: data,
+                    type: 2
+                })
+            });
 
-            this.socket.on('reconnect',function(){
+            this.socket.on('reconnect', function () {
                 console.log('reconnect');
             });
-
-            this.socket.on('getAllUsers',function(data){
-                console.log(data);
-            })
         }
     }
 

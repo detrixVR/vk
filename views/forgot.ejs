@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ./parts/defaultHead.ejs %>
+</head>
+<body>
+<%- include ./parts/defaultNavbar.ejs %>
+<div class="container" id="mainContainer">
+    <div style="margin-top:50px;" class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="panel-title">Восстановление доступа</div>
+            </div>
+            <div style="padding-top:30px" class="panel-body">
+                <form id="forgotForm" role="form">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="form-group">
+                                <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="glyphicon glyphicon-envelope"></i>
+                        </span>
+                                    <input id="forgotEmail" type="text" class="form-control" value=""
+                                           placeholder="example@example.com">
+                                </div>
+                            </div>
+
+                            <%- include ./parts/captchaFormGroup.ejs %>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-xs-offset-2 col-xs-8">
+                                        <button class="btn btn-primary full-width">Восстановить</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include ./parts/defaultScripts.ejs %>
+<script src="/javascripts/index/forgot.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+<%- include ../parts/cabinetNavbar.ejs %>
+<div class="canvas">
+    <%- include ../parts/cabinetTopNavbar.ejs %>
+
+    <div class="hidden" id="listType"><%= type %></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="nav nav-pills">
+                    <li role="presentation" <% if(type === 'clean'){ %>class="active"
+                            <% } %>
+                            ><a href="/config?type=clean">Чистка</a></li>
+                    <li role="presentation" <% if(type === 'copy'){ %>class="active"
+                            <% } %>
+                            ><a href="/config?type=copy">Копирование</a></li>
+                    <li role="presentation" <% if(type === 'group'){ %>class="active"
+                            <% } %>
+                            ><a href="/config?type=group">Мои группы</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="well well-sm">
+                    <label class="bold float">Настройки</label>
+                    <% if (type == 'clean') { %>
+
+
+                    <div class="row nomargin">
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="checkbox">
+                                <input type="checkbox" id="checkAll" checked>
+                                <label for="checkAll">
+                                    Все
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row nomargin">
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removePhotos" checked>
+                                <label for="removePhotos">
+                                    Удалить фотографии
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeVideos" checked>
+                                <label for="removeVideos">
+                                    Удалить видеозаписи
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeAudios" checked>
+                                <label for="removeAudios">
+                                    Удалить аудиозаписи
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeDocs" checked>
+                                <label for="removeDocs">
+                                    Удалить документы
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeNotes" checked>
+                                <label for="removeNotes">
+                                    Удалить заметки
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeFriends" checked>
+                                <label for="removeFriends">
+                                    Удалить друзей
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeDialogs" checked>
+                                <label for="removeDialogs">
+                                    Удалить сообщения
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="cleanWall" checked>
+                                <label for="cleanWall">
+                                    Очистить стену
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="cleanStatus" checked>
+                                <label for="cleanStatus">
+                                    Очистить статус
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeGroups" checked>
+                                <label for="removeGroups">
+                                    Выйти из групп
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="removeRequests" checked>
+                                <label for="removeRequests">
+                                    Очистить заявки
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="banFollowers" checked>
+                                <label for="banFollowers">
+                                    Забанить подписчиков
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="clearProfile" checked>
+                                <label for="clearProfile">
+                                    Очистить профиль
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="unSubscribeAll" checked>
+                                <label for="unSubscribeAll">
+                                    Отписаться от всех
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <% } else if (type === 'copy') { %>
+                    <div class="row nomargin">
+
+                        <div class="col-xs-6">
+                            <label>Откуда копировать</label>
+                            <select class="selectpicker" id="copyFromSelector">
+                                <option>Из моих аккаунтов</option>
+                                <option>Указать ID</option>
+                            </select>
+                        </div>
+
+                        <div class="copyFromSelector0 hidden">
+                            <div class="col-xs-6">
+                                <label>Мои аккаунты</label>
+                                <select class="selectpicker" id="myAccountSelector">
+                                    <% for (var i = 0 ; i < accounts.length; i++) { %>
+                                    <option data-content='<div><%= accounts[i].first_name %> <%= accounts[i].last_name %><div class="hidden id"><%= accounts[i].id %></div></div>'></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="copyFromSelector1 hidden">
+                            <div class="col-xs-6">
+                                <label>ID</label>
+                                <input type="text" class="form-control input-sm full-width" id="copyFromTarget">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row nomargin">
+                        <div class=" col-xs-12 col-sm-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="copyPhotos" checked>
+                                <label for="copyPhotos">
+                                    Копировать фотографии
+                                </label>
+                            </div>
+                        </div>
+                        <div class=" col-xs-12 col-sm-6">
+                            <div class="checkbox">
+                                <input type="checkbox" id="copyVideos" checked>
+                                <label for="copyVideos">
+                                    Копировать видеозаписи
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <div class="row nomargin">
+                        <div class="col-xs-12 col-sm-6">123</div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <div class="col-xs-12 col-lg-4">
+                <div class="well well-sm controls">
+                    <label class="bold float">Выполнение</label>
+
+                    <div class="form-group">
+                        <%- include ../parts/eventButtons.ejs %>
+                    </div>
+                    <div class="list" id="eventsHolder"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+</script>
+
+<script data-main="js/require/config" src="js/require.js"></script>
+</body>
+</html>

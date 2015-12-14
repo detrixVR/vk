@@ -1,0 +1,109 @@
+@import '_variables.less';
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  position: relative;
+  padding-bottom: 50px;
+}
+
+.navbar-default {
+  background-color: @vkColor;
+  border: none;
+
+  .navbar-toggle {
+    float: left;
+    margin-left: 15px;
+    border-color: white;
+
+    .icon-bar {
+      background-color: white;
+    }
+
+    &:hover {
+      background-color: @vkColorHover;
+    }
+
+    &:focus {
+      background-color: @vkColorHover;
+    }
+  }
+
+  .navbar-nav > li > a {
+    color: white;
+    &:hover {
+      background-color: @vkColorHover;
+      color: white;
+    }
+  }
+}
+
+#vkChar {
+  padding: 4px 10px;
+  background-color: @vkColor;
+  border-radius: 4px;
+  color: white;
+}
+
+.well.well-sm.index {
+  padding: 0;
+
+  h3 {
+    margin: 10px 0 0 0;
+  }
+}
+
+.nomargin {
+  margin: 0 0 0 0;
+}
+
+.panel,
+.panel-heading {
+  border-radius: 0;
+  border-radius: 0;
+}
+
+.input-group-addon {
+  background-color: transparent;
+}
+
+#captchaHolder {
+  height: 60px;
+  width: 200px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-bottom: 15px;
+  position: relative;
+  //background-image: url('/captcha.png');
+
+  .btn {
+    position: absolute;
+    bottom: 0;
+    left: -32px;
+    background-color: transparent;
+    border: none;
+  }
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+
+  color: white;
+
+  .container {
+    padding-top: 5px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+@import "libschange";
+@import "custom";

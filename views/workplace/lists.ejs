@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+<%- include ../parts/cabinetNavbar.ejs %>
+<div class="canvas">
+    <%- include ../parts/cabinetTopNavbar.ejs %>
+    <%- include ../parts/overlay.ejs %>
+
+    <div class="hidden" id="listType"><%= type %></div>
+
+    <div class="container-fluid" id="mainContainer">
+
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="nav nav-pills">
+                    <li role="presentation" <% if(type === 'person'){ %>class="active"
+                            <% } %>
+                            ><a href="/lists?type=person">Люди</a></li>
+                    <li role="presentation" <% if(type === 'group'){ %>class="active"
+                            <% } %>
+                            ><a href="/lists?type=group">Группы</a></li>
+                    <li role="presentation" <% if(type === 'post'){ %>class="active"
+                            <% } %>
+                            ><a href="/lists?type=post">Посты</a></li>
+                    <li role="presentation" <% if(type === 'photo'){ %>class="active"
+                            <% } %>
+                            ><a href="/lists?type=photo">Фотографии</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <% if (type === 'person') { %>
+                <%- include ../widgetTemplates/gridTemplatePerson.ejs %>
+                <% } %>
+            </div>
+            <div class="col-xs-12 col-lg-4">
+                <div class="well well-sm widget">
+                    <label class="bold float">Настройки</label>
+
+                    <div class="row nomargin form-group">
+                        <div class="col-xs-6">
+                            <label>Откуда <i class="fa fa-question-circle"
+                                             title="Источник данных, пользователи, таблица слева"></i></label>
+
+                            <div>
+                                <select class="selectpicker full-width"
+                                        id="fromSelector">
+                                    <option>Выделенные</option>
+                                    <option>Случайные</option>
+                                    <option>По порядку</option>
+                                    <option>Указать ID</option>
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fromSelector3 hidden">
+                            <div class="col-xs-6">
+                                <label>ID <i class="fa fa-question-circle"
+                                             title="ID пользователей через запятую"></i></label>
+                                <textarea class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row nomargin form-group">
+                        <div class="col-xs-6">
+                            <label>Взять</label>
+                            <select class="selectpicker" data-width="100%" id="typeSelector">
+                                <option>Пост</option>
+                                <option>Фотографию</option>
+                            </select>
+                        </div>
+                        <div class="typeSelector0 hidden">
+                            <div class="col-xs-6">
+                                <label></label>
+
+                                <div class="checkbox">
+                                    <input type="checkbox" id="onlyOwner">
+                                    <label for="onlyOwner">
+                                        Только владельца
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row nomargin form-group">
+                        <div class="col-xs-6">
+                            <label>Какой</label>
+                            <select class="selectpicker" data-width="100%" id="targetSelector">
+                                <option>Последний</option>
+                                <option>Случайный</option>
+                                <option>Найти</option>
+                            </select>
+                        </div>
+
+                        <div class="targetSelector1 hidden">
+                            <div class="col-xs-6">
+                                <label>Из последних</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control input-sm hours"
+                                           id="atTimeHours"
+                                           data-settings="true" value="10">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="targetSelector2 hidden">
+                            <div class="col-xs-6">
+                                <label>Поисковая строка</label>
+                                <input type="text" class="form-control input-sm"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row nomargin form-group">
+                        <div class="col-xs-6">
+                            <label>Новый список</label>
+
+                            <div>
+                                <select class="selectpicker" data-style="btn-primary" data-width="100%"
+                                        id="replaceSelector">
+                                    <option>Заменить список</option>
+                                    <option>Добавить в список</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="typeSelector0 hidden">
+                    <%- include ../widgetTemplates/gridTemplatePost.ejs %>
+                </div>
+                <div class="typeSelector1 hidden">
+                    <%- include ../widgetTemplates/gridTemplatePhoto.ejs %>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-lg-4">
+                <%- include ../widgetTemplates/eventsHolder.ejs %>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<%- include ../parts/modalIO.ejs %>
+<script data-main="js/require/socket1" src="js/require.js"></script>
+</body>
+</html>

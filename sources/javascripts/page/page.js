@@ -4,8 +4,9 @@ import ui from '../ui'
 
 class Page {
 
-    constructor(accountId) {
+    constructor(accountId, processId) {
         this.accountId      = accountId;
+        this.processId      = processId;
         this.socket         = new Socket(this);
         this.ui             = ui;
     }
@@ -22,12 +23,10 @@ class Page {
         this.ui.overlay('Инициализация');
 
         this.socket.socket.emit('getCurrentProcess', {
-            accountId: this.accountId
+            accountId: this.accountId,
+            processId: this.processId
         });
 
-        this.socket.socket.emit('getAllUsers', {
-            accountId: this.accountId
-        });
     }
 }
 

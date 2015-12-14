@@ -3,6 +3,9 @@ var redis = require('socket.io-redis');
 var extend = require('extend');
 var async = require('async');
 var request = require('request');
+var cookieParser = require('cookie-parser');
+var cookie = require('cookie');
+var config = require('../config');
 
 
 var sio = function (server) {
@@ -40,10 +43,21 @@ var sio = function (server) {
         var process = getProcess(data);
         if (process) {
             process.state = data.state;
+            s.sockets.in(process.username + ':' + process.accountId).emit('setState', process);
         }
     }
 
     process.on('message', function (msg) {
+
+        var credentials = {
+            username: msg.data.username,
+            accountId: msg.data.accountId,
+            processId: msg.data.processId
+        };
+
+        var room = credentials.username + ':' + credentials.accountId; //+ ':' + credentials.processId;
+
+        console.log(process.pid + ': message [' + msg.command + '] from [' + room + ']');
 
         switch (msg.command) {
             case  'startProcess':
@@ -61,10 +75,14 @@ var sio = function (server) {
                     };
                     delay(msg.data);
                     processes.push(msg.data);
+                    s.sockets.in(msg.data.username + ':' + msg.data.accountId).emit('setState', msg.data);
                 }
                 break;
             case 'setProcessState':
                 startPauseProcess(msg.data);
+                break;
+            case 'setProcess':
+                s.sockets.in(room).emit('setProcess', msg.data.process);
                 break;
             default:
                 s.to([msg.data.socketId]).emit(msg.command, msg.data);
@@ -72,25 +90,34 @@ var sio = function (server) {
     });
 
 
+    s.set('authorization', function (handshakeData, accept) {
+
+        if (handshakeData.headers.cookie) {
+            var parsedCookies = cookie.parse(handshakeData.headers.cookie);
+            if (parsedCookies["username"]) {
+                var username = cookieParser.signedCookie(parsedCookies["username"], config.get('secretCookies'));
+                if (username !== parsedCookies["username"]) {
+                    handshakeData.username = username;
+                    handshakeData.accountId = handshakeData._query.accountId;
+                    return accept(null, true);
+                }
+            }
+        }
+
+        return accept('Вы не авторизованы', false);
+    });
+
     s.sockets.on('connection', function (socket) {
 
-        console.log('connection to ' + process.pid);
+        var user = {
+            username: socket.request.username,
+            accountId: socket.request.accountId
+        };
 
-        var user = {};
+        console.log(process.pid + ': user connected [' + user.username + ':' + user.accountId + ']');
 
-        socket.emit('welcome');
-
-        socket.on('getAllUsers', function (inData) {
-            process.send({
-                command: 'getAllUsers',
-                data: extend(data, inData)
-            });
-        });
-
-        socket.on('username', function (inData) {
-            user = extend(user, inData);
-            socket.emit('username');
-        });
+        socket.join(user.username);
+        socket.join(user.username + ':' + user.accountId);
 
         socket.on('startProcess', function (inData) {
             console.log(inData);
@@ -134,7 +161,7 @@ var sio = function (server) {
         });
 
         socket.on('leave', function (inData) {
-            console.log('leave '+ inData);
+            console.log('leave ' + inData);
             for (var i = 0; i < socket.rooms.length; i++) {
                 if (socket.rooms[i] === inData) {
                     socket.leave(socket.rooms[i]);
@@ -146,6 +173,29 @@ var sio = function (server) {
         socket.on('disconnect', function (inData) {
             console.log('disconnected');
         });
+
+        socket.on('getCurrentProcess', function (inData) {
+            process.send({
+                command: 'getCurrentProcess',
+                data: {
+                    username: user.username,
+                    accountId: inData.accountId,
+                    processId: inData.processId
+                }
+            });
+        });
+
+        socket.on('startPauseProcess', function (inData) {
+            console.log(inData);
+            process.send({
+                command: 'startPauseProcess',
+                data: extend({
+                    username: user.username,
+                    accountId: inData.accountId,
+                    processId: inData.processId
+                }, {settings: inData.settings})
+            });
+        })
 
     })
 };

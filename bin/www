@@ -52,13 +52,17 @@ if (cluster.isMaster) {
         worker.on('message', function (msg) {
 
             switch (msg.command) {
-                case 'startProcess':
+                case 'startPauseProcess':
                     var process = getExistingProcess(msg.data);
                     if (process) {
-                        process.start();
+                        if (process.getState() === 2) {
+                            process.start();
+                        } else {
+                            process.pause();
+                        }
                         broadcast({
                             command: 'setProcessState',
-                            data: extend(msg.data, {state:  process.getState()})
+                            data: extend(msg.data, {state: process.getState()})
                         });
                     } else {
                         process = new Process(msg.data);
@@ -80,12 +84,22 @@ if (cluster.isMaster) {
                         });
                     }
                     break;
+                case 'getCurrentProcess':
+                    worker.send({
+                        command: 'setProcess',
+                        data: extend(msg.data, {process: getExistingProcess(msg.data)})
+                    })
+                    break;
             }
 
-        });
 
-        workersArray.push(worker);
+        })
+
     }
+
+
+    workersArray.push(worker);
+
 
     cluster.on('death', function (worker) {
         console.log('worker %s died. restart...', worker.process.pid);
@@ -98,12 +112,22 @@ if (cluster.isMaster) {
 
     app.set('port', port);
 
+
     server.listen(port);
 
     server.on('error', onError);
     server.on('listening', onListening);
 
     new Socket(server);
+
+    app.use(function (req, res, next) {
+        var err = {
+            message: 'Страница не найдена'
+        };
+        err.status = 404;
+        next(err);
+    });
+
 
     function onError(error) {
         if (error.syscall !== 'listen') {

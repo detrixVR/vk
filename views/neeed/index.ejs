@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+
+    <title>Off Canvas Reveal Menu Template for Bootstrap</title>
+
+    <link href="stylesheets/libs.css" rel="stylesheet"/>
+    <link href="stylesheets/style.css" rel="stylesheet"/>
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]>
+    <script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<!--<div class="hidden" id="pageId">pageId </div>
+<div class="hidden" id="accountId">account.id </div>-->
+
+
+<div class="navmenu navmenu-default navmenu-fixed-left">
+    <a class="navmenu-brand" href="#">Project name</a>
+    <ul class="nav navmenu-nav">
+        <li><a href="../navmenu/">ПРОКСИ<span class="glyphicon glyphicon-globe pull-right"
+                                              aria-hidden="true"></span></a></li>
+        <li><a href="../navmenu-push/">АККАУНТЫ<span class="glyphicon glyphicon-user pull-right"
+                                                     aria-hidden="true"></span></a></li>
+    </ul>
+    <ul class="nav navmenu-nav">
+        <li><a href="#">ЛЮДИ<span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">ГРУППЫ<span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">СПИСКИ<span class="glyphicon glyphicon-list pull-right" aria-hidden="true"></span></a></li>
+        <li><a href="#">ЗАДАНИЯ<span class="glyphicon glyphicon-briefcase pull-right" aria-hidden="true"></span></a>
+        </li>
+    </ul>
+</div>
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-recalc="false"
+                        data-target=".navmenu" data-canvas=".canvas">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="well well-sm container-fluid">
+                    <div class="row">
+                        <div class="col-xs-12">
+                         <!--    include templates/accountSelector.ejs -->
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Проверять</label>
+                            <select class="selectpicker" data-width="100%" id="targetSelect">
+                                <option>Все</option>
+                                <option>Загруженные</option>
+                                <option>Выделенные</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Адрес проверки</label>
+                                <input type="text" class="form-control" id="urlInput" value="http://vk.com"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Таймаут, сек</label>
+
+                            <div class="input-group spinner full-width">
+                                <input type="text" class="form-control" id="timeoutInput" value="2" max="5">
+
+                                <div class="input-group-btn-vertical">
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-up"></i></button>
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label></label>
+
+                            <div class="checkbox">
+                                <input type="checkbox" id="deleteIfWrong" data-settings="true">
+                                <label for="deleteIfWrong">
+                                    Удалять невалидные
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="well well-sm">
+                    <%- include ../templates/proxyGrid.ejs %>
+                </div>
+            </div>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm">
+                    <div class="bootgrid-header">
+                        <button id="startPauseButton" class="btn btn-default"
+                                onclick="$(this).closest('body').trigger('startPauseProcess', 'validateProxy');"><span
+                                    class="glyphicon glyphicon-play"></span></button>
+                        <button id="stopButton" class="btn btn-default hidden"
+                                onclick="$(this).closest('body').trigger('stopProcess');"><span
+                                    class="glyphicon glyphicon-stop"></span></button>
+                    </div>
+                    <div id="eventsHolder">
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-success">Dapibus ac facilisis in</li>
+                            <li class="list-group-item list-group-item-info">Cras sit amet nibh libero</li>
+                            <li class="list-group-item list-group-item-warning">Porta ac consectetur ac</li>
+                            <li class="list-group-item list-group-item-danger">Vestibulum at eros</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<%- include ../templates/modalInput.ejs %>
+
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+
+<script>
+
+    $('.selectpicker').selectpicker();
+
+    $('.spinner input').on('keydown', function (e) {
+        if (!((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105))) {
+            e.preventDefault();
+        }
+    });
+
+    $('.spinner input').on('change', function (e) {
+        if (isNaN(parseInt(this.value))) {
+            this.value = 0;
+        } else {
+            var input = $(this);
+            if (input.hasClass('hours') && this.value > 24)
+                this.value = 24;
+            else if (input.hasClass('minutes') && this.value > 60)
+                this.value = 60;
+            else if (input.hasClass('seconds') && this.value > 60)
+                this.value = 60;
+            else if (input.attr('max') && +this.value > +input.attr('max')) {
+                this.value = input.attr('max');
+            }
+        }
+    });
+
+    $('.spinner .btn:first-of-type').on('click', function () {
+        var $this = $(this);
+        var input = $this.closest('.spinner').find('input:not(:disabled)');
+        if (input) {
+            var parsedVal = parseInt(input.val(), 10) + 1;
+            var val = (parsedVal < 0 || isNaN(parsedVal)) ? 0 : parsedVal;
+            if (input.hasClass('hours') && val > 24)
+                return (0);
+            else if (input.hasClass('minutes') && val > 60)
+                return (0);
+            else if (input.hasClass('seconds') && val > 60)
+                return (0);
+            input.val(val);
+            input.trigger('change');
+        }
+    });
+
+    $('.spinner .btn:last-of-type').on('click', function () {
+        var $this = $(this);
+        var input = $this.closest('.spinner').find('input:not(:disabled)');
+        if (input) {
+            var parsedVal = parseInt(input.val(), 10) - 1;
+            var val = (parsedVal < 0 || isNaN(parsedVal)) ? 0 : parsedVal;
+            if (input.hasClass('hours') && val > 24)
+                return (0);
+            else if (input.hasClass('minutes') && val > 60)
+                return (0);
+            else if (input.hasClass('seconds') && val > 60)
+                return (0);
+            input.val(val);
+            input.trigger('change');
+        }
+    });
+
+</script>
+
+
+</body>
+</html>

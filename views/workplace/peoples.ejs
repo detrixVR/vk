@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+<%- include ../parts/cabinetNavbar.ejs %>
+<div class="canvas">
+    <%- include ../parts/cabinetTopNavbar.ejs %>
+    <%- include ../parts/overlay.ejs %>
+
+    <div class="hidden" id="listType"><%= type %></div>
+
+
+    <div class="container-fluid">
+        <div class="row canFade">
+            <div class="col-xs-12">
+                <div class="well well-sm controls">
+                    <label class="bold float">Настройки</label>
+                    <div class="row nomargin form-group">
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div>
+                                <select class="selectpicker" data-style="btn-primary" data-width="100%"
+                                        id="searchSelector">
+                                    <option>Поиск</option>
+                                    <option>Мои друзья</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div>
+                                <select class="selectpicker" data-style="btn-primary" data-width="100%" id="replaceSelector">
+                                    <option>Заменить список</option>
+                                    <option>Добавить в список</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="searchSelector0 hidden">
+                        <div class="row nomargin form-group">
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Строка поиска</label>
+
+                                <input type="text" class="form-control input-sm" id="q" value="Иван"/>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Сортировать по</label>
+
+                                <select class="selectpicker" data-width="100%" id="sort">
+                                    <option>Популярность</option>
+                                    <option>Дата регистрации</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Оффсет</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control input-sm" id="offset"
+                                           value="0">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-down"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Количество</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control input-sm" id="count" value="20">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Страна</label>
+                                <% include ../parts/countryDropdown %>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Город</label>
+                                <input class="form-control input-sm typeahead" type="text" placeholder="Город"
+                                       id="city">
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Пол</label>
+                                <select class="selectpicker" data-width="100%" id="sex">
+                                    <option>Любой</option>
+                                    <option>Женский</option>
+                                    <option>Мужской</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Семейное положение</label>
+                                <select class="selectpicker" data-width="100%" id="status">
+                                    <option>Не женат</option>
+                                    <option>Встречается</option>
+                                    <option>Помолвлен</option>
+                                    <option>Женат</option>
+                                    <option>Влюблён</option>
+                                    <option>В активном поиске</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Возраст от</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control input-sm" id="age_from"
+                                           value="18">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>До</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control input-sm" id="age_to"
+                                           value="24">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="fa fa-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+                                <label>Интересы</label>
+                                <input type="text" class="form-control input-sm" id="interests">
+                            </div>
+                        </div>
+                        <div class="row nomargin form-group">
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+
+                                <div class="checkbox">
+                                    <input type="checkbox" id="online">
+                                    <label for="online">
+                                        Онлайн
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+
+                                <div class="checkbox">
+                                    <input type="checkbox" id="has_photo">
+                                    <label for="has_photo">
+                                        С фото
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+
+                                <div class="checkbox">
+                                    <input type="checkbox" id="from_list">
+                                    <label for="from_list">
+                                        Поиск среди друзей
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-sm-3 col-md-2">
+
+                                <div class="checkbox">
+                                    <input type="checkbox" id="canWritePrivateMsg">
+                                    <label for="canWritePrivateMsg">
+                                        Можно написать
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8 canFade">
+
+
+                <div class="well well-sm list">
+                    <label class="bold float">Люди</label>
+                    <%- include ../widgetTemplates/gridTemplatePerson.ejs %>
+                </div>
+            </div>
+            <div class="col-xs-12 col-lg-4">
+                <div class="well well-sm controls clearfix">
+                    <label class="bold float">Выполнение</label>
+
+                    <div class="form-group">
+                        <%- include ../parts/eventButtons.ejs %>
+                    </div>
+                    <div class="list" id="eventsHolder"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<%- include ../parts/modalIO.ejs %>
+<script data-main="js/require/search" src="js/require.js"></script>
+
+</body>
+</html>

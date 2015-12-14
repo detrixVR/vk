@@ -13,11 +13,20 @@ import concat  from 'gulp-concat';
 import config from '../config.js';
 import wrapPipe from '../utils.js';
 
-gulp.task('styles', ['concat-libs-css'], wrapPipe(function (success, error) {
+gulp.task('styles', ['concat-libs-css', 'styles-index'], wrapPipe(function (success, error) {
     return gulp.src(['./sources/stylesheets/style.less'])
         .pipe(sourcemaps.init())
         .pipe(less()).on('error', error)
         //.pipe(postcss([]))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(config.build.styles));
+}));
+
+
+gulp.task('styles-index', ['concat-libs-css'], wrapPipe(function (success, error) {
+    return gulp.src(['./sources/stylesheets/index.less'])
+        .pipe(sourcemaps.init())
+        .pipe(less()).on('error', error)
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(config.build.styles));
 }));

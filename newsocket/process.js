@@ -6,6 +6,8 @@ class Process {
         this.username = data.username;
         this.processId = data.processId;
         this.accountId = data.accountId;
+        this.settings = data.settings;
+        this.messages = [];
         this.state = 0;
     }
 
