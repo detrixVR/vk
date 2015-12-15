@@ -80,19 +80,10 @@
             <div class="col-xs-12  col-lg-4">
                 <div class="well well-sm">
                     <div class="bootgrid-header">
-                        <button id="startPauseButton" class="btn btn-default"
-                                onclick="$(this).closest('body').trigger('startPauseProcess','<%=processId%>');"><span
-                                    class="glyphicon glyphicon-play"></span></button>
-                        <button id="stopButton" class="btn btn-default hidden"
-                                onclick="$(this).closest('body').trigger('stopProcess');"><span
-                                    class="glyphicon glyphicon-stop"></span></button>
+                        <%- include ../parts/buttonsProcess.ejs %>
                     </div>
                     <div id="eventsHolder">
                         <ul class="list-group">
-                            <li class="list-group-item list-group-item-success">Dapibus ac facilisis in</li>
-                            <li class="list-group-item list-group-item-info">Cras sit amet nibh libero</li>
-                            <li class="list-group-item list-group-item-warning">Porta ac consectetur ac</li>
-                            <li class="list-group-item list-group-item-danger">Vestibulum at eros</li>
                         </ul>
                     </div>
 

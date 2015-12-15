@@ -16,22 +16,8 @@ var redrawSelector = function (selectedItem) {
 };
 
 var setState = function (data) {
-
-    var stopButton = $('#stopButton');
-    var startPauseButton = $('#startPauseButton');
-
-
-    stopButton.attr('disabled', false);
-    startPauseButton.attr('disabled', false);
-
-    startPauseButton.find('.glyphicon').
-        toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-        toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
-
-    stopButton.toggleClass('hidden', data.state === 0);
-
+    $('#eventsHolder').trigger('setState', [data]);
     $('.taskHolder').trigger('setState', [data]);
-
 };
 
 var overlay = function (state) {
@@ -174,7 +160,7 @@ var setProcess = function (process) {
 
     if (process) {
         if (process.state)
-            setState(process.state);
+            setState(process);
         eventsHolder.trigger('printEvent', [process.messages || [], true]);
         applySettings(process.settings);
     } else {
@@ -266,6 +252,21 @@ var getListGroupItemClass = function (type) {
             break;
     }
     return subClass;
+};
+
+var setProcessButtonsState = function (state, parent) {
+
+    var stopButton = $('.stopButton', parent);
+    var startPauseButton = $('.startPauseButton', parent);
+
+    stopButton.attr('disabled', false);
+    startPauseButton.attr('disabled', false);
+
+    startPauseButton.find('.glyphicon').
+    toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+    toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+
+    stopButton.toggleClass('hidden', state === 0);
 };
 
 var init = function () {
@@ -425,22 +426,25 @@ var init = function () {
             }
         });
 
-    $('#eventsHolder').bind('printEvent', function (event, message, clear) {
-        var list = $('.list-group', this);
+    $('#eventsHolder')
+        .bind('printEvent', function (event, message, clear) {
+            var list = $('.list-group', this);
 
-        if (!isArray(message)) {
-            message = [message];
-        }
+            if (!isArray(message)) {
+                message = [message];
+            }
 
-        if (clear) {
-            list.empty();
-        }
+            if (clear) {
+                list.empty();
+            }
 
-        message.forEach(function (item) {
-            list.append('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
-        });
+            message.forEach(function (item) {
+                list.prepend('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
+            });
 
-        $(this).scrollTop(this.scrollHeight);
+           // $(this).scrollTop(this.scrollHeight);
+        }).bind('setState', function (event, data) {
+        setProcessButtonsState(data.state, $(this).closest('.well'));
     });
 
 
@@ -455,15 +459,21 @@ var init = function () {
             list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
                 '<div class="taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
                 '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
-                '<div class="speechBox" style=""><div class="innerText"><label class="small">' + process.title + '</label>' +
-                '<span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span>' +
+                '<div class="speechBox" style=""><div class="innerText">' +
+                '<label class="small">' + process.title + '</label>' +
+                '<ul>' +
+                '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
+                '</ul>' +
+
                 '</div></div><div>' +
                 '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.taskHolder\').trigger(\'startPauseProcess1\', this)">' +
                 '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
                 '</button>' +
                 '<button class="btn btn-default btn-sm stopButton"><span class="glyphicon glyphicon-stop"></span></button>' +
                 '</div></div>' +
-                '</li>');
+                '</li>'
+            )
+            ;
         });
 
 
@@ -487,28 +497,13 @@ var init = function () {
     $(document)
         .bind('printEvent', '.taskHolder', function (event, message) {
             var $this = $(event.target);
-            var textHolder = $this.find('.innerText span');
-            textHolder.html('').fadeOut(0, function () {
-                textHolder.html('<span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg).fadeIn();
-            });
+            var textList = $this.find('.innerText ul');
+            textList.prepend('<li><span class="small"><span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg + '</span></li>').fadeIn();
             $this.closest('.list-group-item').toggleClass(getListGroupItemClass(message.type), true);
         })
         .bind('setState', function (event, data) {
             var $taskHolder = $(event.target);
-
-            var stopButton = $('.stopButton', $taskHolder);
-            var startPauseButton = $('.startPauseButton', $taskHolder);
-
-
-            stopButton.attr('disabled', false);
-            startPauseButton.attr('disabled', false);
-
-            startPauseButton.find('.glyphicon').
-                toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
-
-            stopButton.toggleClass('hidden', data.state === 0);
-
+            setProcessButtonsState(data.state, $taskHolder);
         });
 
     $(document.body)
@@ -569,6 +564,11 @@ var init = function () {
             from: 'bottom',
             to: 'top'
         }
+    });
+
+    $(document).on('click', '.speechBox', function (event) {
+        var $speechBox = $(event.currentTarget);
+        $speechBox.toggleClass('expanded', !$speechBox.hasClass('expanded'));
     });
 
     $(document).ajaxError(function (e, x, settings, exception) {
