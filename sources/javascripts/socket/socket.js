@@ -53,6 +53,7 @@ class Socket {
 
 
             this.socket.on('setState', function (state) {
+                console.log(state);
                 that.page.ui.setState(processResponse.apply(that, [state]));
             });
 
@@ -61,8 +62,13 @@ class Socket {
                 that.page.ui.setProcess(process);
             });
 
-            this.socket.on('updatechat', function (process) {
-                console.log(process);
+            this.socket.on('setProcesses', function (processes) {
+               // console.log(process);
+                that.page.ui.setProcesses(processes);
+            });
+
+            this.socket.on('updatechat', function (data) {
+                processResponse.apply(that, [data]);
             });
 
             this.socket.on('printEvent', function (data) {

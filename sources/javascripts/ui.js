@@ -30,6 +30,8 @@ var setState = function (data) {
 
     stopButton.toggleClass('hidden', data.state === 0);
 
+    $('.taskHolder').trigger('setState', [data]);
+
 };
 
 var overlay = function (state) {
@@ -188,6 +190,7 @@ var setProcess = function (process) {
 
 var printEvent = function (data) {
     $('#eventsHolder').trigger('printEvent', [data, data.clear]);
+    $('.taskHolder').trigger('printEvent', [data]);
 };
 
 var refreshRow = function (data) {
@@ -201,13 +204,20 @@ var highLightFunc = function () {
 var highLightFields = function (badFields) {
 
     badFields.forEach(function (item) {
-        var $field = $('#'+item);
+        var $field = $('#' + item);
         $field.closest('.form-group').toggleClass('has-error', true);
         $field.off('change', highLightFunc).on('change', highLightFunc);
     })
 };
 
-var displayNotification = function(info) {
+var setProcesses = function (processes) {
+    processes.forEach(function (item, i) {
+        $('#tasksHolder').trigger('printProcess', [item, i === 0]);
+    });
+
+};
+
+var displayNotification = function (info) {
 
     var type = 'info';
 
@@ -225,6 +235,37 @@ var displayNotification = function(info) {
 
 
     $.notify({message: info.notify}, {type: type});
+};
+
+var getTitleById = function (processId) {
+    var title = null;
+    switch (processId) {
+        case 'validateProxy':
+            title = 'Валидация прокси';
+            break;
+        default :
+            title = 'Стандартное название';
+    }
+    return title;
+};
+
+var getListGroupItemClass = function (type) {
+    var subClass = '';
+    switch (type) {
+        case 0: // info
+            subClass = 'list-group-item-info';
+            break;
+        case 1: //warning
+            subClass = 'list-group-item-warning';
+            break;
+        case 2: //success
+            subClass = 'list-group-item-success';
+            break;
+        case 3: //danger
+            subClass = 'list-group-item-danger';
+            break;
+    }
+    return subClass;
 };
 
 var init = function () {
@@ -396,28 +437,79 @@ var init = function () {
         }
 
         message.forEach(function (item) {
-            var subClass = '';
-            switch (item.type) {
-                case 0: // info
-                    subClass = 'list-group-item-info';
-                    break;
-                case 1: //warning
-                    subClass = 'list-group-item-warning';
-                    break;
-                case 2: //success
-                    subClass = 'list-group-item-success';
-                    break;
-                case 3: //danger
-                    subClass = 'list-group-item-danger';
-                    break;
-            }
-
-            list.append('<li class="list-group-item ' + subClass + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
-
+            list.append('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
         });
 
         $(this).scrollTop(this.scrollHeight);
     });
+
+
+    $('#tasksHolder')
+        .bind('printProcess', function (event, process, clear) {
+            var list = $('.list-group', this);
+
+            if (clear) {
+                list.empty();
+            }
+
+            list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
+                '<div class="taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
+                '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
+                '<div class="speechBox" style=""><div class="innerText"><label class="small">' + process.title + '</label>' +
+                '<span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span>' +
+                '</div></div><div>' +
+                '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.taskHolder\').trigger(\'startPauseProcess1\', this)">' +
+                '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
+                '</button>' +
+                '<button class="btn btn-default btn-sm stopButton"><span class="glyphicon glyphicon-stop"></span></button>' +
+                '</div></div>' +
+                '</li>');
+        });
+
+
+    $(document).on('startPauseProcess1', '.taskHolder', function (event, elem) {
+        var $elem = $(elem);
+        var taskHolder = $(event.target);
+
+        $elem.attr('disabled', true);
+
+        var data = taskHolder.data();
+
+        console.log(data);
+
+        that.socket.socket.emit('startPauseProcess', {
+            accountId: data.account,
+            processId: data.process
+        });
+    });
+
+
+    $(document)
+        .bind('printEvent', '.taskHolder', function (event, message) {
+            var $this = $(event.target);
+            var textHolder = $this.find('.innerText span');
+            textHolder.html('').fadeOut(0, function () {
+                textHolder.html('<span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg).fadeIn();
+            });
+            $this.closest('.list-group-item').toggleClass(getListGroupItemClass(message.type), true);
+        })
+        .bind('setState', function (event, data) {
+            var $taskHolder = $(event.target);
+
+            var stopButton = $('.stopButton', $taskHolder);
+            var startPauseButton = $('.startPauseButton', $taskHolder);
+
+
+            stopButton.attr('disabled', false);
+            startPauseButton.attr('disabled', false);
+
+            startPauseButton.find('.glyphicon').
+                toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+
+            stopButton.toggleClass('hidden', data.state === 0);
+
+        });
 
     $(document.body)
         .bind('selectAccount', function () {
@@ -459,6 +551,7 @@ var init = function () {
             that.socket.socket.emit('startPauseProcess', {
                 accountId: that.accountId,
                 processId: that.processId,
+                title: getTitleById(that.processId),
                 settings: getSettings()
             });
         })
@@ -597,6 +690,7 @@ var ui = {
     refreshRow: refreshRow,
     highLightFields: highLightFields,
     displayNotification: displayNotification,
+    setProcesses: setProcesses,
 };
 
 

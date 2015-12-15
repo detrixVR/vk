@@ -42,6 +42,19 @@ if (cluster.isMaster) {
         return process;
     }
 
+    function getAllProcesses(data) {
+        var result = [];
+
+        for (var k = 0; k < processes.length; k++) {
+            if (processes[k].username === data.username) {
+                result.push(processes[k]);
+                break;
+            }
+        }
+
+        return result;
+    }
+
 
     workers--;
 
@@ -88,7 +101,19 @@ if (cluster.isMaster) {
                     worker.send({
                         command: 'setProcess',
                         data: extend(msg.data, {process: getExistingProcess(msg.data)})
-                    })
+                    });
+                    break;
+                case 'getAllProcesses':
+                    worker.send({
+                        command: 'setProcesses',
+                        data: extend(msg.data, {processes: getAllProcesses(msg.data)})
+                    });
+                    break;
+                case 'setProcessMessage':
+                    var process = getExistingProcess(msg.data);
+                    if (process) {
+                        process.messages.push(msg.data.msg);
+                    }
                     break;
             }
 

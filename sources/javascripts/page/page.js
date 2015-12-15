@@ -14,6 +14,19 @@ class Page {
     init() {
         this.socket.listen();
         this.ui.init.call(this);
+
+
+        switch (this.processId){
+            case 'validateProxy':
+                console.log('validateProxy');
+                this.socket.socket.emit('join', 'validateProxy');
+                break;
+            case 'tasksListen':
+                console.log('tasksListen');
+                this.socket.socket.emit('getAllProcesses');
+                this.socket.socket.emit('join', 'tasksListen');
+                break;
+        }
     }
 
     pageReload() {

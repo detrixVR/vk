@@ -103,7 +103,11 @@ module.exports.get = function (req, res) {
     } else {
         res.render('workplace/index', {
             user: req.user,
-            page: 'index'
+            page: 'index',
+            accounts: [{
+                accountId: 'defaultAccount'
+            }],
+            processId: 'tasksListen'
         });
     }
 
