@@ -8,6 +8,7 @@ var express = require('express')
     , server = require('http').createServer(app);
 
 var Socket = require('../newsocket');
+var dbProcess = require('../models/process').Process;
 
 
 var workers = /*process.env.WORKERS*/7 || require('os').cpus().length; //WEB_CONCURRENCY
@@ -81,20 +82,37 @@ if (cluster.isMaster) {
                         process = new Process(msg.data);
                         processes.push(process);
                         process.start();
+
                         worker.send({
                             command: 'startProcess',
                             data: extend(msg.data, {state: process.getState()})
                         });
                     }
                     break;
-                case 'pauseProcess':
+                case 'stopProcess':
                     var process = getExistingProcess(msg.data);
                     if (process) {
-                        process.pause();
-                        broadcast({
-                            command: 'setProcessState',
-                            data: extend(msg.data, {state: process.getState()})
+                        process.stop();
+                        var newProcess = dbProcess({
+                            username: process.username,
+                            accountId: process.accountId,
+                            processId: process.processId,
+                            messages: process.messages,
+                            settings: process.settings,
+                            state: process.getState()
                         });
+                        newProcess.save(function(err, proc){
+                            if(err) {
+                                console.error(err);
+                            } else {
+                                processes.splice(processes.indexOf(process,1));
+                                console.log(processes);
+                                broadcast({
+                                    command: 'stopProcess',
+                                    data: proc//extend(msg.data, {state: process.getState()})
+                                });
+                            }
+                        })
                     }
                     break;
                 case 'getCurrentProcess':

@@ -19,42 +19,22 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-6">
-                <div class="well well-sm container-fluid">
-                    <h3>Текущие задачи</h3>
-                    <hr>
-                    <div id="tasksHolder">
-                        <ul class="list-group">
-                            <li class="list-group-item list-group-item-success">
-                                <div class="taskHolder">
-                                    <div>
-                                        <div id="accountHolder">
-                                            <div class="img-thumbnail avatarHolder"
-                                                 style="background-image: url('http://vk.com/images/camera_50.png');"></div>
-                                        </div>
-                                    </div>
+                <div class="well well-sm widget tasksHolder container-fluid ">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#home">Текущие задачи</a></li>
+                        <li><a data-toggle="tab" href="#menu1">Звершенные задачи</a></li>
+                    </ul>
 
-                                    <div class="speechBox" style="">
-                                        <div class="innerText">
-                                            <label class="small">Название задания</label>
-                                            <span class="small">Строка два</span>
-                                        </div>
-
-                                    </div>
-                                    <div>
-                                        <button id="startPauseButton" class="btn btn-default btn-sm"
-                                                ><span
-                                                    class="glyphicon glyphicon-pause"></span></button>
-                                        <button id="stopButton" class="btn btn-default btn-sm"
-                                                ><span
-                                                    class="glyphicon glyphicon-stop"></span></button>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="list-group-item list-group-item-info">Cras sit amet nibh libero</li>
-                            <li class="list-group-item list-group-item-warning">Porta ac consectetur ac</li>
-                            <li class="list-group-item list-group-item-danger">Vestibulum at eros</li>
-                        </ul>
+                    <div class="tab-content">
+                        <div id="home" class="tab-pane fade in active">
+                            <ul class="list-group">
+                            </ul>
+                        </div>
+                        <div id="menu1" class="tab-pane fade">
+                            <%- include ../templates/processGrid.ejs %>
+                        </div>
                     </div>
+
                 </div>
             </div>
             <div class="col-lg-6">

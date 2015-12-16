@@ -22,6 +22,10 @@ var schema = new Schema({
         type: Array,
         required: true
     },
+    state: {
+        type: Number,
+        required: true
+    },
     created: {
         type: Date,
         required: false,

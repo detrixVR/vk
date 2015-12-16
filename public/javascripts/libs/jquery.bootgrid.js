@@ -209,7 +209,7 @@
                         that.xqr = null;
 
                         if (textStatus !== "abort") {
-                            renderNoResultsRow.call(that); // overrides loading mask
+                            that.renderNoResultsRow.call(that); // overrides loading mask
                             that.element._bgBusyAria(false).trigger("loaded" + namespace);
                         }
                     }

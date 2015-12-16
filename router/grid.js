@@ -3,6 +3,7 @@ var AccountGrid = require('../models/grid/account').AccountGrid;
 var PersonGrid = require('../models/grid/person').PersonGrid;
 var GroupGrid = require('../models/grid/group').GroupGrid;
 var PostGrid = require('../models/grid/post').PostGrid;
+var Process = require('../models/process').Process;
 var utils = require('../modules/utils');
 var async = require('async');
 
@@ -65,6 +66,9 @@ module.exports.post = function (req, res) {
             break;
         case 'post':
             Requester = PostGrid;
+            break;
+        case 'process':
+            Requester = Process;
             break;
     }
 

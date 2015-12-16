@@ -16,8 +16,7 @@ var redrawSelector = function (selectedItem) {
 };
 
 var setState = function (data) {
-    $('#eventsHolder').trigger('setState', [data]);
-    $('.taskHolder').trigger('setState', [data]);
+    $('.widget').trigger('setState', [data]);
 };
 
 var overlay = function (state) {
@@ -175,8 +174,7 @@ var setProcess = function (process) {
 };
 
 var printEvent = function (data) {
-    $('#eventsHolder').trigger('printEvent', [data, data.clear]);
-    $('.taskHolder').trigger('printEvent', [data]);
+    $('.widget').trigger('printEvent', [data, data.clear]);
 };
 
 var refreshRow = function (data) {
@@ -198,7 +196,7 @@ var highLightFields = function (badFields) {
 
 var setProcesses = function (processes) {
     processes.forEach(function (item, i) {
-        $('#tasksHolder').trigger('printProcess', [item, i === 0]);
+        $('.widget').trigger('printProcess', [item, i === 0]);
     });
 
 };
@@ -256,17 +254,27 @@ var getListGroupItemClass = function (type) {
 
 var setProcessButtonsState = function (state, parent) {
 
-    var stopButton = $('.stopButton', parent);
-    var startPauseButton = $('.startPauseButton', parent);
 
-    stopButton.attr('disabled', false);
-    startPauseButton.attr('disabled', false);
+    if (parent.hasClass('eventsHolder') || parent.hasClass('taskHolder')) {
+        var stopButton = $('.stopButton', parent);
+        var startPauseButton = $('.startPauseButton', parent);
 
-    startPauseButton.find('.glyphicon').
-    toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-    toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+        stopButton.attr('disabled', false);
+        startPauseButton.attr('disabled', false);
 
-    stopButton.toggleClass('hidden', state === 0);
+        if (parent.hasClass('taskHolder') && state === 0) {
+            startPauseButton.toggleClass('hidden', true);
+            parent.find('.finishIndicator').toggleClass('hidden', false);
+        } else {
+            startPauseButton.find('.glyphicon').
+                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+        }
+
+
+        stopButton.toggleClass('hidden', state === 0);
+    }
+
 };
 
 var init = function () {
@@ -426,85 +434,104 @@ var init = function () {
             }
         });
 
-    $('#eventsHolder')
-        .bind('printEvent', function (event, message, clear) {
-            var list = $('.list-group', this);
-
-            if (!isArray(message)) {
-                message = [message];
-            }
-
-            if (clear) {
-                list.empty();
-            }
-
-            message.forEach(function (item) {
-                list.prepend('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
-            });
-
-           // $(this).scrollTop(this.scrollHeight);
-        }).bind('setState', function (event, data) {
-        setProcessButtonsState(data.state, $(this).closest('.well'));
-    });
-
-
-    $('#tasksHolder')
-        .bind('printProcess', function (event, process, clear) {
-            var list = $('.list-group', this);
-
-            if (clear) {
-                list.empty();
-            }
-
-            list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
-                '<div class="taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
-                '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
-                '<div class="speechBox" style=""><div class="innerText">' +
-                '<label class="small">' + process.title + '</label>' +
-                '<ul>' +
-                '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
-                '</ul>' +
-
-                '</div></div><div>' +
-                '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.taskHolder\').trigger(\'startPauseProcess1\', this)">' +
-                '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
-                '</button>' +
-                '<button class="btn btn-default btn-sm stopButton"><span class="glyphicon glyphicon-stop"></span></button>' +
-                '</div></div>' +
-                '</li>'
-            )
-            ;
-        });
-
-
-    $(document).on('startPauseProcess1', '.taskHolder', function (event, elem) {
-        var $elem = $(elem);
-        var taskHolder = $(event.target);
-
-        $elem.attr('disabled', true);
-
-        var data = taskHolder.data();
-
-        console.log(data);
-
-        that.socket.socket.emit('startPauseProcess', {
-            accountId: data.account,
-            processId: data.process
-        });
-    });
-
 
     $(document)
-        .bind('printEvent', '.taskHolder', function (event, message) {
-            var $this = $(event.target);
-            var textList = $this.find('.innerText ul');
-            textList.prepend('<li><span class="small"><span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg + '</span></li>').fadeIn();
-            $this.closest('.list-group-item').toggleClass(getListGroupItemClass(message.type), true);
+        .bind('startPauseProcess', '.widget', function (event, elem) {
+
+            var $elem = $(elem);
+            var $target = $(event.target);
+            $elem.attr('disabled', true);
+
+            if ($target.hasClass('taskHolder')) {
+                var data = $target.data();
+                that.socket.socket.emit('startPauseProcess', {
+                    //accountId: data.account,
+                   /// processId: data.process
+                });
+            } else if ($target.hasClass('eventsHolder')) {
+                that.socket.socket.emit('startPauseProcess', {
+                   // accountId: that.accountId,
+                    //processId: that.processId,
+                    title: getTitleById(that.processId),
+                    settings: getSettings()
+                });
+            }
         })
-        .bind('setState', function (event, data) {
-            var $taskHolder = $(event.target);
-            setProcessButtonsState(data.state, $taskHolder);
+        .bind('stopProcess', '.widget', function (event, elem) {
+            var $elem = $(elem);
+            var $target = $(event.target);
+            $elem.attr('disabled', true);
+
+            if ($target.hasClass('taskHolder')) {
+                var data = $target.data();
+                that.socket.socket.emit('stopProcess', {
+                    accountId: data.account,
+                    processId: data.process
+                });
+            } else if ($target.hasClass('eventsHolder')) {
+
+                that.socket.socket.emit('stopProcess', {
+                    accountId: that.accountId,
+                    processId: that.processId
+                });
+            }
+
+        })
+        .bind('printEvent', '.widget', function (event, message, clear) {
+            var $target = $(event.target);
+            if ($target.hasClass('taskHolder')) {
+                var textList = $target.find('.innerText ul');
+                textList.prepend('<li><span class="small"><span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg + '</span></li>').fadeIn();
+                $target.closest('.list-group-item').toggleClass(getListGroupItemClass(message.type), true);
+            } else if ($target.hasClass('eventsHolder')) {
+                var list = $('.list-group', $target);
+
+                if (!isArray(message)) {
+                    message = [message];
+                }
+
+                if (clear) {
+                    list.empty();
+                }
+
+                message.forEach(function (item) {
+                    list.prepend('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
+                });
+            }
+        })
+        .bind('setState', '.widget', function (event, data) {
+            setProcessButtonsState(data.state, $(event.target));
+        })
+        .bind('printProcess', '.widget', function (event, process, clear) {
+
+            var $target = $(event.target);
+            if ($target.hasClass('tasksHolder')) {
+                var list = $('.list-group', $target);
+
+                if (clear) {
+                    list.empty();
+                }
+
+                list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
+                    '<div class="widget taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
+                    '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
+                    '<div class="speechBox" style=""><div class="innerText">' +
+                    '<label class="small">' + process.title + '</label>' +
+                    '<ul>' +
+                    '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
+                    '</ul>' +
+                    '</div></div><div>' +
+                    '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.widget\').trigger(\'startPauseProcess\', this)">' +
+                    '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
+                    '</button>' +
+                    '<button class="btn btn-default btn-sm stopButton" onclick="$(this).closest(\'.widget\').trigger(\'stopProcess\', this)"><span class="glyphicon glyphicon-stop"></span></button>' +
+                    '<span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>' +
+                    '</div></div>' +
+                    '</li>'
+                );
+            }
         });
+
 
     $(document.body)
         .bind('selectAccount', function () {
@@ -534,29 +561,6 @@ var init = function () {
 
             var selector = $('#modalAccounts');
             selector.modal().unbind('selectOk').bind('selectOk', bindFunc);
-        })
-        .bind('startPauseProcess', function (event, processId) {
-
-            $('#startPauseButton').attr('disabled', true);
-
-
-            console.log(processId);
-
-
-            that.socket.socket.emit('startPauseProcess', {
-                accountId: that.accountId,
-                processId: that.processId,
-                title: getTitleById(that.processId),
-                settings: getSettings()
-            });
-        })
-        .bind('stopProcess', function () {
-
-            $('#stopButton').attr('disabled', true);
-
-            that.socket.socket.emit('stopProcess', {
-                pageId: that.pageId
-            });
         });
 
     $.notifyDefaults({
@@ -617,7 +621,6 @@ var init = function () {
         }
         $.notify({message: message}, {type: 'warning'});
     });
-
 
     $('.selectpicker').selectpicker();
 

@@ -43,7 +43,7 @@ class Socket {
             this.socket = this.manager.connect({
                 transports: ['websocket'],
                 reconnection: false,
-                query: "accountId=" + this.page.accountId
+               // query: "accountId=" + this.page.accountId
             });
 
             this.socket.on('connect', function () {
@@ -60,6 +60,24 @@ class Socket {
             this.socket.on('setProcess', function (process) {
                 console.log(process);
                 that.page.ui.setProcess(process);
+            });
+
+            this.socket.on('switchAccount', function () {
+                switch (that.page.processId){
+                    case 'validateProxy':
+                        console.log('validateProxy');
+                        that.socket.emit('getCurrentProcess', {
+                            processId: that.page.processId
+                        });
+                        that.socket.emit('join', 'validateProxy');
+                        break;
+                    case 'tasksListen':
+                        console.log('tasksListen');
+                        that.socket.emit('getAllProcesses');
+                        that.socket.emit('join', 'tasksListen');
+                        break;
+
+                }
             });
 
             this.socket.on('setProcesses', function (processes) {
