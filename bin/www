@@ -101,15 +101,15 @@ if (cluster.isMaster) {
                             settings: process.settings,
                             state: process.getState()
                         });
-                        newProcess.save(function(err, proc){
-                            if(err) {
+                        newProcess.save(function (err, proc) {
+                            if (err) {
                                 console.error(err);
                             } else {
-                                processes.splice(processes.indexOf(process,1));
+                                processes.splice(processes.indexOf(process, 1));
                                 console.log(processes);
                                 broadcast({
                                     command: 'stopProcess',
-                                    data: proc//extend(msg.data, {state: process.getState()})
+                                    data: proc
                                 });
                             }
                         })
@@ -162,14 +162,6 @@ if (cluster.isMaster) {
     server.on('listening', onListening);
 
     new Socket(server);
-
-    app.use(function (req, res, next) {
-        var err = {
-            message: 'Страница не найдена'
-        };
-        err.status = 404;
-        next(err);
-    });
 
 
     function onError(error) {

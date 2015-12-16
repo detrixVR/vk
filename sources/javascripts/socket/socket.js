@@ -42,8 +42,7 @@ class Socket {
 
             this.socket = this.manager.connect({
                 transports: ['websocket'],
-                reconnection: false,
-               // query: "accountId=" + this.page.accountId
+                reconnection: false
             });
 
             this.socket.on('connect', function () {
@@ -58,32 +57,32 @@ class Socket {
             });
 
             this.socket.on('setProcess', function (process) {
-                console.log(process);
                 that.page.ui.setProcess(process);
             });
 
+            this.socket.on('setProcesses', function (processes) {
+                that.page.ui.setProcess(null);
+                that.page.ui.setProcesses(processes);
+            });
+
             this.socket.on('switchAccount', function () {
-                switch (that.page.processId){
+                that.socket.emit('join', {
+                    processId: that.page.processId
+                });
+                switch (that.page.processId) {
                     case 'validateProxy':
-                        console.log('validateProxy');
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });
-                        that.socket.emit('join', 'validateProxy');
                         break;
                     case 'tasksListen':
-                        console.log('tasksListen');
                         that.socket.emit('getAllProcesses');
-                        that.socket.emit('join', 'tasksListen');
                         break;
-
                 }
+
             });
 
-            this.socket.on('setProcesses', function (processes) {
-               // console.log(process);
-                that.page.ui.setProcesses(processes);
-            });
+
 
             this.socket.on('updatechat', function (data) {
                 processResponse.apply(that, [data]);

@@ -46,6 +46,14 @@ module.exports = function (app) {
     app.put('/grid', require('./grid').put);
     app.delete('/grid', require('./grid').delete);
 
+    app.use(function (req, res, next) {
+        var err = {
+            message: 'Страница не найдена'
+        };
+        err.status = 404;
+        next(err);
+    });
+
     if (app.get('env') === 'development') {
         app.use(function (err, req, res, next) {
             res.status(err.status || 500);

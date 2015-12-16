@@ -445,14 +445,11 @@ var init = function () {
             if ($target.hasClass('taskHolder')) {
                 var data = $target.data();
                 that.socket.socket.emit('startPauseProcess', {
-                    //accountId: data.account,
-                   /// processId: data.process
+                    processId: data.process
                 });
             } else if ($target.hasClass('eventsHolder')) {
                 that.socket.socket.emit('startPauseProcess', {
-                   // accountId: that.accountId,
-                    //processId: that.processId,
-                    title: getTitleById(that.processId),
+                    processId: that.processId,
                     settings: getSettings()
                 });
             }
@@ -461,21 +458,16 @@ var init = function () {
             var $elem = $(elem);
             var $target = $(event.target);
             $elem.attr('disabled', true);
-
             if ($target.hasClass('taskHolder')) {
                 var data = $target.data();
                 that.socket.socket.emit('stopProcess', {
-                    accountId: data.account,
                     processId: data.process
                 });
             } else if ($target.hasClass('eventsHolder')) {
-
                 that.socket.socket.emit('stopProcess', {
-                    accountId: that.accountId,
                     processId: that.processId
                 });
             }
-
         })
         .bind('printEvent', '.widget', function (event, message, clear) {
             var $target = $(event.target);
@@ -516,7 +508,7 @@ var init = function () {
                     '<div class="widget taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
                     '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
                     '<div class="speechBox" style=""><div class="innerText">' +
-                    '<label class="small">' + process.title + '</label>' +
+                    '<label class="small">' + getTitleById(process.processId) + '</label>' +
                     '<ul>' +
                     '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
                     '</ul>' +
@@ -694,6 +686,7 @@ var ui = {
     highLightFields: highLightFields,
     displayNotification: displayNotification,
     setProcesses: setProcesses,
+    getTitleById: getTitleById,
 };
 
 

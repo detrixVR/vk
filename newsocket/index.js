@@ -12,7 +12,11 @@ const COMMANDS_DATA = [
     {
         command: 'join',
         fields: [
-            {}
+            {
+                processId: {
+                    properties: []
+                }
+            }
         ]
     },
     {
@@ -36,7 +40,11 @@ const COMMANDS_DATA = [
     {
         command: 'startPauseProcess',
         fields: [
-            {}
+            {
+                processId: {
+                    properties: []
+                }
+            }
         ]
     },
     {
@@ -48,13 +56,21 @@ const COMMANDS_DATA = [
     {
         command: 'stopProcess',
         fields: [
-            {}
+            {
+                processId: {
+                    properties: []
+                }
+            }
         ]
     },
     {
         command: 'switchAccount',
         fields: [
-            {}
+            {
+                accountId: {
+                    properties: []
+                }
+            }
         ]
     }
 ];
@@ -64,7 +80,10 @@ var sio = function (server) {
 
     var s = io.listen(server);
 
-    s.adapter(redis({host: 'localhost', port: 6379}));
+    s.adapter(redis({
+        host: 'localhost',
+        port: 6379
+    }));
 
     var processes = [];
 
@@ -82,19 +101,9 @@ var sio = function (server) {
         return process;
     }
 
-    function getProcessState(data) {
-        var process = getProcess(data);
-        var state = -1;
-        if (process) {
-            state = process.state;
-        }
-        return state;
-    }
-
     function startPauseProcess(data) {
         var process = getProcess(data);
         if (process) {
-            console.log(process.username + ':' + process.accountId + ':' + process.processId)
             process.state = data.state;
             s.sockets.in(process.username + ':' + process.accountId + ':' + process.processId).emit('setState', process);
             s.sockets.in(process.username + ':' + process.accountId + ':' + 'tasksListen').emit('setState', process);
@@ -104,35 +113,40 @@ var sio = function (server) {
     function stopProcess(data) {
         var process = getProcess(data);
         if (process) {
-            console.log(process.username + ':' + process.accountId + ':' + process.processId);
             process.state = data.state;
-            // processes
             s.sockets.in(process.username + ':' + process.accountId + ':' + process.processId).emit('setState', process);
             s.sockets.in(process.username + ':' + process.accountId + ':' + 'tasksListen').emit('setState', process);
         }
     }
 
-    function validateDataForCommand(command, data) {
+    function validatePacketData(command, data) {
 
-    }
-
-    function validatePacketData(data) {
-        var command = data[0];
-        var data = data[1];
 
         for (var i = 0; i < COMMANDS_DATA.length; i++) {
-            if (COMMANDS_DATA[i] === command) {
-                for (var k = 0; k < COMMANDS_DATA.fields.length; k++) {
-                    if (data[k]) {
 
-                    } else {
-                        return false;
+
+            if (COMMANDS_DATA[i].command === command) {
+                //console.log('v:'+command);
+                for (var k = 0; k < COMMANDS_DATA[i].fields.length; k++) {
+                    //  console.log('v:'+COMMANDS_DATA[i].fields);
+
+                    for (var t in COMMANDS_DATA[i].fields[k]) {
+                        if (data.hasOwnProperty(t)) {
+                            //console.log('v:'+t);
+                        } else {
+                            console.log(t);
+                            return false;
+                        }
                     }
                 }
             }
         }
 
-        return false;
+        return true;
+    }
+
+    function getUserNameString(user) {
+        return user.username + ':' + (user.accountId ? user.accountId + (user.processId ? ':' + user.processId : '') : '');
     }
 
     process.on('message', function (msg) {
@@ -143,7 +157,7 @@ var sio = function (server) {
             processId: msg.data.processId
         };
 
-        var room = credentials.username + ':' + credentials.accountId; //+ ':' + credentials.processId;
+        var room = getUserNameString(credentials);
 
         console.log(process.pid + ': message [' + msg.command + '] from [' + room + ']');
 
@@ -198,7 +212,6 @@ var sio = function (server) {
                 s.sockets.in(room).emit('setProcess', msg.data.process);
                 break;
             case 'setProcesses':
-                console.log('setProcesses');
                 s.sockets.in(room).emit('setProcesses', msg.data.processes);
                 break;
             default:
@@ -215,7 +228,6 @@ var sio = function (server) {
                 var username = cookieParser.signedCookie(parsedCookies["username"], config.get('secretCookies'));
                 if (username !== parsedCookies["username"]) {
                     handshakeData.username = username;
-                    //   handshakeData.accountId = handshakeData._query.accountId;
                     return accept(null, true);
                 }
             }
@@ -234,37 +246,27 @@ var sio = function (server) {
 
         socket.onevent = function (packet) {
             var args = packet.data || [];
-            //onevent.call(this, packet);
-            packet.data = ["*"].concat(args);
-            onevent.call(this, packet);
-            packet.data.shift();
-
-            validatePacketData(packet.data);
-
-            onevent.call(this, packet);
+            var command = args[0];
+            var data = args[1];
+            console.log(process.pid + ': [' + getUserNameString(user) + '] command [' + command + ']');
+            if (validatePacketData(command, data)) {
+                onevent.call(this, packet);
+            } else {
+                console.error(process.pid + ': [' + getUserNameString(user) + '] validation error [' + command + ']');
+                this.emit('error', 'Команда сокета не прошла проверку');
+            }
         };
-
-        socket.on("*", function (event, data) {
-            console.log(process.pid + ': [' + user.username + ':' + (user.accountId ? user.accountId + ':' : '') + (user.processId ? user.processId + ':' : '') + '] command [' + event + ']');
-        });
 
 
         socket.join(user.username);
 
         socket.on('join', function (inData) {
-
-            if (inData) {
-                user.processId = inData;
-
-
-                socket.join(user.username + ':' + user.accountId + ':' + inData);
-            }
-
+            user.processId = inData.processId;
+            socket.join(getUserNameString(user));
             //s.sockets.in(inData).emit('updatechat', 'you are in ' + user.username + ':' + user.accountId + ':' + inData);
         });
 
         socket.on('leaveAll', function (inData) {
-            console.log(process.pid + ': [' + user.username + ':' + user.accountId + '] leave all rooms');
             for (var i = 0; i < socket.rooms.length; i++) {
                 socket.leave(socket.rooms[i]);
             }
@@ -280,49 +282,42 @@ var sio = function (server) {
         });
 
         socket.on('disconnect', function (inData) {
-            console.log(process.pid + ': [' + user.username + ':' + user.accountId + '] disconnected');
+            console.log(process.pid + ': [' + getUserNameString(user) + '] disconnected');
         });
 
         socket.on('getCurrentProcess', function (inData) {
-            if (inData.processId) {
-                process.send({
-                    command: 'getCurrentProcess',
-                    data: extend({}, user, {processId: inData.processId})
-                });
-            }
+            process.send({
+                command: 'getCurrentProcess',
+                data: extend({}, user, {
+                    processId: inData.processId
+                })
+            });
         });
 
         socket.on('startPauseProcess', function (inData) {
-            console.log('here');
-            if (user.processId) {
-                process.send({
-                    command: 'startPauseProcess',
-                    data: extend(user, {
-                        settings: inData.settings,
-                        title: inData.title
-                    })
-                });
-            }
+            process.send({
+                command: 'startPauseProcess',
+                data: extend({}, user, {
+                    processId: inData.processId,
+                    settings: inData.settings,
+                    title: inData.title
+                })
+            });
         });
 
         socket.on('getAllProcesses', function (inData) {
             process.send({
                 command: 'getAllProcesses',
-                data: {
-                    username: user.username,
-                    accountId: user.accountId
-                }
+                data: user
             });
         });
 
         socket.on('stopProcess', function (inData) {
             process.send({
                 command: 'stopProcess',
-                data: {
-                    username: user.username,
-                    accountId: user.accountId,
+                data: extend({}, user, {
                     processId: inData.processId
-                }
+                })
             });
         });
 
@@ -343,13 +338,13 @@ var sio = function (server) {
                 /// console.log(process.pid + ': [' + user.username + '] current rooms:');
                 for (var k in myRooms) {
                     if (k.indexOf(user.accountId) > -1)
-                        socket.leave(k);
+                        this.leave(k);
                 }
 
                 user.accountId = inData.accountId;
                 user.processId = inData.processId;
 
-                socket.join(user.username + ':' + user.accountId);
+                this.join(user.username + ':' + user.accountId);
 
                 console.log(process.pid + ': [' + user.username + '] new rooms:');
                 myRooms = [];
@@ -359,7 +354,7 @@ var sio = function (server) {
                 }
                 console.log(myRooms);
 
-                socket.emit('switchAccount');
+                this.emit('switchAccount');
 
             }
 

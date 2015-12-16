@@ -28,6 +28,7 @@ module.exports.post = function (req, res) {
                         });
                         return (0);
                     }
+                    console.error('here');
                     console.error(err);
                     res.status(500).json('Ошибка сервера');
                     return (0);

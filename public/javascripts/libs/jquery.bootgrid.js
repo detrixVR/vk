@@ -86,6 +86,18 @@
         }
     }
 
+    var getTitleById = function (processId) {
+        var title = null;
+        switch (processId) {
+            case 'validateProxy':
+                title = 'Валидация прокси';
+                break;
+            default :
+                title = 'Стандартное название';
+        }
+        return title;
+    };
+
     function isVisible(column) {
         return column.visible;
     }
@@ -1123,6 +1135,9 @@
             },
             verified: function (column, row) {
                 return row.verified ? '<i class="fa fa-check"></i>' : '';
+            },
+            title: function(column, row){
+                return getTitleById(row.processId);
             }
         },
 

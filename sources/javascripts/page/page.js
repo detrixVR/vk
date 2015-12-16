@@ -14,8 +14,6 @@ class Page {
     init() {
         this.socket.listen();
         this.ui.init.call(this);
-
-
     }
 
     pageReload() {
@@ -27,9 +25,6 @@ class Page {
         this.socket.socket.emit('switchAccount', {
             accountId: this.accountId
         });
-
-
-
     }
 }
 
