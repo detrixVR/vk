@@ -13,6 +13,16 @@ function nocache(req, res, next) {
 module.exports = function (app) {
 
     app.use(function (req, res, next) {
+       // console.log(req.baseUrl);
+       // console.log(req.url);
+       // console.log(req._parsedUrl);
+        //console.log(req.client.parser.incoming.originalUrl);
+        //console.log(req.originalUrl);
+        return next();
+    });
+
+
+    app.use(function (req, res, next) {
         if (req.signedCookies['username'] && req.signedCookies['id']) {
             req.session.userName = req.signedCookies['username'];
             req.session.userId = req.signedCookies['id'];
@@ -24,6 +34,8 @@ module.exports = function (app) {
 
 
     app.get('/', require('./index').get);
+
+    app.post('/account', require('./account').post);
 
     app.get('/proxies', require('./workplace/proxies').get);
     //app.get('/accounts', require('./workplace/accounts').get);

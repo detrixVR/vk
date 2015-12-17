@@ -89,6 +89,11 @@ var getSettings = function () {
         }
     });
 
+    settings['accountInfo'] = {
+        type: 'accountInfo',
+        value: this.accountInfo
+    };
+
     return settings;
 };
 
@@ -450,7 +455,7 @@ var init = function () {
             } else if ($target.hasClass('eventsHolder')) {
                 that.socket.socket.emit('startPauseProcess', {
                     processId: that.processId,
-                    settings: getSettings()
+                    settings: getSettings.call(that)
                 });
             }
         })
@@ -542,8 +547,11 @@ var init = function () {
                             if (selectedItem) {
                                 if (that.accountId != selectedItem.id) {
                                     that.accountId = selectedItem.id;
+
+
+                                    that.accountInfo = selectedItem;
                                     redrawSelector.apply(that, [selectedItem]);
-                                    that.pageReload();
+                                    that.pageReload(accountId);
                                 }
                             }
                         }

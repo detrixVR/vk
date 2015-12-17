@@ -117,7 +117,8 @@ module.exports.post = function (req, res) {
 
         async.waterfall([function (callback) {
             Requester.count({
-                username: options.username
+                username: options.username,
+                content: {"$regex": options.searchPhrase, "$options": "i"}
             }, function (err, count) {
                 if (err)
                     return callback(err);

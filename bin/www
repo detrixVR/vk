@@ -82,7 +82,7 @@ if (cluster.isMaster) {
                         process = new Process(msg.data);
                         processes.push(process);
                         process.start();
-
+                            console.log(process);
                         worker.send({
                             command: 'startProcess',
                             data: extend(msg.data, {state: process.getState()})
@@ -97,7 +97,7 @@ if (cluster.isMaster) {
                             username: process.username,
                             accountId: process.accountId,
                             processId: process.processId,
-                            messages: process.messages,
+                            messages: process.messages || [],
                             settings: process.settings,
                             state: process.getState()
                         });

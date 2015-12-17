@@ -89,7 +89,7 @@
     var getTitleById = function (processId) {
         var title = null;
         switch (processId) {
-            case 'validateProxy':
+            case 'validateProxies':
                 title = 'Валидация прокси';
                 break;
             default :
@@ -229,7 +229,7 @@
                 ;
             settings = $.extend(this.options.ajaxSettings, settings);
 
-            this.xqr = $.ajax(settings).always(function(){
+            this.xqr = $.ajax(settings).always(function () {
                 if (callback) callback();
             });
         }
@@ -327,7 +327,11 @@
 
                 // Row count selection
 
-                renderAddIcon.call(this, actions);
+                if (this.options.canAdd) {
+                    renderAddIcon.call(this, actions);
+                }
+
+
                 renderRemoveIcon.call(this, actions);
 
                 renderRowCountSelection.call(this, actions);
@@ -819,6 +823,8 @@
         columnSelection: true,
         rowCount: [10, 25, 50, -1], // rows per page int or array of int (-1 represents "All")
 
+        canAdd: true,
+
         /**
          * Enables row selection (to enable multi selection see also `multiSelect`). Default value is `false`.
          *
@@ -1113,7 +1119,7 @@
                     " <button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
             },
             commandsNotAll: function (column, row) {
-                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\"><span class=\"fa fa-trash-o\"></span></button>";
+                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
             },
             sex: function (column, row) {
                 switch (row.sex) {
@@ -1136,8 +1142,21 @@
             verified: function (column, row) {
                 return row.verified ? '<i class="fa fa-check"></i>' : '';
             },
-            title: function(column, row){
+            title: function (column, row) {
                 return getTitleById(row.processId);
+            },
+            avatar: function (column, row) {
+                var accountInfo = row.settings.accountInfo.value;
+                return '<a href="#">' +
+                    '<div id="accountHolder">' +
+                    '<div class="img-thumbnail avatarHolder" title="' +
+                    '" style="background-image: url(' + accountInfo.photo_50 + ');">' +
+                    '</div>' +
+                    '</div></a>';
+            },
+            account: function (column, row) {
+                var accountInfo = row.settings.accountInfo.value;
+                return accountInfo.first_name + ' ' + accountInfo.last_name + '</span><br><span class="text-muted small">' + accountInfo.id + '</span>';
             }
         },
 
@@ -1185,7 +1204,7 @@
         }
     };
 
-    Grid.prototype.renderRows = function(rows) {
+    Grid.prototype.renderRows = function (rows) {
         if (rows.length > 0) {
             var that = this,
                 css = this.options.css,
@@ -1203,7 +1222,11 @@
                     var selected = ($.inArray(row[that.identifier], that.selectedRows) !== -1),
                         selectBox = tpl.select.resolve(getParams.call(that,
                             {type: "checkbox", value: row[that.identifier], checked: selected}));
-                    cells += tpl.cell.resolve(getParams.call(that, {content: selectBox, css: css.selectCell}));
+                    cells += tpl.cell.resolve(getParams.call(that, {
+                        content: selectBox,
+                        css: css.selectCell,
+                        style: 'vertical-align: middle;'
+                    }));
                     allRowsSelected = (allRowsSelected && selected);
                     if (selected) {
                         rowCss += css.selected;
@@ -1226,7 +1249,7 @@
                             content: (value == null || value === "") ? "&nbsp;" : value,
                             css: ((column.align === "right") ? css.right : (column.align === "center") ?
                                 css.center : css.left) + cssClass,
-                            style: (column.width == null) ? "" : "width:" + column.width + ";"
+                            style: ((column.width == null) ? "" : "width:" + column.width + ";") + " vertical-align: middle;"
                         }));
                     }
                 });
@@ -1250,7 +1273,7 @@
         }
     };
 
-    Grid.prototype.renderNoResultsRow = function() {
+    Grid.prototype.renderNoResultsRow = function () {
         var tbody = this.element.children("tbody").first(),
             tpl = this.options.templates,
             count = this.columns.where(isVisible).length;
@@ -1261,7 +1284,7 @@
         tbody.html(tpl.noResults.resolve(getParams.call(this, {columns: count})));
     };
 
-    Grid.prototype.registerRowEvents = function(tbody) {
+    Grid.prototype.registerRowEvents = function (tbody) {
         var that = this,
             selectBoxSelector = getCssSelector(this.options.css.selectBox);
 
@@ -1281,6 +1304,8 @@
                     }
                 });
         }
+
+       // if (this.selection) {
 
         tbody.off("click" + namespace, "> tr")
             .on("click" + namespace, "> tr", function (e) {
@@ -1321,7 +1346,7 @@
                     });
                     if (column && column.editable) {
                         content += '<div class="form-group">' +
-                            '<input class="form-control" data-column="'+k+'" value="' + rowData[k] + '"/>' +
+                            '<input class="form-control" data-column="' + k + '" value="' + rowData[k] + '"/>' +
                             '</div>';
                     }
                 }
@@ -1371,7 +1396,7 @@
                 url: '/grid'
             }).done(function () {
                 return callback();
-            }).fail(function(fail){
+            }).fail(function (fail) {
                 return callback(fail);
             })
         }
@@ -1441,7 +1466,7 @@
      **/
     Grid.prototype.reload = function (callback) {
         //this.current = 1; // reset
-        loadData.apply(this, [function(){
+        loadData.apply(this, [function () {
             return callback();
         }]);
 
@@ -1471,7 +1496,7 @@
                     url: '/grid'
                 }).done(function () {
                     callback();
-                }).fail(function(fail){
+                }).fail(function (fail) {
                     callback(fail);
                 })
             }
@@ -1750,7 +1775,7 @@
             if (actionItems.length > 0) {
                 var dropDown = $($(getCssSelector(css.dropDownMenu), actionItems)[0]);
                 $(menuTextSelector, dropDown).text(this.rowCount);
-                $(menuItemsSelector, dropDown).children().each(function(){
+                $(menuItemsSelector, dropDown).children().each(function () {
                     var $item = $(this),
                         currentRowCount = $item.find(menuItemSelector).data("action");
                     $item._bgSelectAria(currentRowCount === that.rowCount);

@@ -5,6 +5,7 @@
        data-selection="true"
        data-multi-select="true"
        data-keep-selection="true"
+       data-can-add="false"
        class="table table-condensed table-hover table-striped"
        id="processGrid">
     <thead>
@@ -27,13 +28,18 @@
             Название
         </th>
 
-        <th data-column-id="status"
-            data-formatter="status"
-            data-sortable="true"
-            data-width="200px">Статус
+        <th data-column-id="accountId"
+            data-formatter="avatar"
+            data-visible-in-selection="false"
+            data-width="60px">
         </th>
 
-        <th data-formatter="commandsAll"
+        <th data-column-id="accountId"
+            data-formatter="account"
+            data-width="200px">Аккаунт
+        </th>
+
+        <th data-formatter="commandsNotAll"
             data-sortable="false"
             data-width="100px"
             data-visible-in-selection="false"></th>

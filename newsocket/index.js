@@ -159,6 +159,7 @@ var sio = function (server) {
 
         var room = getUserNameString(credentials);
 
+
         console.log(process.pid + ': message [' + msg.command + '] from [' + room + ']');
 
         switch (msg.command) {
@@ -174,17 +175,19 @@ var sio = function (server) {
                                     msg: `Выполняется ${proces.processId + ' ' + proces.state }`,
                                     type: 0
                                 });
-                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + proces.processId).emit('updatechat', {
-                                    msg: msg
-                                });
-                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'tasksListen').emit('updatechat', {
-                                    msg: msg
-                                });
 
-                                process.send({
-                                    command: 'setProcessMessage',
-                                    data: extend(data, {msg: msg})
-                                })
+                                //  for (var i = 0; i < data.roomsWhereUserIs.length; i++) {
+                                //   console.log(data.roomsWhereUserIs[i]);
+                                // s.sockets.in(data.roomsWhereUserIs[i]).emit('updatechat', extend({}, data, {msg: msg}));
+                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + proces.processId).emit('updatechat', extend({}, data, {msg: msg}));
+                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'tasksListen').emit('updatechat', extend({}, data, {msg: msg}));
+                                //   }
+
+                               process.send({
+                                   command: 'setProcessMessage',
+                                   data: data
+                               })
+
                             } else {
                                 console.log('process stopped');
                                 processes.splice(processes.indexOf(proces), 1);
@@ -212,6 +215,8 @@ var sio = function (server) {
                 s.sockets.in(room).emit('setProcess', msg.data.process);
                 break;
             case 'setProcesses':
+                console.log('setProcesses');
+                console.log(room);
                 s.sockets.in(room).emit('setProcesses', msg.data.processes);
                 break;
             default:
@@ -250,10 +255,19 @@ var sio = function (server) {
             var data = args[1];
             console.log(process.pid + ': [' + getUserNameString(user) + '] command [' + command + ']');
             if (validatePacketData(command, data)) {
+                var roomsWhereUserIs = [];
+                for (var k in s.sockets.adapter.rooms) {
+                    if (k.indexOf(user.username) > -1)
+                        roomsWhereUserIs.push(k);
+                }
+                user.roomsWhereUserIs = roomsWhereUserIs;
                 onevent.call(this, packet);
             } else {
                 console.error(process.pid + ': [' + getUserNameString(user) + '] validation error [' + command + ']');
-                this.emit('error', 'Команда сокета не прошла проверку');
+                this.emit('clientError', {
+                    notify: 'Команда сокета не прошла проверку',
+                    type: 4
+                });
             }
         };
 
@@ -261,6 +275,7 @@ var sio = function (server) {
         socket.join(user.username);
 
         socket.on('join', function (inData) {
+            console.log('join to ',inData.processId)
             user.processId = inData.processId;
             socket.join(getUserNameString(user));
             //s.sockets.in(inData).emit('updatechat', 'you are in ' + user.username + ':' + user.accountId + ':' + inData);
@@ -308,7 +323,9 @@ var sio = function (server) {
         socket.on('getAllProcesses', function (inData) {
             process.send({
                 command: 'getAllProcesses',
-                data: user
+                data: extend({}, user, {
+                    s: s.sockets.adapter.rooms
+                })
             });
         });
 

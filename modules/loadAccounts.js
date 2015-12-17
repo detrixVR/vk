@@ -22,7 +22,9 @@ function loadAccounts(req, res, next) {
         };
 
         if (query.next) {
-            dbQuery.id = {$gt: query.account}
+            dbQuery.id = {
+                $gt: query.account
+            }
         }
 
         Account.findOne(dbQuery, function (err, doc) {

@@ -70,12 +70,12 @@ class Socket {
                     processId: that.page.processId
                 });
                 switch (that.page.processId) {
-                    case 'validateProxy':
+                    case 'validateProxies':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });
                         break;
-                    case 'tasksListen':
+                    case 'defaultProcess':
                         that.socket.emit('getAllProcesses');
                         break;
                 }
@@ -83,8 +83,8 @@ class Socket {
             });
 
 
-
             this.socket.on('updatechat', function (data) {
+                console.log(data);
                 processResponse.apply(that, [data]);
             });
 
@@ -113,6 +113,10 @@ class Socket {
 
             this.socket.on('reconnect', function () {
                 console.log('reconnect');
+            });
+
+            this.socket.on('clientError', function (error) {
+                processResponse.apply(that, [error]);
             });
         }
     }

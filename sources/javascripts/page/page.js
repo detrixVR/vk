@@ -4,9 +4,10 @@ import ui from '../ui'
 
 class Page {
 
-    constructor(accountId, processId) {
-        this.accountId = accountId;
-        this.processId = processId;
+    constructor() {
+        this.accountInfo = null;
+        this.accountId = null;
+        this.processId = null;
         this.socket = new Socket(this);
         this.ui = ui;
     }
@@ -16,15 +17,35 @@ class Page {
         this.ui.init.call(this);
     }
 
-    pageReload() {
-        console.log('pageReload');
-        console.log(this.accountId);
+    pageReload(accountId) {
 
         this.ui.overlay('Инициализация');
 
-        this.socket.socket.emit('switchAccount', {
-            accountId: this.accountId
-        });
+        this.getAccountInfo(accountId, (account) => {
+
+            console.log('pageReload');
+            console.log(account);
+
+            this.accountInfo = account.accountInfo;
+            this.accountId = account.accountInfo.accountId;
+            this.processId = account.processId;
+
+            this.socket.socket.emit('switchAccount', {
+                accountId: this.accountId
+            });
+        })
+    }
+
+    getAccountInfo(accountId, callback) {
+        if (accountId) {
+            location.search = 'account=' + accountId;
+        } else {
+            $.post('/account', {
+                location: JSON.stringify(window.location)
+            }).done(function (account) {
+                callback(account);
+            });
+        }
     }
 }
 
