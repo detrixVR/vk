@@ -180,13 +180,13 @@ var sio = function (server) {
                                 //   console.log(data.roomsWhereUserIs[i]);
                                 // s.sockets.in(data.roomsWhereUserIs[i]).emit('updatechat', extend({}, data, {msg: msg}));
                                 s.sockets.in(proces.username + ':' + proces.accountId + ':' + proces.processId).emit('updatechat', extend({}, data, {msg: msg}));
-                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'tasksListen').emit('updatechat', extend({}, data, {msg: msg}));
+                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'defaultProcess').emit('updatechat', extend({}, data, {msg: msg}));
                                 //   }
 
-                               process.send({
-                                   command: 'setProcessMessage',
-                                   data: data
-                               })
+                                process.send({
+                                    command: 'setProcessMessage',
+                                    data: extend({}, data, {msg: msg})
+                                })
 
                             } else {
                                 console.log('process stopped');
@@ -275,7 +275,7 @@ var sio = function (server) {
         socket.join(user.username);
 
         socket.on('join', function (inData) {
-            console.log('join to ',inData.processId)
+            console.log('join to ', inData.processId)
             user.processId = inData.processId;
             socket.join(getUserNameString(user));
             //s.sockets.in(inData).emit('updatechat', 'you are in ' + user.username + ':' + user.accountId + ':' + inData);

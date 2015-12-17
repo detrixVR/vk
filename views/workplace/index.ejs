@@ -18,38 +18,27 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
-                <div class="well well-sm widget tasksHolder container-fluid ">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="#home">Текущие задачи</a></li>
-                        <li><a data-toggle="tab" href="#menu1">Звершенные задачи</a></li>
-                    </ul>
+            <div class="col-xs-12">
 
-                    <div class="tab-content">
-                        <div id="home" class="tab-pane fade in active">
-                            <ul class="list-group">
-                            </ul>
-                        </div>
-                        <div id="menu1" class="tab-pane fade">
-                            <%- include ../templates/processGrid.ejs %>
-                        </div>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#home">Текущие задачи</a></li>
+                    <li><a data-toggle="tab" href="#menu1">Звершенные задачи</a></li>
+                </ul>
+                <div class="tab-content widget tasksHolder">
+                    <div id="home" class="tab-pane fade in active">
+
+                        <ul class="list-group">
+                        </ul>
+
                     </div>
-
+                    <div id="menu1" class="tab-pane fade">
+                        <%- include ../templates/processGrid.ejs %>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="well well-sm container-fluid">
 
-                </div>
-            </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="well well-sm container-fluid">
 
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -59,6 +48,7 @@
 <script src="javascripts/libs.js"></script>
 <script src="javascripts/app.js"></script>
 
+<%- include ../templates/other/taskRow.ejs %>
 
 </body>
 </html>

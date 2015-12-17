@@ -44,7 +44,8 @@ gulp.task('concat-libs-js', wrapPipe((success, error) => {
             './public/javascripts/libs/bootstrap-notify.min.js',
             './public/javascripts/libs/jasny-bootstrap.min.js',
             './public/javascripts/libs/bootstrap-select.min.js',
-            './public/javascripts/libs/jquery.bootgrid.js'
+            './public/javascripts/libs/jquery.bootgrid.js',
+            './public/javascripts/libs/underscore-min.js'
         ])
         .pipe(concat('libs.js'))
         .pipe(gulp.dest('./public/javascripts/'));

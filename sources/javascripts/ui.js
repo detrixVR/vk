@@ -1,5 +1,7 @@
 "use string"
 
+import {_} from 'underscore';
+
 var redrawSelector = function (selectedItem) {
     var url = 'url(' + selectedItem.photo_50 + ')';
     var selector = $('#accountHolder');
@@ -272,8 +274,8 @@ var setProcessButtonsState = function (state, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+            toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+            toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -509,23 +511,35 @@ var init = function () {
                     list.empty();
                 }
 
-                list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
-                    '<div class="widget taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
-                    '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
-                    '<div class="speechBox" style=""><div class="innerText">' +
-                    '<label class="small">' + getTitleById(process.processId) + '</label>' +
-                    '<ul>' +
-                    '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
-                    '</ul>' +
-                    '</div></div><div>' +
-                    '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.widget\').trigger(\'startPauseProcess\', this)">' +
-                    '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
-                    '</button>' +
-                    '<button class="btn btn-default btn-sm stopButton" onclick="$(this).closest(\'.widget\').trigger(\'stopProcess\', this)"><span class="glyphicon glyphicon-stop"></span></button>' +
-                    '<span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>' +
-                    '</div></div>' +
-                    '</li>'
-                );
+
+                list.append(_.template($('#taskRow').html())({
+                    listGroupStyle: getListGroupItemClass(process.messages.pop().type),
+                    accountId: process.accountId,
+                    processId: process.processId,
+                    processTitle: getTitleById(process.processId),
+                    avatarUrl: process.settings.accountInfo.value.photo_50,
+                    lastMessageTime: new Date(process.messages.pop().time).toLocaleString(),
+                    lastMessage: process.messages.pop().msg,
+                    startPauseButtonGlyph: (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause')
+                }));
+
+                /* list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
+                 '<div class="widget taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
+                 '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
+                 '<div class="speechBox" style=""><div class="innerText">' +
+                 '<label class="small">' + getTitleById(process.processId) + '</label>' +
+                 '<ul>' +
+                 '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
+                 '</ul>' +
+                 '</div></div><div>' +
+                 '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.widget\').trigger(\'startPauseProcess\', this)">' +
+                 '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
+                 '</button>' +
+                 '<button class="btn btn-default btn-sm stopButton" onclick="$(this).closest(\'.widget\').trigger(\'stopProcess\', this)"><span class="glyphicon glyphicon-stop"></span></button>' +
+                 '<span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>' +
+                 '</div></div>' +
+                 '</li>'
+                 );*/
             }
         });
 

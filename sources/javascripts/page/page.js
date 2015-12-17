@@ -1,5 +1,12 @@
 import Socket from '../socket/socket.js';
 import ui from '../ui'
+import {_} from 'underscore';
+
+_.templateSettings = {
+    evaluate:    /\{\{(.+?)\}\}/g,
+    interpolate: /\{\{=(.+?)\}\}/g,
+    escape: /\{\{-(.+?)\}\}/g
+};
 
 
 class Page {
@@ -15,6 +22,8 @@ class Page {
     init() {
         this.socket.listen();
         this.ui.init.call(this);
+
+        this.test();
     }
 
     pageReload(accountId) {
@@ -46,6 +55,11 @@ class Page {
                 callback(account);
             });
         }
+    }
+
+    test() {
+        var compiled = _.template("hello: {{= name }}");
+        console.log(compiled({name : 'moe'}));
     }
 }
 
