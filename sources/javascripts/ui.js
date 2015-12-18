@@ -443,7 +443,7 @@ var init = function () {
 
 
     $(document)
-        .bind('startPauseProcess', '.widget', function (event, elem) {
+        .bind('startPauseProcess', '.widget', function (event, data) {
 
             var $elem = $(elem);
             var $target = $(event.target);
@@ -504,15 +504,15 @@ var init = function () {
         .bind('printProcess', '.widget', function (event, process, clear) {
 
             var $target = $(event.target);
+
             if ($target.hasClass('tasksHolder')) {
-                var list = $('.list-group', $target);
+                var tabContainer = $('.tabContainer', $target);
 
                 if (clear) {
-                    list.empty();
+                    tabContainer.empty();
                 }
 
-
-                list.append(_.template($('#taskRow').html())({
+                tabContainer.append(_.template($('#taskRow').html())({
                     listGroupStyle: getListGroupItemClass(process.messages.pop().type),
                     accountId: process.accountId,
                     processId: process.processId,
@@ -523,23 +523,6 @@ var init = function () {
                     startPauseButtonGlyph: (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause')
                 }));
 
-                /* list.append('<li class="list-group-item ' + getListGroupItemClass(process.messages.pop().type) + '">' +
-                 '<div class="widget taskHolder" data-account="' + process.accountId + '" data-process="' + process.processId + '">' +
-                 '<div><div id="accountHolder"><div class="img-thumbnail avatarHolder" style="background-image: url(\'http://vk.com/images/camera_50.png\');"></div></div></div> ' +
-                 '<div class="speechBox" style=""><div class="innerText">' +
-                 '<label class="small">' + getTitleById(process.processId) + '</label>' +
-                 '<ul>' +
-                 '<li><span class="small"><span class="time">' + new Date(process.messages.pop().time).toLocaleString() + '</span> ' + process.messages.pop().msg + '</span></li>' +
-                 '</ul>' +
-                 '</div></div><div>' +
-                 '<button class="btn btn-default btn-sm startPauseButton" onclick="$(this).closest(\'.widget\').trigger(\'startPauseProcess\', this)">' +
-                 '<span class="glyphicon ' + (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause') + '"></span>' +
-                 '</button>' +
-                 '<button class="btn btn-default btn-sm stopButton" onclick="$(this).closest(\'.widget\').trigger(\'stopProcess\', this)"><span class="glyphicon glyphicon-stop"></span></button>' +
-                 '<span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>' +
-                 '</div></div>' +
-                 '</li>'
-                 );*/
             }
         });
 

@@ -1,38 +1,34 @@
 <script type="text/template" id="taskRow">
-    <li class="list-group-item {{= listGroupStyle }}">
-        <div class="clearfix">
-            <div class="col-xs-12 col-sm-6 clearfix">
-                <div class=" widget taskHolder " data-account="{{= accountId }}"
-                     data-process="{{= processId }}">
-                    <div>
-                        <div id="accountHolder">
-                            <div class="img-thumbnail avatarHolder"
-                                 style="background-image: url('{{= avatarUrl }}');"></div>
-                        </div>
+        <div class="col-xs-12 col-md-6 list-group-item {{= listGroupStyle }}">
+            <div class=" widget taskHolder " data-account="{{= accountId }}"
+                 data-process="{{= processId }}">
+                <div>
+                    <div id="accountHolder">
+                        <div class="img-thumbnail avatarHolder"
+                             style="background-image: url('{{= avatarUrl }}');"></div>
                     </div>
-                    <div class="speechBox" style="">
-                        <div class="innerText">
-                            <label class="small">{{= processTitle }}</label>
-                            <ul>
-                                <li><span class="small"><span
-                                                class="time">{{= lastMessageTime }}</span> {{= lastMessage }}</span>
-                                </li>
-                            </ul>
-                        </div>
+                </div>
+                <div class="speechBox" style="">
+                    <div class="innerText">
+                        <label class="small">{{= processTitle }}</label>
+                        <ul>
+                            <li><span class="small"><span
+                                            class="time">{{= lastMessageTime }}</span> {{= lastMessage }}</span>
+                            </li>
+                        </ul>
                     </div>
-                    <div>
-                        <button class="btn btn-default btn-sm startPauseButton"
-                                onclick="$(this).closest('.widget').trigger('startPauseProcess', this)">
-                            <span class="glyphicon {{= startPauseButtonGlyph }}"></span>
-                        </button>
-                        <button class="btn btn-default btn-sm stopButton"
-                                onclick="$(this).closest('.widget').trigger('stopProcess', this)"><span
-                                    class="glyphicon glyphicon-stop"></span></button>
-                        <span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>
-                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-default btn-sm startPauseButton"
+                            onclick="$(this).closest('.widget').trigger('startPauseProcess', this)">
+                        <span class="glyphicon {{= startPauseButtonGlyph }}"></span>
+                    </button>
+                    <button class="btn btn-default btn-sm stopButton"
+                            onclick="$(this).closest('.widget').trigger('stopProcess', this)"><span
+                                class="glyphicon glyphicon-stop"></span></button>
+                    <span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>
                 </div>
             </div>
         </div>
 
-    </li>
 </script>

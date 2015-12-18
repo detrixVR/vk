@@ -7,6 +7,6 @@ module.exports.get = function (req, res) {
         accounts: [{
             accountId: 'defaultAccount'
         }],
-        processId: 'validateProxy'
+        //processId: 'validateProxy'
     });
 };

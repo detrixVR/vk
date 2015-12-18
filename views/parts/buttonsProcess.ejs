@@ -1,6 +1,7 @@
 <button class="btn btn-default startPauseButton"
-        onclick="$(this).closest('.widget').trigger('startPauseProcess','<%=processId%>');"><span
+        onclick="$(this).closest('.widget').trigger('startPauseProcess','<%= processId %>');"><span
             class="glyphicon glyphicon-play"></span></button>
 <button class="btn btn-default hidden stopButton"
         onclick="$(this).closest('.widget').trigger('stopProcess');"><span
             class="glyphicon glyphicon-stop"></span></button>
+<div id="processId"></div>
