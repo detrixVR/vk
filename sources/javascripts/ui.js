@@ -202,9 +202,13 @@ var highLightFields = function (badFields) {
 };
 
 var setProcesses = function (processes) {
-    processes.forEach(function (item, i) {
-        $('.widget').trigger('printProcess', [item, i === 0]);
-    });
+    if (processes.length) {
+        processes.forEach(function (item, i) {
+            $('.widget').trigger('printProcess', [item, i === 0]);
+        });
+    } else {
+        $('.widget').trigger('printNoProcesses');
+    }
 
 };
 
@@ -223,7 +227,6 @@ var displayNotification = function (info) {
             type = 'danger';
             break;
     }
-
 
     $.notify({message: info.notify}, {type: type});
 };
@@ -263,6 +266,7 @@ var setProcessButtonsState = function (state, parent) {
 
 
     if (parent.hasClass('eventsHolder') || parent.hasClass('taskHolder')) {
+
         var stopButton = $('.stopButton', parent);
         var startPauseButton = $('.startPauseButton', parent);
 
@@ -439,13 +443,17 @@ var init = function () {
                     callback();
                 });
             }
+        })
+        .bind('eventable', function (event, rowData) {
+            console.log('from grid');
+            $('.widget').trigger('showProcessInfo', rowData);
         });
 
 
     $(document)
         .bind('startPauseProcess', '.widget', function (event, data) {
 
-            var $elem = $(elem);
+            var $elem = $(data);
             var $target = $(event.target);
             $elem.attr('disabled', true);
 
@@ -506,7 +514,7 @@ var init = function () {
             var $target = $(event.target);
 
             if ($target.hasClass('tasksHolder')) {
-                var tabContainer = $('.tabContainer', $target);
+                var tabContainer = $('#tab1', $target);
 
                 if (clear) {
                     tabContainer.empty();
@@ -524,6 +532,22 @@ var init = function () {
                 }));
 
             }
+        })
+        .bind('printNoProcesses', '.widget', function (event) {
+            var $target = $(event.target);
+            if ($target.hasClass('tasksHolder')) {
+                $('#tab1', $target).html(_.template($('#noProcessesTemplate').html())({}))
+            }
+        })
+        .bind('showProcessInfo', '.widget', function (event, rowData) {
+            var $target = $(event.target);
+            if ($target.hasClass('eventsHolder')) {
+
+                rowData.getListGroupItemClass = getListGroupItemClass;
+                $('.list-group', $target).html(_.template($('#eventsList').html())(rowData));
+
+            }
+            //console.log($target);
         });
 
 

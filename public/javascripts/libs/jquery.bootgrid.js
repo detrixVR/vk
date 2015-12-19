@@ -824,6 +824,7 @@
         rowCount: [10, 25, 50, -1], // rows per page int or array of int (-1 represents "All")
 
         canAdd: true,
+        eventable: false,
 
         /**
          * Enables row selection (to enable multi selection see also `multiSelect`). Default value is `false`.
@@ -1146,17 +1147,22 @@
                 return getTitleById(row.processId);
             },
             avatar: function (column, row) {
-                var accountInfo = row.settings.accountInfo.value;
-                return '<a href="#">' +
-                    '<div id="accountHolder">' +
-                    '<div class="img-thumbnail avatarHolder" title="' +
-                    '" style="background-image: url(' + accountInfo.photo_50 + ');">' +
-                    '</div>' +
-                    '</div></a>';
+                var accountInfo = row.settings.accountInfo;
+                if (accountInfo && accountInfo.value) {
+                    return '<a href="#">' +
+                        '<div id="accountHolder">' +
+                        '<div class="img-thumbnail avatarHolder" title="' +
+                        '" style="background-image: url(' + accountInfo.value.photo_50 + ');">' +
+                        '</div>' +
+                        '</div></a>';
+                }
+
             },
             account: function (column, row) {
-                var accountInfo = row.settings.accountInfo.value;
-                return accountInfo.first_name + ' ' + accountInfo.last_name + '</span><br><span class="text-muted small">' + accountInfo.id + '</span>';
+                var accountInfo = row.settings.accountInfo;
+                if (accountInfo && accountInfo.value) {
+                    return accountInfo.value.first_name + ' ' + accountInfo.value.last_name + '</span><br><span class="text-muted small">' + accountInfo.value.id + '</span>';
+                }
             }
         },
 
@@ -1305,7 +1311,7 @@
                 });
         }
 
-       // if (this.selection) {
+        // if (this.selection) {
 
         tbody.off("click" + namespace, "> tr")
             .on("click" + namespace, "> tr", function (e) {
@@ -1328,8 +1334,16 @@
                     }
                 }
 
+                if (that.options.eventable) {
+                    that.element.trigger('eventable', [row]);
+                }
+
                 that.element.trigger("click" + namespace, [that.columns, row]);
             });
+
+        if (that.options.eventable) {
+            $('tr:first-child', tbody).trigger('click' + namespace);
+        }
     };
 
 

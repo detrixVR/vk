@@ -1,0 +1,7 @@
+<script type="text/template" id="eventsList">
+    {{ _.each(messages, function(message) { }}
+    {{ var listGroupStyle = getListGroupItemClass(message.type); }}
+    {{ var messageTime = new Date(message.time).toLocaleString(); }}
+        <li class="list-group-item {{= listGroupStyle }}"><span class="text-muted small">{{= messageTime }}</span> {{= message.msg }}</li>
+    {{ }); }}
+</script>
