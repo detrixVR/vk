@@ -13,7 +13,7 @@ var dbProcess = require('../models/process').Process;
 var util = require('util');
 
 
-var workers = /*process.env.WORKERS*/7 || require('os').cpus().length; //WEB_CONCURRENCY
+var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
 
 var workersArray = [];
 var processes = [];
@@ -137,7 +137,7 @@ if (cluster.isMaster) {
                 case 'setMemoryUsage':
                     //  console.log('', msg.data.processPid, ': ' + msg.data.memoryUsage.heapTotal / 1024 / 1024, 'mb');
                     memoryUsage[msg.data.processPid] = msg.data.memoryUsage.heapTotal;
-                    console.log(memoryUsage);
+                   // console.log(memoryUsage);
                     break;
             }
         });

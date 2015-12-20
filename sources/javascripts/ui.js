@@ -429,8 +429,14 @@ var init = function () {
 
                     if (linesArr.length) {
                         grid.append(linesArr, function (err) {
-                            if (!err) $.notify({message: 'Успешно добавлено'}, {type: 'success'});
-                            grid.reload();
+                            if (!err) {
+                                grid.reload(function(){
+                                    $.notify({message: 'Успешно добавлено'}, {type: 'success'});
+                                });
+                            } else {
+                                $.notify({message: 'Произошла ошибка'}, {type: 'error'});
+                            }
+
                         })
                     }
                 };

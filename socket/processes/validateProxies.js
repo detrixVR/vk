@@ -58,7 +58,7 @@ var validationModel = {
 };
 
 
-var validateProxy = function (settings, callback) {
+var validateProxies = function (settings, callback) {
 
     var error = utils.validateSettings(settings, validationModel);
 
@@ -75,7 +75,7 @@ var validateProxy = function (settings, callback) {
         msg: utils.createMsg({msg: 'Проверка прокси', clear: true})
     });
 
-    var username = 'huyax';
+   /* var username = 'huyax';
     var that = this;
 
     console.log(settings);
@@ -266,8 +266,8 @@ var validateProxy = function (settings, callback) {
             cbType: 0,
             msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
         })
-    });
+    });*/
 };
 
 
-module.exports = validateProxy;
+module.exports = validateProxies;

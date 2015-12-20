@@ -8,6 +8,8 @@ var cookie = require('cookie');
 var config = require('../config');
 var utils = require('../modules/utils');
 
+var validateProxies = require('../socket/processes/validateProxies');
+
 
 const COMMANDS_DATA = [
     {
@@ -170,7 +172,69 @@ var sio = function (server) {
             switch (msg.command) {
                 case  'startProcess':
                     var proc = getProcess(msg.data);
+
                     if (!proc) {
+
+                        switch (msg.data.processId) {
+                            case 'validateProxies':
+
+                                break;
+                            case 'validateProxies':
+                                break;
+                            case 'validateProxies':
+                                break;
+                            case 'validateProxies':
+                                break;
+                            case 'validateProxies':
+                                break;
+                            default:
+                                console.log('ХЗ процесс');
+                                return (0);
+                        }
+
+                        eval(msg.data.processId).apply(this, [msg.data.settings, (err, cbData) => {
+
+                            if (cbData.hasOwnProperty('msg')) {
+
+                                process.send({
+                                    command: 'setProcessMessage',
+                                    data: extend({}, msg.data, {msg: msg})
+                                })
+
+
+                            }
+
+
+
+                            switch (cbData.cbType) {
+                                case 0:
+                                    console.log('process stopped');
+                                    processes.splice(processes.indexOf(proc), 1);
+                                    console.log(processes);
+                                    return (0);
+                                    break;
+                                case 1:
+                                    s.sockets.in(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.processId).emit('printEvent', extend({}, msg.data, {msg: msg}));
+                                    s.sockets.in(msg.data.username + ':' + msg.data.accountId + ':' + 'defaultProcess').emit('printEvent', extend({}, msg.data, {msg: msg}));
+                                    break;
+                                case 4:
+                                    //this.user.socket.emit('refreshRow', cbData);
+                                    s.sockets.in(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.processId).emit('refreshRow', extend({}, msg.data, cbData));
+                                    break;
+                            }
+                        }]);
+
+                        processes.push(msg.data);
+                        s.sockets.in(msg.data.username + ':' + msg.data.accountId).emit('setState', msg.data);
+                    }
+
+
+
+
+
+
+
+                    /*if (!proc) {
                         var delay = function (data) {
                             var proces = getProcess(data);
                             if (proces) {
@@ -205,7 +269,7 @@ var sio = function (server) {
                         delay(msg.data);
                         processes.push(msg.data);
                         s.sockets.in(msg.data.username + ':' + msg.data.accountId).emit('setState', msg.data);
-                    }
+                    }*/
                     break;
                 case 'setProcessState':
                     startPauseProcess(msg.data);
@@ -216,7 +280,6 @@ var sio = function (server) {
                 case 'setProcess':
                     s.sockets.in(room).emit('setProcess', msg.data.process);
                     break;
-
                 case 'setProcesses':
                     console.log('setProcesses');
                     console.log(room);

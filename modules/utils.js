@@ -34,8 +34,8 @@ function isFloat(n){
 
 function validateSettings(settings, validationModel) {
     var errors = [];
-    for (var k in settings) {
-        if (validationModel.hasOwnProperty(k) && settings[k].hasOwnProperty('value')) {
+    for (var k in validationModel) {
+        if (settings.hasOwnProperty(k) && settings[k].hasOwnProperty('value')) {
             var result = validationModel[k].validate(settings[k].value);
             if (result) {
                 errors.push({
@@ -44,6 +44,7 @@ function validateSettings(settings, validationModel) {
                 });
             }
         } else {
+           // console.log(k)
             errors.push({
                 text: 'Необходим параметр ' + validationModel[k].name
             });

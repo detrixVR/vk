@@ -1,6 +1,6 @@
 "use strict"
 
-var validateProxy = require('./processes/validateProxy');
+var validateProxy = require('./processes/validateProxies');
 var request = require('request');
 var extend = require('extend');
 
