@@ -84,6 +84,9 @@ label {
   font-weight: normal;
   min-height: 1em;
 
+  &.small {
+    margin: 0;
+  }
 }
 
 hr {
@@ -99,6 +102,24 @@ hr {
   background: white;
   border: 1px solid #e3e3e3;
   border-top: none;
+}
+
+.jspVerticalBar {
+  width: 10px;
+}
+
+.jspHorizontalBar {
+  width: 10px;
+}
+
+.list-group-item-info {
+  .jspTrack {
+    background: @palette-Blue-200;
+  }
+
+  .jspDrag {
+    background: @palette-Blue-400;
+  }
 }
 
 

@@ -206,6 +206,8 @@ var setProcesses = function (processes) {
         processes.forEach(function (item, i) {
             $('.widget').trigger('printProcess', [item, i === 0]);
         });
+
+
     } else {
         $('.widget').trigger('printNoProcesses');
     }
@@ -452,19 +454,18 @@ var init = function () {
 
     $(document)
         .bind('startPauseProcess', '.widget', function (event, data) {
-
-            var $elem = $(data);
             var $target = $(event.target);
-            $elem.attr('disabled', true);
-
             if ($target.hasClass('taskHolder')) {
-                var data = $target.data();
+                var $elem = $(data);
+                $elem.attr('disabled', true);
+                var elemData = $target.data();
                 that.socket.socket.emit('startPauseProcess', {
-                    processId: data.process
+                    processId: elemData.process
                 });
             } else if ($target.hasClass('eventsHolder')) {
+                $('.startPauseButton', $target).attr('disabled', true);
                 that.socket.socket.emit('startPauseProcess', {
-                    processId: that.processId,
+                    processId: data,
                     settings: getSettings.call(that)
                 });
             }
@@ -487,23 +488,38 @@ var init = function () {
         .bind('printEvent', '.widget', function (event, message, clear) {
             var $target = $(event.target);
             if ($target.hasClass('taskHolder')) {
-                var textList = $target.find('.innerText ul');
+                var inner = $target.find('.innerText');
+                var jsp = inner.data('jsp');
+                var textList = $('ul', inner);
                 textList.prepend('<li><span class="small"><span class="time">' + new Date(message.time).toLocaleString() + '</span> ' + message.msg + '</span></li>').fadeIn();
+                var elements = $('li', textList);
+                var length = elements.length;
+                if (length > 20) {
+                    elements.last().remove();
+                } else {
+                    if (jsp) {
+                        jsp.reinitialise();
+                    }
+                }
                 $target.closest('.list-group-item').toggleClass(getListGroupItemClass(message.type), true);
             } else if ($target.hasClass('eventsHolder')) {
-                var list = $('.list-group', $target);
-
+                var listHolder = $('.listHolder', $target);
+                var list = $('.list-group', listHolder);
                 if (!isArray(message)) {
                     message = [message];
                 }
-
                 if (clear) {
                     list.empty();
                 }
-
                 message.forEach(function (item) {
                     list.prepend('<li class="list-group-item ' + getListGroupItemClass(item.type) + '"><span class="text-muted small">' + new Date(item.time).toLocaleString() + '</span> ' + item.msg + '</li>');
                 });
+                jsp = listHolder.data('jsp');
+                if (jsp) {
+                    jsp.reinitialise();
+                } else {
+                    listHolder.jScrollPane();
+                }
             }
         })
         .bind('setState', '.widget', function (event, data) {
@@ -514,7 +530,7 @@ var init = function () {
             var $target = $(event.target);
 
             if ($target.hasClass('tasksHolder')) {
-                var tabContainer = $('#tab1', $target);
+                var tabContainer = $('#tab1 .row', $target);
 
                 if (clear) {
                     tabContainer.empty();
@@ -531,6 +547,7 @@ var init = function () {
                     startPauseButtonGlyph: (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause')
                 }));
 
+
             }
         })
         .bind('printNoProcesses', '.widget', function (event) {
@@ -541,13 +558,10 @@ var init = function () {
         })
         .bind('showProcessInfo', '.widget', function (event, rowData) {
             var $target = $(event.target);
-            if ($target.hasClass('eventsHolder')) {
-
+            if ($target.hasClass('freezedEventsHolder')) {
                 rowData.getListGroupItemClass = getListGroupItemClass;
                 $('.list-group', $target).html(_.template($('#eventsList').html())(rowData));
-
             }
-            //console.log($target);
         });
 
 
@@ -592,8 +606,27 @@ var init = function () {
     });
 
     $(document).on('click', '.speechBox', function (event) {
-        var $speechBox = $(event.currentTarget);
-        $speechBox.toggleClass('expanded', !$speechBox.hasClass('expanded'));
+        var currentTarget = $(event.currentTarget);
+        var target = $(event.target);
+        if (!target.hasClass('jspTrack') && !target.hasClass('jspDragTop') && !target.hasClass('jspDragBottom') && !target.hasClass('jspDrag')) {
+
+            currentTarget.toggleClass('expanded', !currentTarget.hasClass('expanded'));
+            var inner = $('.innerText', currentTarget);
+            var jsp = inner.data('jsp');
+            if (currentTarget.hasClass('expanded')) {
+                if (jsp) {
+                    jsp.reinitialise();
+                } else {
+                    inner.jScrollPane();
+                }
+            } else {
+                if (jsp) {
+                    jsp.scrollToY(0);
+                    jsp.destroy();
+                }
+            }
+        }
+
     });
 
     $(document).ajaxError(function (e, x, settings, exception) {
@@ -644,6 +677,8 @@ var init = function () {
     });
 
     $('.selectpicker').selectpicker();
+
+    // $('#scrollbar1').jScrollPane();
 
     $('.spinner input').on('keydown', function (e) {
         if (!((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105))) {

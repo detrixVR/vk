@@ -8,6 +8,7 @@ var cookie = require('cookie');
 var config = require('../config');
 var utils = require('../modules/utils');
 
+
 const COMMANDS_DATA = [
     {
         command: 'join',
@@ -151,76 +152,94 @@ var sio = function (server) {
 
     process.on('message', function (msg) {
 
-        var credentials = {
-            username: msg.data.username,
-            accountId: msg.data.accountId,
-            processId: msg.data.processId
-        };
 
-        var room = getUserNameString(credentials);
+        if (msg.data && msg.data.username) {
 
 
-        console.log(process.pid + ': message [' + msg.command + '] from [' + room + ']');
+            var credentials = {
+                username: msg.data.username,
+                accountId: msg.data.accountId,
+                processId: msg.data.processId
+            };
 
-        switch (msg.command) {
-            case  'startProcess':
-                var proc = getProcess(msg.data);
-                if (!proc) {
-                    var delay = function (data) {
-                        var proces = getProcess(data);
-                        if (proces) {
+            var room = getUserNameString(credentials);
 
-                            if (proces.state !== 0) {
-                                var msg = utils.createMsg({
-                                    msg: `Выполняется ${proces.processId + ' ' + proces.state }`,
-                                    type: 0
-                                });
 
-                                //  for (var i = 0; i < data.roomsWhereUserIs.length; i++) {
-                                //   console.log(data.roomsWhereUserIs[i]);
-                                // s.sockets.in(data.roomsWhereUserIs[i]).emit('updatechat', extend({}, data, {msg: msg}));
-                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + proces.processId).emit('updatechat', extend({}, data, {msg: msg}));
-                                s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'defaultProcess').emit('updatechat', extend({}, data, {msg: msg}));
-                                //   }
+            console.log(process.pid + ': message [' + msg.command + '] from [' + room + ']');
 
-                                process.send({
-                                    command: 'setProcessMessage',
-                                    data: extend({}, data, {msg: msg})
-                                })
+            switch (msg.command) {
+                case  'startProcess':
+                    var proc = getProcess(msg.data);
+                    if (!proc) {
+                        var delay = function (data) {
+                            var proces = getProcess(data);
+                            if (proces) {
 
-                            } else {
-                                console.log('process stopped');
-                                processes.splice(processes.indexOf(proces), 1);
-                                console.log(processes);
-                                return;
+                                if (proces.state !== 0) {
+                                    var msg = utils.createMsg({
+                                        msg: `Выполняется ${proces.processId + ' ' + proces.state }`,
+                                        type: 0
+                                    });
+
+                                    s.sockets.in(proces.username + ':' + proces.accountId + ':' + proces.processId).emit('updatechat', extend({}, data, {msg: msg}));
+                                    s.sockets.in(proces.username + ':' + proces.accountId + ':' + 'defaultProcess').emit('updatechat', extend({}, data, {msg: msg}));
+
+
+                                    process.send({
+                                        command: 'setProcessMessage',
+                                        data: extend({}, data, {msg: msg})
+                                    })
+
+                                } else {
+                                    console.log('process stopped');
+                                    processes.splice(processes.indexOf(proces), 1);
+                                    console.log(processes);
+                                    return;
+                                }
+
                             }
+                            d = setTimeout(function () {
+                                delay(data);
+                            }, 1000);
+                        };
+                        delay(msg.data);
+                        processes.push(msg.data);
+                        s.sockets.in(msg.data.username + ':' + msg.data.accountId).emit('setState', msg.data);
+                    }
+                    break;
+                case 'setProcessState':
+                    startPauseProcess(msg.data);
+                    break;
+                case 'stopProcess':
+                    stopProcess(msg.data);
+                    break;
+                case 'setProcess':
+                    s.sockets.in(room).emit('setProcess', msg.data.process);
+                    break;
 
+                case 'setProcesses':
+                    console.log('setProcesses');
+                    console.log(room);
+                    s.sockets.in(room).emit('setProcesses', msg.data.processes);
+                    break;
+                default:
+                    s.to([msg.data.socketId]).emit(msg.command, msg.data);
+            }
+        } else {
+            switch (msg.command) {
+                case 'memoryUsage':
+                    process.send({
+                        command: 'setMemoryUsage',
+                        data: {
+                            processPid: process.pid,
+                            memoryUsage: process.memoryUsage()
                         }
-                        d = setTimeout(function () {
-                            delay(data);
-                        }, 1000);
-                    };
-                    delay(msg.data);
-                    processes.push(msg.data);
-                    s.sockets.in(msg.data.username + ':' + msg.data.accountId).emit('setState', msg.data);
-                }
-                break;
-            case 'setProcessState':
-                startPauseProcess(msg.data);
-                break;
-            case 'stopProcess':
-                stopProcess(msg.data);
-                break;
-            case 'setProcess':
-                s.sockets.in(room).emit('setProcess', msg.data.process);
-                break;
-            case 'setProcesses':
-                console.log('setProcesses');
-                console.log(room);
-                s.sockets.in(room).emit('setProcesses', msg.data.processes);
-                break;
-            default:
-                s.to([msg.data.socketId]).emit(msg.command, msg.data);
+                    });
+                    break;
+                case 'sendMemoryUsage':
+                    s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
+                    break;
+            }
         }
     });
 

@@ -5,10 +5,10 @@
 </head>
 
 <body>
-<% var processId='validateProxy'%>
+
+<% var processId='validateProxies'%>
+
 <%- include ../parts/cabinetMenu.ejs %>
-
-
 
 <div class="canvas">
 
@@ -23,7 +23,7 @@
                     <div class="row">
 
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Проверять</label>
+                            <label class="small control-label">Проверять</label>
                             <select class="selectpicker" data-width="100%" id="targetSelect">
                                 <option>Все</option>
                                 <option>Загруженные</option>
@@ -34,13 +34,13 @@
 
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="form-group">
-                                <label class="control-label">Адрес проверки</label>
+                                <label class="small control-label">Адрес проверки</label>
                                 <input type="text" class="form-control" id="urlInput" value="http://vk.com"
                                        maxlength="100">
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Таймаут, сек</label>
+                            <label class="small control-label">Таймаут, сек</label>
 
                             <div class="input-group spinner full-width">
                                 <input type="text" class="form-control" id="timeoutInput" value="2" max="5">
@@ -55,7 +55,7 @@
 
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label></label>
+                            <label class="small control-label"></label>
 
                             <div class="checkbox">
                                 <input type="checkbox" id="deleteIfWrong" data-settings="true">
@@ -80,7 +80,7 @@
                     <div class="bootgrid-header">
                         <%- include ../parts/buttonsProcess.ejs %>
                     </div>
-                    <div>
+                    <div class="listHolder">
                         <ul class="list-group">
                         </ul>
                     </div>

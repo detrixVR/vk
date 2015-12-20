@@ -10,12 +10,14 @@ var express = require('express')
 var Socket = require('../newsocket');
 var dbProcess = require('../models/process').Process;
 
+var util = require('util');
+
 
 var workers = /*process.env.WORKERS*/7 || require('os').cpus().length; //WEB_CONCURRENCY
 
 var workersArray = [];
-var users = [];
 var processes = [];
+var memoryUsage = {};
 
 if (cluster.isMaster) {
 
@@ -56,7 +58,6 @@ if (cluster.isMaster) {
         return result;
     }
 
-
     workers--;
 
     for (var i = 0; i < workers; ++i) {
@@ -82,7 +83,7 @@ if (cluster.isMaster) {
                         process = new Process(msg.data);
                         processes.push(process);
                         process.start();
-                            console.log(process);
+                        console.log(process);
                         worker.send({
                             command: 'startProcess',
                             data: extend(msg.data, {state: process.getState()})
@@ -133,21 +134,43 @@ if (cluster.isMaster) {
                         process.messages.push(msg.data.msg);
                     }
                     break;
+                case 'setMemoryUsage':
+                    //  console.log('', msg.data.processPid, ': ' + msg.data.memoryUsage.heapTotal / 1024 / 1024, 'mb');
+                    memoryUsage[msg.data.processPid] = msg.data.memoryUsage.heapTotal;
+                    console.log(memoryUsage);
+                    break;
             }
+        });
 
-
-        })
+        workersArray.push(worker);
 
     }
-
-
-    workersArray.push(worker);
 
 
     cluster.on('death', function (worker) {
         console.log('worker %s died. restart...', worker.process.pid);
         cluster.fork();
     });
+
+    setInterval(function () {
+        for (var i = 0; i < workersArray.length; i++) {
+            workersArray[i].send({
+                command: 'memoryUsage'
+            });
+        }
+    }, 2000);
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    setInterval(function () {
+        workersArray[getRandomInt(0, workers-1)].send({
+            command: 'sendMemoryUsage',
+            data: memoryUsage
+        })
+    }, 3333);
+
 
 } else {
 

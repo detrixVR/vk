@@ -1,6 +1,6 @@
 <script type="text/template" id="taskRow">
     <div class="col-xs-12 col-md-6 list-group-item {{= listGroupStyle }}">
-        <div class=" widget taskHolder " data-account="{{= accountId }}"
+        <div class="widget taskHolder " data-account="{{= accountId }}"
              data-process="{{= processId }}">
             <div>
                 <div id="accountHolder">
@@ -9,8 +9,9 @@
                 </div>
             </div>
             <div class="speechBox" style="">
+                <label class="small">{{= processTitle }}</label>
                 <div class="innerText">
-                    <label class="small">{{= processTitle }}</label>
+
                     <ul>
                         <li><span class="small"><span
                                         class="time">{{= lastMessageTime }}</span> {{= lastMessage }}</span>

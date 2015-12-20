@@ -11,9 +11,6 @@
 
 <div class="canvas">
 
-    <div class="hidden" id="accountId"><%= accounts[0].accountId %></div>
-    <div class="hidden" id="processId"><%= processId %></div>
-
     <%- include ../parts/cabinetNavbar.ejs %>
 
     <div class="container-fluid">
@@ -30,7 +27,11 @@
                 </ul>
                 <div class="tab-content widget tasksHolder">
                     <div id="tab1" class="tab-pane fade in active">
+                        <div class="container-fluid">
+                            <div class="row">
 
+                            </div>
+                        </div>
                     </div>
                     <div id="tab2" class="tab-pane fade">
                         <div class="container-fluid">
@@ -39,7 +40,7 @@
                                     <%- include ../templates/processGrid.ejs %>
                                 </div>
                                 <div class="col-xs-12 col-lg-4">
-                                    <div class="well well-sm widget eventsHolder">
+                                    <div class="well well-sm widget freezedEventsHolder">
 
                                         <div>
                                             <ul class="list-group">
@@ -51,6 +52,8 @@
                                 </div>
                             </div>
 
+
+
                         </div>
                     </div>
                 </div>
@@ -58,10 +61,12 @@
 
         </div>
 
+
     </div>
 </div>
 
 <%- include ../templates/modalInput.ejs %>
+
 
 
 <script src="javascripts/libs.js"></script>
