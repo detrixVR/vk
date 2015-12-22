@@ -24,11 +24,11 @@ function validateURL(textval) {
     return urlregex.test(textval);
 }
 
-function isInt(n){
+function isInt(n) {
     return !isNaN(+n);
 }
 
-function isFloat(n){
+function isFloat(n) {
     return n === Number(n) && n % 1 !== 0;
 }
 
@@ -44,7 +44,7 @@ function validateSettings(settings, validationModel) {
                 });
             }
         } else {
-           // console.log(k)
+            // console.log(k)
             errors.push({
                 text: 'Необходим параметр ' + validationModel[k].name
             });
@@ -52,12 +52,12 @@ function validateSettings(settings, validationModel) {
     }
 
     var text = 'Неверные параметры:<br>';
-    errors.forEach(function(item){
-        text += '<span class="small">'+item.text+'</small><br>';
+    errors.forEach(function (item) {
+        text += '<span class="small">' + item.text + '</small><br>';
     });
 
     var badFields = [];
-    errors.forEach(function(item){
+    errors.forEach(function (item) {
         badFields.push(item.field);
     });
 
@@ -267,6 +267,19 @@ function getLocation(href) {
         }
 }
 
+function getProcessState(processes, credentials) {
+
+    for (var i = 0; i < processes.length; i++) {
+        if (processes[i].username === credentials.username &&
+            processes[i].accountId === credentials.accountId &&
+            processes[i].processId === credentials.processId) {
+            return processes[i].state;
+        }
+    }
+
+    return -1;
+}
+
 function validateIPaddress(ipaddress) {
 
     function validateNum(input, min, max) {
@@ -337,4 +350,5 @@ module.exports = {
     validateSettings: validateSettings,
     isInt: isInt,
     isFloat: isFloat,
+    getProcessState: getProcessState,
 };

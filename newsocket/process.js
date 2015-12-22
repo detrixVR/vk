@@ -7,7 +7,6 @@ class Process {
         this.processId = data.processId;
         this.accountId = data.accountId;
         this.settings = data.settings;
-        this.messages = data.messages;
         this.title = data.title;
         this.messages = [];
         this.state = 0;

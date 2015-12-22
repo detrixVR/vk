@@ -340,8 +340,13 @@ var init = function () {
                 var bindFunc = function () {
                     var forRemove = rowId ? [rowId] : grid.selectedRows;
                     grid.remove(forRemove, function (err) {
-                        if (!err) $.notify({message: 'Успешно удалено'}, {type: 'success'});
-                        grid.reload();
+                        if (!err) {
+                            grid.reload(function(){
+                                $.notify({message: 'Успешно удалено'}, {type: 'success'});
+                            });
+                        } else {
+                            $.notify({message: 'Произошла ошибка'}, {type: 'error'});
+                        }
                     });
                 };
 

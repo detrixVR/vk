@@ -2,7 +2,7 @@
 
 var cluster = require('cluster');
 var extend = require('extend');
-//var Process = require('../newsocket/process');
+var Process = require('../newsocket/process');
 var express = require('express')
     , app = require('../app')
     , server = require('http').createServer(app);
@@ -11,7 +11,6 @@ var Socket = require('../newsocket');
 var dbProcess = require('../models/process').Process;
 
 var util = require('util');
-var io = require('socket.io');
 
 
 var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
@@ -22,7 +21,7 @@ var memoryUsage = {};
 
 if (cluster.isMaster) {
 
-    console.log('Start cluster with %s workers', workers - 1);
+    console.log('start cluster with %s workers', workers - 1);
 
     var broadcast = function (data) {
         for (var i in workersArray) {
@@ -46,6 +45,19 @@ if (cluster.isMaster) {
         return process;
     }
 
+    function getAllProcesses(data) {
+        var result = [];
+
+        for (var k = 0; k < processes.length; k++) {
+            if (processes[k].username === data.username) {
+                result.push(processes[k]);
+                break;
+            }
+        }
+
+        return result;
+    }
+
     workers--;
 
     for (var i = 0; i < workers; ++i) {
@@ -54,72 +66,88 @@ if (cluster.isMaster) {
 
         worker.on('message', function (msg) {
 
-            var process = null;
-
             switch (msg.command) {
                 case 'startPauseProcess':
-                    process = getExistingProcess(msg.data);
+                    var process = getExistingProcess(msg.data);
                     if (process) {
-                        if (process.state !== 0) {
-                            cluster.workers[process.wid].send({
-                                command: msg.command,
-                                data: msg.data
-                            });
+                        if (process.getState() === 2) {
+                            process.start();
                         } else {
-                            console.error('error 1');
+                            process.pause();
                         }
-                    } else {
-                        process = {
-                            wid: worker.id,
-                            username: msg.data.username,
-                            accountId: msg.data.accountId,
-                            processId: msg.data.processId,
-                            state: 0
-                        };
-                        processes.push(process);
-                        cluster.workers[process.wid].send({
-                            command: 'startProcess',
-                            data: msg.data
+                        broadcast({
+                            command: 'setProcessState',
+                            data: extend(msg.data, {state: process.getState()})
                         });
-                    }
-                    break;
-                case 'startProcess':
-                    process = getExistingProcess(msg.data);
-                    if (process) {
-                        process.state = 1;
                     } else {
-                        console.error('error 2');
-                    }
-                    break;
-                case 'stopProcess':
-                case 'getCurrentProcess':
-                    process = getExistingProcess(msg.data);
-                    if (process) {
-                        cluster.workers[process.wid].send({
-                            command: msg.command,
-                            data: msg.data
+                        process = new Process(msg.data);
+                        processes.push(process);
+                        process.start();
+                        worker.send({
+                            command: 'startProcess',
+                            data: extend(msg.data, {state: process.getState()})
                         });
                     }
                     break;
                 case 'justStopProcess':
-                    process = getExistingProcess(msg.data);
+                case 'stopProcess':
+                    console.log(msg.command );
+                    var process = getExistingProcess(msg.data);
                     if (process) {
-                        processes.splice(processes.indexOf(process), 1);
+                        console.log(process)
+                        process.stop();
+                        var newProcess = dbProcess({
+                            username: process.username,
+                            accountId: process.accountId,
+                            processId: process.processId,
+                            messages: process.messages || [],
+                            settings: process.settings,
+                            state: process.getState()
+                        });
+                        newProcess.save(function (err, proc) {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                processes.splice(processes.indexOf(process, 1));
+                                console.log(processes);
+                                if (msg.command === 'stopProcess') {
+                                    broadcast({
+                                        command: 'stopProcess',
+                                        data: proc
+                                    });
+                                }
+                            }
+                        })
                     }
-                case 'getAllProcesses':
-                    broadcast({
-                        command: 'getAllProcesses',
-                        data: msg.data
+                    break;
+                case 'getCurrentProcess':
+                    worker.send({
+                        command: 'setProcess',
+                        data: extend(msg.data, {process: getExistingProcess(msg.data)})
                     });
+                    break;
+                case 'getAllProcesses':
+                    worker.send({
+                        command: 'setProcesses',
+                        data: extend(msg.data, {processes: getAllProcesses(msg.data)})
+                    });
+                    break;
+                case 'setProcessMessage':
+                    var process = getExistingProcess(msg.data);
+                    if (process) {
+                        process.messages.push(msg.data.msg);
+                    }
                     break;
                 case 'setMemoryUsage':
                     //  console.log('', msg.data.processPid, ': ' + msg.data.memoryUsage.heapTotal / 1024 / 1024, 'mb');
                     memoryUsage[msg.data.processPid] = msg.data.memoryUsage.heapTotal;
+                   // console.log(memoryUsage);
                     break;
             }
         });
 
         workersArray.push(worker);
+
     }
 
 
@@ -128,24 +156,24 @@ if (cluster.isMaster) {
         cluster.fork();
     });
 
-    /*setInterval(function () {
-     for (var i = 0; i < workersArray.length; i++) {
-     workersArray[i].send({
-     command: 'memoryUsage'
-     });
-     }
-     }, 2000);
+    setInterval(function () {
+        for (var i = 0; i < workersArray.length; i++) {
+            workersArray[i].send({
+                command: 'memoryUsage'
+            });
+        }
+    }, 2000);
 
-     function getRandomInt(min, max) {
-     return Math.floor(Math.random() * (max - min + 1)) + min;
-     }
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
-     setInterval(function () {
-     workersArray[getRandomInt(0, workers - 1)].send({
-     command: 'sendMemoryUsage',
-     data: memoryUsage
-     })
-     }, 3333);*/
+    setInterval(function () {
+        workersArray[getRandomInt(0, workers-1)].send({
+            command: 'sendMemoryUsage',
+            data: memoryUsage
+        })
+    }, 3333);
 
 
 } else {
@@ -154,12 +182,14 @@ if (cluster.isMaster) {
 
     app.set('port', port);
 
+
     server.listen(port);
 
     server.on('error', onError);
     server.on('listening', onListening);
 
     new Socket(server);
+
 
     function onError(error) {
         if (error.syscall !== 'listen') {

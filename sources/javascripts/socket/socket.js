@@ -50,7 +50,6 @@ class Socket {
                 that.page.pageReload();
             });
 
-
             this.socket.on('setState', function (state) {
                 console.log(state);
                 that.page.ui.setState(processResponse.apply(that, [state]));

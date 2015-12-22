@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 var validateProxy = require('./processes/validateProxies');
 var request = require('request');
@@ -10,7 +10,7 @@ var CALLBACK_TYPES = [
     'start', //1
     'pause', //2
     'msg', //3
-    'refreshRow', //4
+    'refreshRow' //4
 ];
 
 class Process {

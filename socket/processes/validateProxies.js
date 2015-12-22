@@ -25,23 +25,23 @@ var checkProxy = function (host, port, options, callback) {
 
 var validationModel = {
     deleteIfWrong: {
-        validate: function(value){
+        validate: function (value) {
             return false;
         }
     },
     proxyGrid: {
-        validate: function(value){
+        validate: function (value) {
             return false;
         }
     },
     targetSelect: {
-        validate: function(value) {
+        validate: function (value) {
             return false;
         }
     },
     timeoutInput: {
         name: 'Таймаут',
-        validate: function(value){
+        validate: function (value) {
             if (!utils.isInt(value) || value < 0 || value > 5) {
                 return 'Должно быть числом от 0 до 5'
             }
@@ -49,7 +49,7 @@ var validationModel = {
     },
     urlInput: {
         name: 'Адрес проверки',
-        validate: function(value){
+        validate: function (value) {
             if (!utils.validateURL(value)) {
                 return 'Неверный формат адреса'
             }
@@ -57,8 +57,11 @@ var validationModel = {
     }
 };
 
+var validateProxies = function (processes, credentials, settings, callback) {
 
-var validateProxies = function (settings, callback) {
+    callback(null, { //start process
+        cbType: 2
+    });
 
     var error = utils.validateSettings(settings, validationModel);
 
@@ -70,33 +73,28 @@ var validateProxies = function (settings, callback) {
         })
     }
 
-    callback(null, {
+    callback(null, { // process msg
         cbType: 1,
         msg: utils.createMsg({msg: 'Проверка прокси', clear: true})
     });
 
-   /* var username = 'huyax';
-    var that = this;
-
-    console.log(settings);
     async.waterfall([function (callback) {
         switch (settings.targetSelect.value) {
             case 0:
                 ProxyGrid.find({
-                    username: username
+                    username: credentials.username
                 }, function (err, docs) {
                     return callback(err ? err : null, docs);
                 });
                 break;
             case 1:
-                settings.proxyGrid.value.username = username;
-                getForGrid(ProxyGrid, settings.proxyGrid.value, function (err, docs) {
+                getForGrid(ProxyGrid, credentials.username, function (err, docs) {
                     return callback(err ? err : null, docs);
                 });
                 break;
             case 2:
                 ProxyGrid.find({
-                    username: username,
+                    username: credentials.username,
                     _id: {$in: settings.proxyGrid.value.selectedRows}
                 }, function (err, docs) {
                     return callback(err ? err : null, docs);
@@ -107,6 +105,8 @@ var validateProxies = function (settings, callback) {
 
         }
     }, function (proxies, next) {
+
+
 
         async.eachSeries(proxies, function (item, done) {
 
@@ -185,7 +185,10 @@ var validateProxies = function (settings, callback) {
                                             id: item._id,
                                             columns: ['status'],
                                             values: [5],
-                                            msg: utils.createMsg({msg: `${item.content} - Невалидный (удален)`, type: 3})
+                                            msg: utils.createMsg({
+                                                msg: `${item.content} - Невалидный (удален)`,
+                                                type: 3
+                                            })
                                         });
 
                                         return back();
@@ -217,7 +220,12 @@ var validateProxies = function (settings, callback) {
 
             };
 
-            switch (that.state.state) {
+            var curState = utils.getProcessState(processes, credentials);
+
+
+            console.log(curState);
+
+            switch (curState) {
                 case 1:
                     processItem(item, function (err) {
                         return done(err ? err : null);
@@ -226,18 +234,20 @@ var validateProxies = function (settings, callback) {
                 case 2:
 
                     callback(null, {
-                        cbType: 2,
+                        cbType: 3,
                         msg: utils.createMsg({msg: 'Пауза'})
                     });
 
                     var d = null;
                     var delay = function () {
-                        console.log('delay');
-                        if (that.state.state === 2) {
+
+                        curState = utils.getProcessState(processes, credentials);
+
+                        if (curState === 2) {
                             d = setTimeout(delay, 100);
                         } else {
                             clearTimeout(d);
-                            if (that.state.state !== 0) {
+                            if (curState !== 0) {
                                 processItem(item, function (err) {
                                     return done(err ? err : null);
                                 });
@@ -266,7 +276,7 @@ var validateProxies = function (settings, callback) {
             cbType: 0,
             msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
         })
-    });*/
+    });
 };
 
 
