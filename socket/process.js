@@ -4,7 +4,6 @@ var validateProxy = require('./processes/validateProxies');
 var request = require('request');
 var extend = require('extend');
 
-
 var CALLBACK_TYPES = [
     'stop', //0
     'start', //1

@@ -1,19 +1,15 @@
-var io = require('socket.io');
-var redis = require('socket.io-redis');
-var extend = require('extend');
-var async = require('async');
-var request = require('request');
-var cookieParser = require('cookie-parser');
-var cookie = require('cookie');
-var config = require('../config');
-var utils = require('../modules/utils');
-
-var dbProcess = require('../models/process').Process;
-
-var validateProxies = require('../socket/processes/validateProxies');
-
-var Process = require('./process');
-
+var io = require('socket.io'),
+    redis = require('socket.io-redis'),
+    extend = require('extend'),
+    async = require('async'),
+    request = require('request'),
+    cookieParser = require('cookie-parser'),
+    cookie = require('cookie'),
+    config = require('../config'),
+    utils = require('../modules/utils'),
+    dbProcess = require('../models/process').Process,
+    validateProxies = require('../socket/processes/validateProxies'),
+    Process = require('./process');
 
 const COMMANDS_DATA = [
     {
@@ -81,7 +77,6 @@ const COMMANDS_DATA = [
         ]
     }
 ];
-
 
 var sio = function (server) {
 
@@ -222,7 +217,7 @@ var sio = function (server) {
         }
     }
 
-    process.on('message', function (msg) {
+    process.on('message', function (msg, callback) {
 
 
         if (msg.data && msg.data.username) {
@@ -333,6 +328,9 @@ var sio = function (server) {
                 case 'sendMemoryUsage':
                     s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
                     break;
+                case 'callback':
+                    callback();
+
             }
         }
     });
@@ -437,6 +435,5 @@ var sio = function (server) {
         });
     })
 };
-
 
 module.exports = sio;

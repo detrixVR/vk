@@ -1,18 +1,12 @@
 #!/usr/bin/env node
 
-var cluster = require('cluster');
-var extend = require('extend');
-//var Process = require('../newsocket/process');
-var express = require('express')
-    , app = require('../app')
-    , server = require('http').createServer(app);
-
-var Socket = require('../newsocket');
-var dbProcess = require('../models/process').Process;
-
-var util = require('util');
-var io = require('socket.io');
-
+var cluster = require('cluster'),
+    extend = require('extend'),
+    express = require('express'),
+    app = require('../app'),
+    server = require('http').createServer(app),
+    Socket = require('../newsocket'),
+    util = require('util');
 
 var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
 
@@ -127,6 +121,10 @@ if (cluster.isMaster) {
 
         workersArray.push(worker);
     }
+
+    workersArray[0].send({},function(){
+        console.log('WOW');
+    });
 
 
     cluster.on('death', function (worker) {

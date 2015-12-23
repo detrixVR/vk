@@ -5,7 +5,6 @@ var ProxyGrid = require('../../models/grid/proxy').ProxyGrid,
     getForGrid = require('../../router/grid').getForGrid,
     extend = require('extend');
 
-
 const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный', 'Удален'];
 
 var checkProxy = function (host, port, options, callback) {
@@ -276,6 +275,5 @@ var validateProxies = function (processes, credentials, settings, callback) {
         })
     });
 };
-
 
 module.exports = validateProxies;

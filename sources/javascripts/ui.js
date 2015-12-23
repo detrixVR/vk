@@ -755,7 +755,6 @@ var init = function () {
     })
 };
 
-
 var ui = {
     init: init,
     redrawSelector: redrawSelector,
@@ -769,7 +768,6 @@ var ui = {
     setProcesses: setProcesses,
     getTitleById: getTitleById,
 };
-
 
 export default ui;
 
