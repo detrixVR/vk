@@ -8,7 +8,7 @@ var express = require('express')
     , server = require('http').createServer(app);
 
 var Socket = require('../newsocket');
-var dbProcess = require('../models/process').Process;
+
 
 var util = require('util');
 

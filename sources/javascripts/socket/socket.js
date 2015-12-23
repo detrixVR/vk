@@ -56,10 +56,12 @@ class Socket {
             });
 
             this.socket.on('setProcess', function (process) {
+                console.log(process);
                 that.page.ui.setProcess(process);
             });
 
             this.socket.on('setProcesses', function (processes) {
+                console.log(processes);
                 that.page.ui.setProcess(null);
                 that.page.ui.setProcesses(processes);
             });

@@ -8,6 +8,8 @@ var cookie = require('cookie');
 var config = require('../config');
 var utils = require('../modules/utils');
 
+var dbProcess = require('../models/process').Process;
+
 var validateProxies = require('../socket/processes/validateProxies');
 
 var Process = require('./process');
@@ -74,9 +76,6 @@ const COMMANDS_DATA = [
             {
                 accountId: {
                     properties: []
-                },
-                processId: {
-                    properties: []
                 }
             }
         ]
@@ -114,9 +113,9 @@ var sio = function (server) {
         s.sockets.in(process.username + ':' + process.accountId + ':' + 'defaultProcess').emit('printEvent', process);
     }
 
-    function sendProcessState(process) {
-        s.sockets.in(process.username + ':' + process.accountId + ':' + process.processId).emit('setState', process);
-        s.sockets.in(process.username + ':' + process.accountId + ':' + 'tasksListen').emit('setState', process);
+    function sendProcessState(data) {
+        s.sockets.in(data.username + ':' + data.accountId + ':' + data.processId).emit('setState', data/*{state: data.state, msg: data.msg}*/);
+        s.sockets.in(data.username + ':' + data.accountId + ':' + 'tasksListen').emit('setState', data/*{state: data.state, msg:  data.msg}*/);
     }
 
     function startProcess(data) {
@@ -127,14 +126,14 @@ var sio = function (server) {
             command: 'startProcess',
             data: data
         });
-        sendProcessState(process);
+        sendProcessState(newProcess);
     }
 
     function startPauseProcess(data, bSend) {
         var process = getProcess(data);
         if (process) {
             if (bSend) {
-                sendProcessState(process);
+                sendProcessState(extend({}, data, {state: process.state}));
             } else {
                 var curState = process.getState();
                 if (curState === 1) {
@@ -157,10 +156,16 @@ var sio = function (server) {
                         data: data
                     });
                 }
-                sendProcessState(process);
-                console.log('process stopped');
-                processes.splice(processes.indexOf(curProc), 1);
-                console.log(processes);
+                curProc.save(function(err){
+                    if(err) {
+                        console.error(err);
+                    } else {
+                        sendProcessState(extend({}, data, {state: curProc.state}));
+                        console.log('process stopped');
+                        processes.splice(processes.indexOf(curProc), 1);
+                        console.log(processes);
+                    }
+                });
             } else {
                 curProc.stop();
             }
@@ -236,6 +241,8 @@ var sio = function (server) {
 
                     var currentProcess = getProcess(msg.data);
 
+                    console.log('startProcess');
+
                     if (!currentProcess) {
 
                         var settings = msg.data.settings;
@@ -263,10 +270,9 @@ var sio = function (server) {
                                 setProcessMessage(extend({}, credentials, {msg: cbData.msg}));
                             }
 
-
                             switch (cbData.cbType) {
                                 case 0:
-                                    stopProcess(extend({}, credentials), true);
+                                    stopProcess(extend({}, credentials, cbData), true);
                                     return (0);
                                     break;
                                 case 1: //process message
@@ -295,15 +301,23 @@ var sio = function (server) {
                     stopProcess(extend({}, msg.data), false);
                     break;
                 case 'getCurrentProcess':
+
                     var process = getProcess(msg.data);
-                    if (process) {
-                        s.sockets.in(room).emit('setCurrentProcess', {
-                            process:
-                        });
+                    if (!process) {
+                        dbProcess.findOne(credentials).sort({created: -1}).exec(function(err, doc){
+                            if(err) {
+                                console.error(err);
+                            } else {
+                                s.sockets.in(room).emit('setProcess', doc);
+                            }
+                        })
+                    } else {
+                        s.sockets.in(room).emit('setProcess', process);
                     }
+
                     break;
                 default:
-                    console.log('default');
+                    console.log('default ' + msg.command);
             }
         } else {
             switch (msg.command) {

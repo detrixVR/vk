@@ -2,7 +2,8 @@ var ProxyGrid = require('../../models/grid/proxy').ProxyGrid,
     utils = require('../../modules/utils'),
     async = require('async'),
     request = require('request'),
-    getForGrid = require('../../router/grid').getForGrid;
+    getForGrid = require('../../router/grid').getForGrid,
+    extend = require('extend');
 
 
 const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный', 'Удален'];
@@ -88,7 +89,8 @@ var validateProxies = function (processes, credentials, settings, callback) {
                 });
                 break;
             case 1:
-                getForGrid(ProxyGrid, credentials.username, function (err, docs) {
+                var options = settings.proxyGrid.value;
+                getForGrid(ProxyGrid, extend({}, credentials, options), function (err, docs) {
                     return callback(err ? err : null, docs);
                 });
                 break;
@@ -105,7 +107,6 @@ var validateProxies = function (processes, credentials, settings, callback) {
 
         }
     }, function (proxies, next) {
-
 
 
         async.eachSeries(proxies, function (item, done) {
@@ -221,9 +222,6 @@ var validateProxies = function (processes, credentials, settings, callback) {
             };
 
             var curState = utils.getProcessState(processes, credentials);
-
-
-            console.log(curState);
 
             switch (curState) {
                 case 1:

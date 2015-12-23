@@ -1,5 +1,8 @@
 "use strict";
 var extend = require('extend');
+var dbProcess = require('../models/process').Process;
+
+
 class Process {
 
     constructor(data) {
@@ -27,6 +30,20 @@ class Process {
 
     getState() {
         return this.state;
+    }
+
+    save(callback) {
+        var newProcess = dbProcess({
+            username: this.username,
+            accountId: this.accountId,
+            processId: this.processId,
+            messages: this.messages || [],
+            settings: this.settings,
+            state: this.getState()
+        });
+        newProcess.save(function (err) {
+            return callback(err ? err : null)
+        });
     }
 }
 

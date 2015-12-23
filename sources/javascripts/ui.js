@@ -162,16 +162,13 @@ var applySettings = function (settings) {
 
 var setProcess = function (process) {
 
-    var eventsHolder = $('#eventsHolder');
-
     if (process) {
         if (process.state)
             setState(process);
-        eventsHolder.trigger('printEvent', [process.messages || [], true]);
         applySettings(process.settings);
-    } else {
-        eventsHolder.trigger('printEvent', [[], true]);
     }
+
+    $('.widget').trigger('printEvent', [process ? process.messages : [], true]);
 
     overlay('Загрузка данных');
 
@@ -280,8 +277,8 @@ var setProcessButtonsState = function (state, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-            toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-            toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -341,7 +338,7 @@ var init = function () {
                     var forRemove = rowId ? [rowId] : grid.selectedRows;
                     grid.remove(forRemove, function (err) {
                         if (!err) {
-                            grid.reload(function(){
+                            grid.reload(function () {
                                 $.notify({message: 'Успешно удалено'}, {type: 'success'});
                             });
                         } else {
@@ -435,7 +432,7 @@ var init = function () {
                     if (linesArr.length) {
                         grid.append(linesArr, function (err) {
                             if (!err) {
-                                grid.reload(function(){
+                                grid.reload(function () {
                                     $.notify({message: 'Успешно добавлено'}, {type: 'success'});
                                 });
                             } else {
@@ -747,6 +744,15 @@ var init = function () {
             input.trigger('change');
         }
     });
+
+    $(window).on('resize', function () {
+        $('.jspContainer').each(function (i, item) {
+            var jsp = $(item).parent().data('jsp');
+            if (jsp) {
+                jsp.reinitialise();
+            }
+        });
+    })
 };
 
 

@@ -360,19 +360,21 @@
                     var item = $(tpl.actionDropDownCheckboxItem.resolve(getParams.call(that,
                         {name: column.id, label: column.text, checked: column.visible})))
                         .on("click" + namespace, selector, function (e) {
-                            e.stopPropagation();
+                            if (e.originalEvent.target!==this) {
+                                e.stopPropagation();
 
-                            var $this = $(this),
-                                checkbox = $this.find(checkboxSelector);
-                            if (!checkbox.prop("disabled")) {
-                                column.visible = checkbox.prop("checked");
-                                var enable = that.columns.where(isVisible).length > 1;
-                                $this.parents(itemsSelector).find(selector + ":has(" + checkboxSelector + ":checked)")
-                                    ._bgEnableAria(enable).find(checkboxSelector)._bgEnableField(enable);
+                                var $this = $(this),
+                                    checkbox = $this.find(checkboxSelector);
+                                if (!checkbox.prop("disabled")) {
+                                    column.visible = checkbox.prop("checked");
+                                    var enable = that.columns.where(isVisible).length > 1;
+                                    $this.parents(itemsSelector).find(selector + ":has(" + checkboxSelector + ":checked)")
+                                        ._bgEnableAria(enable).find(checkboxSelector)._bgEnableField(enable);
 
-                                that.element.find("tbody").empty(); // Fixes an column visualization bug
-                                renderTableHeader.call(that);
-                                loadData.call(that);
+                                    that.element.find("tbody").empty(); // Fixes an column visualization bug
+                                    renderTableHeader.call(that);
+                                    loadData.call(that);
+                                }
                             }
                         });
                     dropDown.find(getCssSelector(css.dropDownMenuItems)).append(item);
@@ -1413,8 +1415,7 @@
             }).fail(function (fail) {
                 return callback(fail);
             })
-        }
-        else {
+        } else {
             var appendedRows = [];
             for (var i = 0; i < rows.length; i++) {
                 if (appendRow.call(this, rows[i])) {

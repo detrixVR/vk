@@ -43,7 +43,7 @@ module.exports.post = function (req, res) {
     }
 
     if (location) {
-        console.log(location);
+       // console.log(location);
 
 
         var url = location.pathname.substring(1);

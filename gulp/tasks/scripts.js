@@ -45,6 +45,7 @@ gulp.task('concat-libs-js', wrapPipe((success, error) => {
             './public/javascripts/libs/jasny-bootstrap.min.js',
             './public/javascripts/libs/bootstrap-select.min.js',
             './public/javascripts/libs/jquery.bootgrid.js',
+            './public/javascripts/libs/jquery.bootgrid.extend.js',
             './public/javascripts/libs/underscore-min.js',
             './public/javascripts/libs/jquery.mousewheel.js',
             './public/javascripts/libs/jquery.jscrollpane.min.js'
