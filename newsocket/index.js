@@ -328,9 +328,6 @@ var sio = function (server) {
                 case 'sendMemoryUsage':
                     s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
                     break;
-                case 'callback':
-                    callback();
-
             }
         }
     });

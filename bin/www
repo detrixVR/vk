@@ -118,14 +118,8 @@ if (cluster.isMaster) {
                     break;
             }
         });
-
         workersArray.push(worker);
     }
-
-    workersArray[0].send({},function(){
-        console.log('WOW');
-    });
-
 
     cluster.on('death', function (worker) {
         console.log('worker %s died. restart...', worker.process.pid);
