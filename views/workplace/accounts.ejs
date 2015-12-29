@@ -5,38 +5,47 @@
 </head>
 <body>
 
-<%- include ../parts/cabinetNavbar.ejs %>
+
+<% var processId='validateAccounts'%>
+
+<%- include ../parts/cabinetMenu.ejs %>
 
 <div class="canvas">
 
-    <%- include ../parts/cabinetTopNavbar.ejs %>
-    <%- include ../parts/overlay.ejs %>
+    <%- include ../templates/overlay.ejs %>
 
-    <div class="hidden" id="listType"><%= type %></div>
+    <%- include ../parts/cabinetNavbar.ejs %>
 
-    <div class="container-fluid" id="mainContainer">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12">
-                <div class="well well-sm controls">
-                    <label class="bold float">Настройки</label>
-                    <div class="row nomargin form-group">
+                <div class="well well-sm container-fluid">
+                    <div class="row">
+
                         <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title="" data-original-title="Какой список использовать">Проверять</label>
+                            <select class="selectpicker" data-width="100%" id="targetSelect" data-toggle="tooltip" data-placement="left" title="" data-original-title="Tooltip on left">
+                                <option>Все</option>
+                                <option>Загруженные</option>
+                                <option>Выделенные</option>
+                            </select>
+                        </div>
+
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label"></label>
+
                             <div class="checkbox">
-                                <input type="checkbox" id="deleteIfWrong"/>
+                                <input type="checkbox" id="deleteIfWrong" data-settings="true">
                                 <label for="deleteIfWrong">
                                     Удалять невалидные
                                 </label>
                             </div>
                         </div>
+
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <div class="checkbox">
-                                <input type="checkbox" id="checkOnlySelected"/>
-                                <label for="checkOnlySelected">
-                                    Только выделенные
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label"></label>
                             <div class="checkbox">
                                 <input type="checkbox" id="checkGetUserInfo" checked/>
                                 <label for="checkGetUserInfo">
@@ -45,78 +54,37 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12 col-lg-8 canFade">
+            <div class="col-xs-12 col-lg-8">
                 <div class="well well-sm">
-                    <label class="bold float">Аккаунты</label>
-                    <table id="grid" class="table table-condensed table-hover table-striped" data-selection="true"
-                           data-multi-select="true" data-row-select="true" data-keep-selection="true">
-                        <thead>
-                        <tr>
-                            <th data-column-id="_id" data-identifier="true" data-type="string" data-visible="false"
-                                data-visible-in-selection="false"></th>
-                            <th data-column-id="created" data-type="date" data-order="-1" data-visible="false"
-                                data-visible-in-selection="false"></th>
-                            <th data-column-id="content" data-order="asc" data-align="center" data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Логин/Пароль
-                            </th>
-                            <th data-column-id="id" data-align="center" data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">id
-                            </th>
-                            <th data-column-id="last_name" data-order="asc" data-align="center" data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Фамилия
-                            </th>
-                            <th data-column-id="first_name" data-order="asc" data-align="center" data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Имя
-                            </th>
-                            <th data-formatter="sex" data-column-id="sex" data-order="asc" data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Пол
-                            </th>
-                            <th data-column-id="friendsCount" data-order="asc" data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Друзья
-                            </th>
-                            <th data-column-id="groupsCount" data-order="asc" data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Группы
-                            </th>
-                            <th data-column-id="valid" data-formatter="link" data-align="center" data-sortable="true"
-                                data-width="100px" data-header-align="center">Статус
-                            </th>
-                            <th data-formatter="commandsNotAll" data-sortable="false" data-align="center" data-width="100px"
-                                data-visible-in-selection="false"></th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <%- include ../templates/accountGrid.ejs %>
                 </div>
-
             </div>
-            <div class="col-xs-12 col-lg-4">
-                <div class="well well-sm controls">
-                    <label class="bold float">Выполнение:</label>
-                    <div class="form-group">
-                        <%- include ../parts/eventButtons.ejs %>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm widget eventsHolder">
+                    <div class="bootgrid-header">
+                        <%- include ../parts/buttonsProcess.ejs %>
                     </div>
-                    <div class="list" id="eventsHolder"></div>
+                    <div class="listHolder">
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<%- include ../parts/modalIO.ejs %>
-<script data-main="js/require/checker" src="js/require.js"></script>
+<%- include ../templates/modalInput.ejs %>
+
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
 </body>
 </html>

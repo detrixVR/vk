@@ -144,7 +144,7 @@ module.exports.post = function (req, res) {
                         return res.status(resp.status).json(resp);
                     } else {
                         if (account) {
-                            result.accountInfo = account
+                            result.accountInfo = account;
                         }
                         res.status(200).json(result);
                     }

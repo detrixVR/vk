@@ -38,11 +38,13 @@ module.exports = function (app) {
     app.post('/account', require('./account').post);
 
     app.get('/proxies', require('./workplace/proxies').get);
-    //app.get('/accounts', require('./workplace/accounts').get);
-    //app.get('/peoples', require('./workplace/peoples').get);
+    app.get('/accounts', require('./workplace/accounts').get);
+    app.get('/peoples', require('./workplace/peoples').get);
    // app.get('/groups', require('./workplace/groups').get);
     //app.get('/lists', require('./workplace/lists').get);
    // app.get('/tasks', require('./workplace/tasks').get);
+
+    app.get('/logout',      require('./default/logout').get);
 
 
     app.get('/forgot', require('./default/forgot').get);

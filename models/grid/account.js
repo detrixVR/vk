@@ -71,7 +71,7 @@ var schema = new Schema({
         type: Number,
         required: false
     },
-    id: {
+    accountId: {
         type: Number,
         required: false
     },

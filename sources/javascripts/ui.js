@@ -407,10 +407,13 @@ var init = function () {
             var grid = $grid.data('.rs.jquery.bootgrid');
             if (grid) {
                 var selector = $('#modalInput');
-
+                var alert = $('.alert', selector);
                 switch (grid.listType) {
                     case 'proxy':
-                        $('.alert', selector).html('Скопируйте сюда прокси в формате <b>host:port</b> и нажмите Добавить');
+                        alert.html('Скопируйте сюда прокси в формате <b>host:port</b> и нажмите Добавить');
+                        break;
+                    case 'account':
+                        alert.html('Скопируйте сюда аккаунты в формате <b>логин:пароль</b> и нажмите Добавить');
                         break;
                 }
 
@@ -686,8 +689,6 @@ var init = function () {
 
     $('.selectpicker').selectpicker();
 
-    // $('#scrollbar1').jScrollPane();
-
     $('.spinner input').on('keydown', function (e) {
         if (!((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105))) {
             e.preventDefault();
@@ -752,7 +753,9 @@ var init = function () {
                 jsp.reinitialise();
             }
         });
-    })
+    });
+
+    $('[data-toggle="tooltip"]').tooltip();
 };
 
 var ui = {

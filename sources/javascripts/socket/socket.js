@@ -72,6 +72,9 @@ class Socket {
                 });
                 switch (that.page.processId) {
                     case 'validateProxies':
+                    case 'validateAccounts':
+                    case 'searchPeoples':
+                    case 'searchGroups':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });
