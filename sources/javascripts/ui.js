@@ -277,8 +277,8 @@ var setProcessButtonsState = function (state, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+            toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+            toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -756,6 +756,8 @@ var init = function () {
     });
 
     $('[data-toggle="tooltip"]').tooltip();
+
+
 };
 
 var ui = {

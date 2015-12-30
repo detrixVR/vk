@@ -49,7 +49,8 @@ gulp.task('concat-libs-js', wrapPipe((success, error) => {
             './public/javascripts/libs/underscore-min.js',
             './public/javascripts/libs/jquery.mousewheel.js',
             './public/javascripts/libs/jquery.jscrollpane.min.js',
-            './public/javascripts/libs/bootstrap3-typeahead.js'
+            './public/javascripts/libs/bootstrap3-typeahead.js',
+            './public/javascripts/libs/bootstrap3-typeahead.extend.js'
         ])
         .pipe(concat('libs.js'))
         .pipe(gulp.dest('./public/javascripts/'));

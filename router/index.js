@@ -60,6 +60,8 @@ module.exports = function (app) {
     app.put('/grid', require('./grid').put);
     app.delete('/grid', require('./grid').delete);
 
+    app.post('/vkapi', require('./vkapi').post);
+
     app.use(function (req, res, next) {
         var err = {
             message: 'Страница не найдена'
