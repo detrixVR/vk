@@ -12,8 +12,8 @@
 <div class="canvas">
 
     <script>
-        var substringMatcher = function(query, process){
-            return ['1','2','3'];
+        var substringMatcher = function (query, process) {
+            return ['1', '2', '3'];
         }
     </script>
 
@@ -36,14 +36,14 @@
                             </select>
 
                         </div>
-                        <div class="col-xs-6 col-sm-3 col-md-2">
+                       <!-- <div class="col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
                                    data-original-title="Искать среди друзей или глобально">Искать</label>
                             <select class="selectpicker" data-width="100%" id="searchSelector">
                                 <option>Поиск</option>
                                 <option>Мои друзья</option>
                             </select>
-                        </div>
+                        </div>-->
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
                                    data-original-title="Искать среди друзей или глобально">Строка поиска</label>
@@ -99,7 +99,8 @@
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
                                    data-original-title="Искать среди друзей или глобально">Город</label>
-                            <input class="form-control" data-provide="typeahead" data-delay="1000" data-type="city" type="text" placeholder="Город"
+                            <input class="form-control" data-provide="typeahead" data-delay="1000" data-type="city"
+                                   type="text" placeholder="Город"
                                    id="city">
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
@@ -164,8 +165,6 @@
                     </div>
                     <div class="row">
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label"></label>
-
                             <div class="checkbox">
                                 <input type="checkbox" id="online">
                                 <label for="online">
@@ -174,8 +173,6 @@
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label"></label>
-
                             <div class="checkbox">
                                 <input type="checkbox" id="has_photo">
                                 <label for="has_photo">
@@ -184,8 +181,6 @@
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label"></label>
-
                             <div class="checkbox">
                                 <input type="checkbox" id="from_list">
                                 <label for="from_list">
@@ -194,8 +189,6 @@
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label"></label>
-
                             <div class="checkbox">
                                 <input type="checkbox" id="canWritePrivateMsg">
                                 <label for="canWritePrivateMsg">
@@ -206,28 +199,28 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-8">
+                <div class="well well-sm">
+                    <%- include ../templates/proxyGrid.ejs %>
+                </div>
+            </div>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm widget eventsHolder">
+                    <div class="bootgrid-header">
+                        <%- include ../parts/buttonsProcess.ejs %>
+                    </div>
+                    <div class="listHolder">
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-xs-12 col-lg-8">
-        <div class="well well-sm">
-            <%- include ../templates/proxyGrid.ejs %>
-        </div>
-    </div>
-    <div class="col-xs-12  col-lg-4">
-        <div class="well well-sm widget eventsHolder">
-            <div class="bootgrid-header">
-                <%- include ../parts/buttonsProcess.ejs %>
-            </div>
-            <div class="listHolder">
-                <ul class="list-group">
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+
 </div>
 
 
@@ -238,7 +231,7 @@
 <script src="javascripts/app.js"></script>
 
 <script>
-    $(function(){
+    $(function () {
         $('#country').on('change', function () {
             var $city = $('#city');
             $city.val('').focus();
