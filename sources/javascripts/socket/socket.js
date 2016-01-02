@@ -104,6 +104,10 @@ class Socket {
                 that.page.ui.refreshRow(processResponse.apply(that, [data]));
             });
 
+            this.socket.on('reloadGrid', function (data) {
+                that.page.ui.reloadGrid(processResponse.apply(that, [data]));
+            });
+
             this.socket.on('disconnect', function () {
                 ui.overlay('Связь с сервером потеряна, перезагрузите страницу');
             });

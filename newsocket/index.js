@@ -9,6 +9,7 @@ var io = require('socket.io'),
     utils = require('../modules/utils'),
     dbProcess = require('../models/process').Process,
     validateProxies = require('../socket/processes/validateProxies'),
+    searchPeoples = require('../socket/processes/searchPeoples'),
     Process = require('./process');
 
 const COMMANDS_DATA = [
@@ -217,7 +218,7 @@ var sio = function (server) {
         }
     }
 
-    process.on('message', function (msg, callback) {
+    process.on('message', function (msg) {
 
 
         if (msg.data && msg.data.username) {
@@ -245,14 +246,7 @@ var sio = function (server) {
 
                         switch (credentials.processId) {
                             case 'validateProxies':
-                                break;
-                            case 'validateProxies':
-                                break;
-                            case 'validateProxies':
-                                break;
-                            case 'validateProxies':
-                                break;
-                            case 'validateProxies':
+                            case 'searchPeoples':
                                 break;
                             default:
                                 console.log('ХЗ процесс');
@@ -284,6 +278,9 @@ var sio = function (server) {
                                     break;
                                 case 4: //row event
                                     s.sockets.in(room).emit('refreshRow', extend({}, credentials, cbData));
+                                    break;
+                                case 5: //row event
+                                    s.sockets.in(room).emit('reloadGrid', extend({}, credentials, cbData));
                                     break;
                             }
                         });

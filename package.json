@@ -46,6 +46,7 @@
     "express": "^4.13.3",
     "express-session": "^1.12.1",
     "extend": "^3.0.0",
+    "https-proxy-agent": "^1.0.0",
     "mongoose": "^4.2.6",
     "morgan": "^1.6.1",
     "nconf": "^0.8.2",

@@ -11,10 +11,13 @@ function executeCommand(options, callback) {
     if (options.token)
         vk.setToken(options.token);
 
+    if (options.proxy)
+        vk.setProxy(options.proxy);
+
     vk.request(options.command,
         options.options,
         function (_o) {
-console.log('here');
+            console.log('here');
             console.log(_o);
             if (_o.error) {
                 processError(req, _o.error, function (err) {

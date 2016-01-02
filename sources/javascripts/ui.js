@@ -185,6 +185,11 @@ var refreshRow = function (data) {
     $('[data-toggle=bootgrid]').trigger('refreshRow', data);
 };
 
+var reloadGrid = function (data) {
+    console.log(data);
+    $('[data-toggle=bootgrid]#' + data.gridId).trigger('reloadGrid');
+};
+
 var highLightFunc = function () {
     $(this).closest('.form-group').toggleClass('has-error', false);
 };
@@ -460,6 +465,13 @@ var init = function () {
         .bind('eventable', function (event, rowData) {
             console.log('from grid');
             $('.widget').trigger('showProcessInfo', rowData);
+        })
+        .bind('reloadGrid', function () {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            grid.reload(function () {
+                //$.notify({message: 'Успешно удалено'}, {type: 'success'});
+            });
         });
 
 
@@ -768,6 +780,7 @@ var ui = {
     overlay: overlay,
     printEvent: printEvent,
     refreshRow: refreshRow,
+    reloadGrid: reloadGrid,
     highLightFields: highLightFields,
     displayNotification: displayNotification,
     setProcesses: setProcesses,
