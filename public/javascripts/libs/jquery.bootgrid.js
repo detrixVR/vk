@@ -360,7 +360,7 @@
                     var item = $(tpl.actionDropDownCheckboxItem.resolve(getParams.call(that,
                         {name: column.id, label: column.text, checked: column.visible})))
                         .on("click" + namespace, selector, function (e) {
-                            if (e.originalEvent.target!==this) {
+                            if (e.originalEvent.target !== this) {
                                 e.stopPropagation();
 
                                 var $this = $(this),
@@ -1149,12 +1149,18 @@
                 return getTitleById(row.processId);
             },
             avatar: function (column, row) {
-                var accountInfo = row.settings.accountInfo;
+                var accountInfo = row.settings ? row.settings.accountInfo : null;
+                var photo_50 = null;
                 if (accountInfo && accountInfo.value) {
+                    photo_50 = accountInfo.value.photo_50;
+                } else if (row.photo_50) {
+                    photo_50 = row.photo_50;
+                }
+                if (photo_50) {
                     return '<a href="#">' +
                         '<div id="accountHolder">' +
                         '<div class="img-thumbnail avatarHolder" title="' +
-                        '" style="background-image: url(' + accountInfo.value.photo_50 + ');">' +
+                        '" style="background-image: url(' + photo_50 + ');">' +
                         '</div>' +
                         '</div></a>';
                 }
@@ -1348,7 +1354,6 @@
         }
     };
 
-
     Grid.prototype.editRow = function (id) {
         var content = '';
         var rowData = this.currentRows.find(function (item) {
@@ -1396,7 +1401,6 @@
             }
         }
     };
-
 
     Grid.prototype.append = function (rows, callback) {
         var that = this;

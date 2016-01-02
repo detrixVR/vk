@@ -27,8 +27,8 @@ var schema = new Schema({
         type: Number,
         required: false
     },
-    friendsCount: {
-        type: Number,
+    photo_50: {
+        type: String,
         required: false
     },
     created: {

@@ -84,6 +84,30 @@
             } else {
                 return this.render(items.slice(0, this.options.items)).show();
             }
+        },
+
+        render: function (items) {
+            var that = this;
+            var self = this;
+            var activeFound = false;
+            items = $(items).map(function (i, item) {
+                var text = self.displayText(item);
+                i = $(that.options.item).data('value', item);
+                i.find('a').html(that.highlighter(text));
+                if (text == self.$element.val()) {
+                    i.addClass('active');
+                    self.$element.data('active', item);
+                    activeFound = true;
+                }
+                return i[0];
+            });
+
+            if (this.autoSelect && !activeFound) {
+                items.first().addClass('active');
+                this.$element.data('active', items.first().data('value'));
+            }
+            this.$menu.html(items);
+            return this;
         }
 
 

@@ -121,81 +121,100 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
     //console.log('here');
 
-    async.waterfall([function (iteration) {
+    async.waterfall([
+        function (iteration) {
 
-        callback(null, { // process msg
-            cbType: 1,
-            msg: utils.createMsg({msg: 'zagruzka akkaunta'})
-        });
+            callback(null, { // process msg
+                cbType: 1,
+                msg: utils.createMsg({msg: 'zagruzka akkaunta'})
+            });
 
-        utils.getAccountByCredentials(credentials, function (err, account) {
-            /*if (err) {
-             return iteration(err);
-             } else if (account) {
-             if (!account.proxy || !account.token) {
-             return iteration({
-             msg: utils.createMsg({msg: 'Akkaunt ne proveren', type: 1})
-             })
-             } else {
-             return iteration(null, account);
-             }
-             } else {
-             return iteration({
-             msg: utils.createMsg({msg: 'Akkaunt ne nayden', type: 1})
-             })
-             }*/
-            return iteration(null, {
-                token: 'c8d7eee470f0fe3714263ab5083f462959c40399f17ebcaed9a0e1d5d41a04f755aa458243721a9ef0feb',
-                proxy: null
+            utils.getAccountByCredentials(credentials, function (err, account) {
+                /*if (err) {
+                 return iteration(err);
+                 } else if (account) {
+                 if (!account.proxy || !account.token) {
+                 return iteration({
+                 msg: utils.createMsg({msg: 'Akkaunt ne proveren', type: 1})
+                 })
+                 } else {
+                 return iteration(null, account);
+                 }
+                 } else {
+                 return iteration({
+                 msg: utils.createMsg({msg: 'Akkaunt ne nayden', type: 1})
+                 })
+                 }*/
+                return iteration(null, {
+                    token: 'c8d7eee470f0fe3714263ab5083f462959c40399f17ebcaed9a0e1d5d41a04f755aa458243721a9ef0feb',
+                    proxy: null
+                })
             })
-        })
 
-    }, function (account, iteration) {
+        }, function (account, iteration) {
+            if (!settings.replaceSelector.value) {
 
-        callback(null, { // process msg
-            cbType: 1,
-            msg: utils.createMsg({msg: 'Poisk lyudey'})
-        });
-
-
-        var options = {
-            token: account.token,
-            proxy: account.proxy,
-            command: 'users.search'
-        };
-
-        var inOptions = {
-            q: settings.q.value,
-            sort: +settings.sort.value,
-            offset: +settings.offset.value,
-            count: +settings.count.value,
-            country: +settings.count.value + 1,
-            city: +settings.city.value + 1,
-            hometown: '',
-            sex: +settings.sex.value,
-            status: +settings.status.value + 1,
-            age_from: +settings.age_from.value,
-            age_to: +settings.age_to.value,
-            interests: settings.interests.value,
-            online: settings.online.value ? 1 : 0,
-            has_photo: settings.has_photo.value ? 1 : 0,
-            from_list: settings.from_list.value ? 'friends' : '',
-            fields: 'sex,online,can_write_private_message'
-        };
-
-
-        var result = [];
-
-        async.forever(function (next) {
-            if (result.length >= +settings.count.value ||
-                inOptions.offset >= 1000) {
-                return next({
-                    result: result,
-                    msg: utils.createMsg({msg: 'done'})
+                callback(null, { // process msg
+                    cbType: 1,
+                    msg: utils.createMsg({msg: 'Ochistka spiska'})
                 });
-            } else {
 
-                options.code = `var peoples = API.users.search(${JSON.stringify(inOptions)}).items;
+                PersonGrid.remove({
+                    username: credentials.username
+                }, function (err) {
+                    return iteration(err ? err : null, account);
+                });
+
+            } else {
+                return iteration(null, account);
+            }
+        }, function (account, iteration) {
+
+            callback(null, { // process msg
+                cbType: 1,
+                msg: utils.createMsg({msg: 'Poisk lyudey'})
+            });
+
+
+            var options = {
+                token: account.token,
+                proxy: account.proxy,
+                command: 'execute'
+            };
+
+            var inOptions = {
+                q: settings.q.value,
+                sort: +settings.sort.value,
+                offset: +settings.offset.value,
+                count: +settings.count.value,
+                country: +settings.count.value + 1,
+                city: +settings.city.value + 1,
+                hometown: '',
+                sex: +settings.sex.value,
+                status: +settings.status.value + 1,
+                age_from: +settings.age_from.value,
+                age_to: +settings.age_to.value,
+                interests: settings.interests.value,
+                online: settings.online.value ? 1 : 0,
+                has_photo: settings.has_photo.value ? 1 : 0,
+                from_list: settings.from_list.value ? 'friends' : '',
+                fields: 'sex,online,can_write_private_message,photo_50'
+            };
+
+
+            var result = [];
+
+            async.forever(function (next) {
+                if (result.length >= +settings.count.value ||
+                    inOptions.offset >= 1000) {
+                    return next({
+                        result: result,
+                        msg: utils.createMsg({msg: 'done'})
+                    });
+                } else {
+
+                    options.options = {
+                        code: `var peoples = API.users.search(${JSON.stringify(inOptions)}).items;
                     var i = 0;
                     var check1 = [];
                     if (${ settings.canWritePrivateMsg.value }) {
@@ -208,68 +227,69 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     } else {
                         check1 = peoples;
                     }
-                    return check1;`;
+                    return check1;`
+                    };
+                //    console.log(options.options.code);
 
-                executeCommand(options, function (err, data) {
-                    // console.log(err);
-                    // console.log(data);
-                    if (err) {
-                        return next(err);
-                    } else {
-                        if (data &&
-                            data.result &&
-                            data.result.response &&
-                            data.result.response.items &&
-                            data.result.response.items.length) {
-                            result = result.concat(data.result.response.items);
-                            next();
+                    executeCommand(options, function (err, data) {
+                        // console.log(err);
+                        // console.log(data);
+                        if (err) {
+                            return next(err);
                         } else {
-                            return next({
-                                result: result,
-                                msg: utils.createMsg({msg: 'oshibka'})
-                            });
+                            if (data &&
+                                data.result &&
+                                data.result.response &&
+                                data.result.response.length) {
+                                result = result.concat(data.result.response);
+                                next();
+                            } else {
+                                return next({
+                                    result: result,
+                                    msg: utils.createMsg({msg: 'oshibka'})
+                                });
+                            }
                         }
-                    }
-                });
-                inOptions.offset += +settings.count.value;
-            }
-        }, function (err) {
-
-            console.log(err.result);
-
-            callback(null, { // process msg
-                cbType: 1,
-                msg: utils.createMsg({msg: 'sohranenie resultatov'})
-            });
-
-            async.each(err.result, function (item, yes) {
-
-
-                item.username = credentials.username;
-
-                console.log(item);
-                var newPersonGrid = new PersonGrid(item);
-
-                newPersonGrid.save(function (err) {
-                    return yes(err ? err : null);
-                });
-
+                    });
+                    inOptions.offset += +settings.count.value;
+                }
             }, function (err) {
 
+                console.log(err.result);
+
                 callback(null, { // process msg
-                    cbType: 5,
-                    gridId: 'personGrid'
+                    cbType: 1,
+                    msg: utils.createMsg({msg: 'sohranenie resultatov'})
                 });
 
-                return iteration(err);
+                async.each(err.result, function (item, yes) {
+
+
+                    item.username = credentials.username;
+
+                    console.log(item);
+                    var newPersonGrid = new PersonGrid(item);
+
+                    newPersonGrid.save(function (err) {
+                        return yes(err ? err : null);
+                    });
+
+                }, function (err) {
+
+                    callback(null, { // process msg
+                        cbType: 5,
+                        gridId: 'personGrid'
+                    });
+
+                    return iteration(err);
+
+                });
+
 
             });
 
 
-        });
-
-
-    }], function (err) {
+        }], function (err) {
         return callback(null, {
             cbType: 0,
             msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
