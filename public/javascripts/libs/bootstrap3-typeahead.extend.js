@@ -3,6 +3,24 @@
 
     var extensionMethods = {
 
+        select: function () {
+            var val = this.$menu.find('.active').data('value');
+            this.$element.data('value', val);
+            this.$element.data('active', val.id);
+            if(this.autoSelect || val.id) {
+                var newVal = this.updater(val.title);
+                // Updater can be set to any random functions via "options" parameter in constructor above.
+                // Add null check for cases when upadter returns void or undefined.
+                if (!newVal) {
+                    newVal = "";
+                }
+                this.$element
+                    .val(this.displayText(newVal) || newVal)
+                    .change();
+                this.afterSelect(newVal);
+            }
+            return this.hide();
+        },
 
         lookup: function (rows, callback) {
             console.log('extended');
@@ -12,19 +30,20 @@
                 switch (this.options.type) {
                     case 'city':
 
-                            $.post('/vkapi', {
-                                command: 'database.getCities',
-                                options: JSON.stringify({
-                                    country_id: this.country || 1,
-                                    q: query
-                                })
-                            }).done(function (data) {
-                                if (data && data.result && data.result.response) {
-                                    process($.map(data.result.response.items, function (e) {
-                                        return e.title;
-                                    }));
-                                }
-                            });
+                        $.post('/vkapi', {
+                            command: 'database.getCities',
+                            options: JSON.stringify({
+                                country_id: this.country || 1,
+                                q: query
+                            })
+                        }).done(function (data) {
+                            if (data && data.result && data.result.response) {
+                                /*process($.map(data.result.response.items, function (e) {
+                                 return e.title;
+                                 }));*/
+                                process(data.result.response.items);
+                            }
+                        });
 
 
                         break;
@@ -59,10 +78,10 @@
             var that = this;
 
             /*items = $.grep(items, function (item) {
-                return that.matcher(item);
-            });*/
+             return that.matcher(item);
+             });*/
 
-            items = this.sorter(items);
+            //items = this.sorter(items);
 
             if (!items.length && !this.options.addItem) {
                 return this.shown ? this.hide() : this;
@@ -75,7 +94,7 @@
             }
 
             // Add item
-            if (this.options.addItem){
+            if (this.options.addItem) {
                 items.push(this.options.addItem);
             }
 
@@ -90,13 +109,21 @@
             var that = this;
             var self = this;
             var activeFound = false;
+
             items = $(items).map(function (i, item) {
                 var text = self.displayText(item);
                 i = $(that.options.item).data('value', item);
-                i.find('a').html(that.highlighter(text));
+                switch (self.options.type) {
+                    case 'city':
+                        i.find('a').html('<div>' + item.title + '</div><div><span class="small text-muted">' + (item.region ? item.region : item.title) + '</span></div>');
+                        break;
+                    default:
+                        i.find('a').html(that.highlighter(text));
+                }
                 if (text == self.$element.val()) {
                     i.addClass('active');
-                    self.$element.data('active', item);
+                    self.$element.data('value', item);
+                    self.$element.data('active', item.id);
                     activeFound = true;
                 }
                 return i[0];
@@ -104,11 +131,41 @@
 
             if (this.autoSelect && !activeFound) {
                 items.first().addClass('active');
-                this.$element.data('active', items.first().data('value'));
+                this.$element.data('value', items.first().data('value'));
+                this.$element.data('active', items.first().data('value').id);
             }
             this.$menu.html(items);
             return this;
-        }
+        },
+
+        show: function () {
+            var pos = $.extend({}, this.$element.position(), {
+                height: this.$element[0].offsetHeight
+            }), scrollHeight;
+
+            scrollHeight = typeof this.options.scrollHeight == 'function' ?
+                this.options.scrollHeight.call() :
+                this.options.scrollHeight;
+
+            var element;
+            if (this.shown) {
+                element = this.$menu;
+            } else if (this.$appendTo) {
+                element = this.$menu.appendTo(this.$appendTo);
+            } else {
+                element = this.$menu.insertAfter(this.$element);
+            }
+            element.css({
+                    top: pos.top + pos.height + scrollHeight
+                    , left: pos.left
+                    , width: this.$element.outerWidth()
+                    , 'min-width': this.$element.outerWidth()
+                })
+                .show();
+
+            this.shown = true;
+            return this;
+        },
 
 
     };

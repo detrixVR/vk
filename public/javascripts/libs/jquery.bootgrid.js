@@ -1127,9 +1127,9 @@
             sex: function (column, row) {
                 switch (row.sex) {
                     case 1:
-                        return "М";
-                    case 2:
                         return "Ж";
+                    case 2:
+                        return "М";
                     case 0:
                         return "Н";
                     default :

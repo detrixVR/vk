@@ -13,6 +13,8 @@ function executeCommand(options, callback) {
 
     if (options.proxy)
         vk.setProxy(options.proxy);
+
+
     console.log('prerequest');
 
     vk.request(options.command,

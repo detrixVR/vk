@@ -91,6 +91,15 @@ var getSettings = function () {
         }
     });
 
+    $('[type=typeahead]').each(function (i, item) {
+        if (item.id) {
+            settings[item.id] = {
+                type: 'typeahead',
+                value: $(item).data('value')
+            }
+        }
+    });
+
     settings['accountInfo'] = {
         type: 'accountInfo',
         value: this.accountInfo
@@ -146,6 +155,17 @@ var applySettings = function (settings) {
                     elem = document.getElementById(k);
                     if (elem) {
                         elem.value = settings[k].value;
+                    }
+                    break;
+                case 'typeahead':
+                    elem = document.getElementById(k);
+                    var $elem = $(elem);
+                    $elem.focus();
+                    var tah = $elem.data('typeahead');
+                    if (tah) {
+                        tah.$element.data('value', settings[k].value);
+                        tah.$element.data('active', settings[k].value.id);
+                        tah.$element.val(settings[k].value.title);
                     }
                     break;
                 case 'grid':

@@ -32,6 +32,9 @@ var validationModel = {
     count: {
         name: 'Количество',
         validate: function (value) {
+            if (!utils.isInt(value) || +value > 1000) {
+                return 'Должно быть числомdo 1000'
+            }
             return false;
         }
     },
@@ -62,6 +65,9 @@ var validationModel = {
     offset: {
         name: 'Адрес проверки',
         validate: function (value) {
+            if (!utils.isInt(value) || +value > 1000) {
+                return 'Должно быть числомdo 1000'
+            }
             return false;
         }
     },
@@ -188,7 +194,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                 offset: +settings.offset.value,
                 count: +settings.count.value,
                 country: +settings.count.value + 1,
-                city: +settings.city.value + 1,
+                city: settings.city.value ? settings.city.value.id : '',
                 hometown: '',
                 sex: +settings.sex.value,
                 status: +settings.status.value + 1,
@@ -229,7 +235,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     }
                     return check1;`
                     };
-                //    console.log(options.options.code);
+                    //    console.log(options.options.code);
 
                     executeCommand(options, function (err, data) {
                         // console.log(err);

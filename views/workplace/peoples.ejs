@@ -36,19 +36,21 @@
                             </select>
 
                         </div>
-                       <!-- <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Искать</label>
-                            <select class="selectpicker" data-width="100%" id="searchSelector">
-                                <option>Поиск</option>
-                                <option>Мои друзья</option>
-                            </select>
-                        </div>-->
+                        <!-- <div class="col-xs-6 col-sm-3 col-md-2">
+                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                    data-original-title="Искать среди друзей или глобально">Искать</label>
+                             <select class="selectpicker" data-width="100%" id="searchSelector">
+                                 <option>Поиск</option>
+                                 <option>Мои друзья</option>
+                             </select>
+                         </div>-->
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Строка поиска</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Строка поиска</label>
 
-                            <input type="text" class="form-control" id="q" value="Иван"/>
+                                <input type="text" class="form-control" id="q" value="Иван"/>
+                            </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
@@ -60,48 +62,54 @@
                             </select>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Оффсет</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Оффсет</label>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control" id="offset"
-                                       value="0">
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="offset"
+                                           value="0">
 
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Количество</label>
-
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control" id="count" value="20">
-
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Количество</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="count" value="20">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
                                    data-original-title="Искать среди друзей или глобально">Страна</label>
                             <%- include ../parts/countryDropdown.ejs %>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Город</label>
-                            <input class="form-control" data-provide="typeahead" data-delay="1000" data-type="city"
-                                   type="text" placeholder="Город"
-                                   id="city" data-templates="{empty: '<div>Ni4ego ne naydeno</div>}">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Город</label>
+                                <input class="form-control" data-provide="typeahead" data-delay="1000" data-type="city"
+                                       data-auto-select="true" type="typeahead" placeholder="Город"
+                                       id="city">
+                            </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
@@ -126,41 +134,47 @@
                             </select>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Возраст от</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Возраст от</label>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control" id="age_from"
-                                       value="18">
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="age_from"
+                                           value="18">
 
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">До</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">До</label>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control" id="age_to"
-                                       value="24">
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="age_to"
+                                           value="24">
 
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Искать среди друзей или глобально">Интересы</label>
-                            <input type="text" class="form-control" id="interests">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Интересы</label>
+                                <input type="text" class="form-control" id="interests">
+                            </div>
                         </div>
                     </div>
                     <div class="row">
