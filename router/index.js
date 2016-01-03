@@ -40,7 +40,7 @@ module.exports = function (app) {
     app.get('/proxies', require('./workplace/proxies').get);
     app.get('/accounts', require('./workplace/accounts').get);
     app.get('/peoples', require('./workplace/peoples').get);
-   // app.get('/groups', require('./workplace/groups').get);
+    app.get('/groups', require('./workplace/groups').get);
     //app.get('/lists', require('./workplace/lists').get);
    // app.get('/tasks', require('./workplace/tasks').get);
 

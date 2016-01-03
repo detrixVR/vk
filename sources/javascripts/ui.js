@@ -95,7 +95,7 @@ var getSettings = function () {
         if (item.id) {
             settings[item.id] = {
                 type: 'typeahead',
-                value: $(item).data('value')
+                value: $(item).data('value') || 0
             }
         }
     });
@@ -162,7 +162,7 @@ var applySettings = function (settings) {
                     var $elem = $(elem);
                     $elem.focus();
                     var tah = $elem.data('typeahead');
-                    if (tah) {
+                    if (tah && settings[k].value && settings[k].value.id) {
                         tah.$element.data('value', settings[k].value);
                         tah.$element.data('active', settings[k].value.id);
                         tah.$element.val(settings[k].value.title);

@@ -25,11 +25,12 @@
                 this.$newElement.css('width', '').addClass('fit-width');
             } else if (this.options.width) {
                 // Remove inline min-width so width can be changed from 'auto'
+                this.$newElement.css('width', this.options.width);
                 this.$menu.css({
                     'min-width': this.$newElement.outerWidth()
                     , width: this.$newElement.outerWidth()
                 });
-                this.$newElement.css('width', this.options.width);
+
             } else {
                 // Remove inline min-width/width so width can be changed
                 this.$menu.css('min-width', '');

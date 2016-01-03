@@ -6,19 +6,11 @@
 <body>
 
 <% var processId = 'searchPeoples' %>
-
 <%- include ../parts/cabinetMenu.ejs %>
 
 <div class="canvas">
 
-    <script>
-        var substringMatcher = function (query, process) {
-            return ['1', '2', '3'];
-        }
-    </script>
-
     <%- include ../templates/overlay.ejs %>
-
     <%- include ../parts/cabinetNavbar.ejs %>
 
     <div class="container-fluid">
@@ -34,7 +26,6 @@
                                 <option>Заменить список</option>
                                 <option>Добавить в список</option>
                             </select>
-
                         </div>
                         <!-- <div class="col-xs-6 col-sm-3 col-md-2">
                              <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
@@ -125,6 +116,7 @@
                                    data-original-title="Искать среди друзей или глобально">Семейное
                                 положение</label>
                             <select class="selectpicker" data-width="100%" id="status">
+                                <option>Ne vibrano</option>
                                 <option>Не женат</option>
                                 <option>Встречается</option>
                                 <option>Помолвлен</option>

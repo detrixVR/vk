@@ -1,4 +1,4 @@
-var PersonGrid = require('../../models/grid/person').PersonGrid,
+var GroupGrid = require('../../models/grid/group').GroupGrid,
     utils = require('../../modules/utils'),
     async = require('async'),
     request = require('request'),
@@ -6,21 +6,6 @@ var PersonGrid = require('../../models/grid/person').PersonGrid,
     executeCommand = require('../../vkapi').executeCommand;
 
 var validationModel = {
-    age_from: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    age_to: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    canWritePrivateMsg: {
-        validate: function (value) {
-            return false;
-        }
-    },
     city: {
         name: 'Таймаут',
         validate: function (value) {
@@ -42,24 +27,6 @@ var validationModel = {
             return false;
         }
     },
-    from_list: {
-        name: 'Поиск среди друзей',
-        validate: function (value) {
-            return false;
-        }
-    },
-    has_photo: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    interests: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
     offset: {
         name: 'Адрес проверки',
         validate: function (value) {
@@ -69,37 +36,62 @@ var validationModel = {
             return false;
         }
     },
-    online: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
     q: {
         name: 'Адрес проверки',
         validate: function (value) {
             return false;
         }
     },
-    personGrid: {
+    groupGrid: {
         name: 'Адрес проверки',
         validate: function (value) {
             return false;
         }
     },
-    replaceSelector: {
+
+    type: {
         name: 'Адрес проверки',
         validate: function (value) {
             return false;
         }
     },
-    sort: {
+    isOpened: {
         name: 'Адрес проверки',
         validate: function (value) {
             return false;
         }
     },
-    status: {
+    isOpenWall: {
+        name: 'Адрес проверки',
+        validate: function (value) {
+            return false;
+        }
+    },
+    isCanPost: {
+        name: 'Адрес проверки',
+        validate: function (value) {
+            return false;
+        }
+    },
+    isCanComment: {
+        name: 'Адрес проверки',
+        validate: function (value) {
+            return false;
+        }
+    },
+    isOfficial: {
+        name: 'Адрес проверки',
+        validate: function (value) {
+            return false;
+        }
+    },
+    isFuture: {
+        name: 'Адрес проверки',
+        validate: function (value) {
+            return false;
+        }
+    },
+    minMembersCount: {
         name: 'Адрес проверки',
         validate: function (value) {
             return false;
@@ -107,7 +99,7 @@ var validationModel = {
     }
 };
 
-var searchPeoples = function (processes, credentials, settings, callback) {
+var searchGroups = function (processes, credentials, settings, callback) {
 
     callback(null, { //start process
         cbType: 2
@@ -163,7 +155,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                         msg: utils.createMsg({msg: 'Ochistka spiska'})
                     });
 
-                    PersonGrid.remove({
+                    GroupGrid.remove({
                         username: credentials.username
                     }, function (err) {
                         return iteration(err ? err : null, account);
@@ -186,23 +178,28 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     command: 'execute'
                 };
 
+                var groupType = null;
+                switch (settings.type.value) {
+                    case 0:
+                        groupType = 'group';
+                        break;
+                    case 1:
+                        groupType = 'page';
+                        break;
+                    case 2:
+                        groupType = 'event';
+                        break;
+
+                }
+
                 var inOptions = {
                     q: settings.q.value,
-                    sort: +settings.sort.value,
+                    type: groupType,
+                    country_id: +settings.country.value + 1,
+                    city_id: settings.city.value ? settings.city.value.id : '',
+                    future: settings.isFuture.value ? 1 : 0,
                     offset: +settings.offset.value,
-                    count: +settings.count.value,
-                    country: +settings.country.value + 1,
-                    city: settings.city.value ? settings.city.value.id : '',
-                    hometown: '',
-                    sex: +settings.sex.value,
-                    status: +settings.status.value,
-                    age_from: +settings.age_from.value,
-                    age_to: +settings.age_to.value,
-                    interests: settings.interests.value,
-                    online: settings.online.value ? 1 : 0,
-                    has_photo: settings.has_photo.value ? 1 : 0,
-                    from_list: settings.from_list.value ? 'friends' : '',
-                    fields: 'sex,online,can_write_private_message,photo_50'
+                    count: +settings.count.value
                 };
 
                 console.log(inOptions);
@@ -220,22 +217,89 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     } else {
 
                         options.options = {
-                            code: `var peoples = API.users.search(${JSON.stringify(inOptions)}).items;
-                    var i = 0;
-                    var check1 = [];
-                    if (${ settings.canWritePrivateMsg.value }) {
-                        while(i < peoples.length) {
-                             if(peoples[i].can_write_private_message == 1) {
-                                check1.push(peoples[i]);
-                             }
-                             i=i+1;
-                        }
-                    } else {
-                        check1 = peoples;
-                    }
-                    return check1;`
+                            code: `var searchResult = API.groups.search(${JSON.stringify(inOptions)}).items;
+                                if ( searchResult@.id ) {
+                                    var groups = API.groups.getById({"group_ids": searchResult@.id, "fields":"city,country,wall_comments,members_count,counters,can_post,can_see_all_posts,activity,fixed_post,verified,ban_info"});
+                                    var i = 0;
+                                    var check1 = [];
+                                    if (${settings.isCanPost.value}){
+                                        while(i < groups.length) {
+                                            if(groups[i].can_post == 1) {
+                                                check1.push(groups[i]);
+                                            }
+                                            i=i+1;
+                                        }
+                                    } else {
+                                        check1 = groups;
+                                    }
+                                    i = 0;
+                                    var check2 = [];
+                                    if (${settings.isOpenWall.value}){
+                                        while(i < check1.length) {
+                                            if(check1[i].can_see_all_posts == 1) {
+                                                check2.push(check1[i]);
+                                            }
+                                            i=i+1;
+                                        }
+                                    } else {
+                                        check2 = check1;
+                                    }
+                                    i = 0;
+                                    var check3 = [];
+                                    if (${settings.isOpened.value}){
+                                        while(i < check2.length) {
+                                            if(check2[i].is_closed == 0) {
+                                                check3.push(check2[i]);
+                                            }
+                                            i=i+1;
+                                        }
+                                    } else {
+                                        check3 = check2;
+                                    }
+                                    i = 0;
+                                    var check4 = [];
+                                    if (${settings.isCanComment.value}){
+                                        while(i < check3.length) {
+                                            var post = API.wall.get({"owner_id": -check3[i].id,"count":1,"offset":0});
+                                            if (post.items.length) {
+                                                if (post.items[0].comments.can_post == 1) {
+                                                    var gg = check3[i];
+                                                    gg.wall_comments = 1;
+                                                    check4.push(gg);
+                                                }
+                                            }
+                                            i=i+1;
+                                        }
+                                    } else {
+                                        check4 = check3;
+                                    }
+                                    i = 0;
+                                    var check5 = [];
+                                    if (${settings.isOfficial.value}){
+                                        while(i < check4.length) {
+                                            if(check4[i].verified == 0) {
+                                                check5.push(check4[i]);
+                                            }
+                                            i=i+1;
+                                        }
+                                    } else {
+                                        check5 = check4;
+                                    }
+                                    i = 0;
+                                    var check6 = [];
+                                    while(i < check5.length) {
+                                        if(check5[i].members_count){
+                                            if(check5[i].members_count > ${settings.minMembersCount.value}) {
+                                                check6.push(check5[i]);
+                                            }
+                                        }
+                                        i=i+1;
+                                    }
+                                    return check6;
+                                } else {
+                                    return [];
+                                };`
                         };
-                        //    console.log(options.options.code);
 
                         executeCommand(options, function (err, data) {
                             // console.log(err);
@@ -272,9 +336,9 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                         item.username = credentials.username;
 
-                        var newPersonGrid = new PersonGrid(item);
+                        var newGroupGrid = new GroupGrid(item);
 
-                        newPersonGrid.save(function (err) {
+                        newGroupGrid.save(function (err) {
                             return yes(err ? err : null);
                         });
 
@@ -282,7 +346,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                         callback(null, { // process msg
                             cbType: 5,
-                            gridId: 'personGrid'
+                            gridId: 'groupGrid'
                         });
 
                         return iteration(err);
@@ -302,4 +366,4 @@ var searchPeoples = function (processes, credentials, settings, callback) {
         });
 };
 
-module.exports = searchPeoples;
+module.exports = searchGroups;

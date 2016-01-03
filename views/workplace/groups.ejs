@@ -4,75 +4,101 @@
     <%- include ../parts/cabinetHead.ejs %>
 </head>
 <body>
-<%- include ../parts/cabinetNavbar.ejs %>
-<div class="canvas">
-    <%- include ../parts/cabinetTopNavbar.ejs %>
-    <%- include ../parts/overlay.ejs %>
 
-    <div class="hidden" id="listType"><%= type %></div>
+<% var processId = 'searchGroups' %>
+<%- include ../parts/cabinetMenu.ejs %>
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+    <%- include ../parts/cabinetNavbar.ejs %>
 
     <div class="container-fluid">
-        <div class="row canFade">
+        <div class="row">
             <div class="col-xs-12">
-                <div class="well well-sm controls">
-                    <label class="bold float">Настройки</label>
-                    <div class="row nomargin form-group">
-                        <div class="col-xs-6 col-sm-3 col-md-2">
-                            <div>
-                                <select class="selectpicker" data-style="btn-primary" data-width="100%" id="replaceSelector">
-                                    <option>Заменить список</option>
-                                    <option>Добавить в список</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row nomargin form-group">
-                        <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Строка поиска</label>
+                <div class="well well-sm container-fluid">
 
-                            <input type="text" class="form-control input-sm" id="q" value="Music">
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                   data-original-title="Заменить существующий список">Настройки</label>
+                            <select class="selectpicker" data-style="btn-primary" data-width="100%"
+                                    id="replaceSelector">
+                                <option>Заменить список</option>
+                                <option>Добавить в список</option>
+                            </select>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Тип сообщества</label>
-
-                            <div>
-                                <select class="selectpicker" data-width="100%" id="type">
-                                    <option>Группа</option>
-                                    <option>Публичная страница</option>
-                                    <option>Событие</option>
-                                </select>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Заменить существующий список">Строка поиска</label>
+                                <input type="text" class="form-control" id="q" value="Music">
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Количество</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Заменить существующий список">Тип сообщества</label>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control input-sm" id="count" value="20" max="1000">
-
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                <div>
+                                    <select class="selectpicker" data-width="100%" id="type">
+                                        <option>Группа</option>
+                                        <option>Публичная страница</option>
+                                        <option>Событие</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Оффсет</label>
-                            <input type="text" class="form-control input-sm" id="offset" value="0">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Заменить существующий список">Количество</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="count" value="20" max="1000">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
-                            <label>Количество участников от</label>
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Заменить существующий список">Оффсет</label>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control input-sm" id="minMembersCount"
-                                       value="10">
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="offset" value="0" max="1000">
 
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Заменить существующий список">Количество участников,
+                                    от</label>
+
+                                <div class="input-group spinner full-width">
+                                    <input type="text" class="form-control" id="minMembersCount"
+                                           value="10">
+
+                                    <div class="input-group-btn-vertical">
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                        <button class="btn btn-default" type="button"><i
+                                                    class="glyphicon glyphicon-chevron-down"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -80,8 +106,19 @@
                             <label>Страна</label>
                             <% include ../parts/countryDropdown %>
                         </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <div class="form-group">
+                                <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
+                                       data-original-title="Искать среди друзей или глобально">Город</label>
+                                <input class="form-control" data-provide="typeahead" data-delay="1000" data-type="city"
+                                       data-auto-select="true" type="typeahead" placeholder="Город"
+                                       id="city">
+                            </div>
+                        </div>
                     </div>
-                    <div class="row nomargin form-group">
+
+
+                    <div class="row ">
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
                                 <input type="checkbox" id="isOpened">
@@ -122,74 +159,67 @@
                                 </label>
                             </div>
                         </div>
+                        <div class="col-xs-6 col-sm-3 col-md-2 hidden type2">
+                            <div class="checkbox">
+                                <input type="checkbox" id="isFuture">
+                                <label for="isFuture">
+                                    Budushie sobitiya
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12 col-lg-8 canFade">
+            <div class="col-xs-12 col-lg-8">
                 <div class="well well-sm">
-                    <label class="bold float">Прокси</label>
-                    <table id="grid" class="table table-condensed table-hover table-striped" data-selection="true"
-                           data-multi-select="true" data-row-select="true" data-keep-selection="true">
-                        <thead>
-                        <tr>
-                            <th data-column-id="_id" data-identifier="true" data-type="string"
-                                data-visible="false"
-                                data-visible-in-selection="false"></th>
-                            <th data-column-id="created" data-type="date" data-order="1"
-                                data-visible="false"
-                                data-visible-in-selection="false"></th>
-                            <th data-formatter="groupLink" data-column-id="id" data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="true">Id
-                            </th>
-                            <th data-column-id="name" data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="false">Название
-                            </th>
-                            <th data-column-id="members_count"
-                                data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="false">Кол-во участников
-                            </th>
-                            <th data-formatter="verified"  data-column-id="verified"
-                                data-align="center"
-                                data-sortable="true"
-                                data-header-align="center"
-                                data-width="100px" data-editable="false">Официальное
-                            </th>
-                            <th data-formatter="commandsNotAll" data-sortable="false"
-                                data-align="center"
-                                data-width="100px"
-                                data-header-align="center"
-                                data-visible-in-selection="false">Действия
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <%- include ../templates/grids/groupGrid.ejs %>
                 </div>
             </div>
-            <div class="col-xs-12 col-lg-4">
-                <div class="well well-sm controls">
-                    <label class="bold float">Выполнение</label>
-
-                    <div class="form-group">
-                        <%- include ../parts/eventButtons.ejs %>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm widget eventsHolder">
+                    <div class="bootgrid-header">
+                        <%- include ../parts/buttonsProcess.ejs %>
                     </div>
-                    <div class="list" id="eventsHolder"></div>
+                    <div class="listHolder">
+                        <ul class="list-group">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<%- include ../parts/modalIO.ejs %>
-<script data-main="js/require/search" src="js/require.js"></script>
+<%- include ../templates/modalInput.ejs %>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<script>
+    $(function () {
+        $('#country').on('change', function () {
+            var $city = $('#city');
+            $city.val('').focus();
+            var cityTypeahead = $city.data('typeahead');
+            if (cityTypeahead) {
+                cityTypeahead.hide();
+                cityTypeahead.country = this.selectedIndex + 1;
+            }
+        })
+
+        $('.selectpicker').on('change', function (e) {
+            var selectedIndex = this.selectedIndex;
+            var $this = $(this);
+            var id = $this.attr('id');
+            var selector = $('.' + id + selectedIndex);
+            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
+            selector.toggleClass('hidden');
+        });
+    });
+
+</script>
 
 </body>
 </html>

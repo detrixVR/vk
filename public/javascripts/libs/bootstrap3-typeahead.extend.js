@@ -167,6 +167,13 @@
             return this;
         },
 
+        blur: function (e) {
+
+
+           // this.select();
+            this.focused = false;
+            if (!this.mousedover && this.shown) this.hide();
+        },
 
     };
 

@@ -36,6 +36,10 @@ var schema = new Schema({
         required: false,
         default: 0
     },
+    photo_50: {
+        type: String,
+        required: false
+    },
     created: {
         type: Date,
         required: false,

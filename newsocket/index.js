@@ -10,6 +10,7 @@ var io = require('socket.io'),
     dbProcess = require('../models/process').Process,
     validateProxies = require('../socket/processes/validateProxies'),
     searchPeoples = require('../socket/processes/searchPeoples'),
+    searchGroups = require('../socket/processes/searchGroups'),
     Process = require('./process');
 
 const COMMANDS_DATA = [
@@ -247,6 +248,7 @@ var sio = function (server) {
                         switch (credentials.processId) {
                             case 'validateProxies':
                             case 'searchPeoples':
+                            case 'searchGroups':
                                 break;
                             default:
                                 console.log('ХЗ процесс');

@@ -1151,13 +1151,16 @@
             avatar: function (column, row) {
                 var accountInfo = row.settings ? row.settings.accountInfo : null;
                 var photo_50 = null;
+                var accountId = null;
                 if (accountInfo && accountInfo.value) {
                     photo_50 = accountInfo.value.photo_50;
+                    accountId = accountInfo.accountId;
                 } else if (row.photo_50) {
                     photo_50 = row.photo_50;
+                    accountId = row.id;
                 }
                 if (photo_50) {
-                    return '<a href="#">' +
+                    return '<a target="_blank" href="http://vk.com/id'+accountId+'">' +
                         '<div id="accountHolder">' +
                         '<div class="img-thumbnail avatarHolder" title="' +
                         '" style="background-image: url(' + photo_50 + ');">' +
