@@ -334,6 +334,8 @@
 
                 renderRemoveIcon.call(this, actions);
 
+                renderSaveIcon.call(this, actions);
+
                 renderRowCountSelection.call(this, actions);
 
                 // Column selection
@@ -504,6 +506,21 @@
                     $(this).closest('.well').find('[data-toggle=bootgrid]').trigger('gridDelete', this);
                 });
         actions.append(remove);
+    }
+
+    function renderSaveIcon(actions) {
+        var that = this,
+            css = this.options.css,
+            tpl = this.options.templates;
+
+        var saveIcon = tpl.icon.resolve(getParams.call(this, {iconCss: css.iconSave})),
+            save = $(tpl.actionLink.resolve(getParams.call(this,
+                {content: saveIcon, text: this.options.labels.saveList, href: "/save/" + that.listType + ".txt"})))
+                .on("click" + namespace, function (e) {
+                    e.stopPropagation();
+                    $(this).closest('.well').find('[data-toggle=bootgrid]').trigger('saveList', this);
+                });
+        actions.append(save);
     }
 
     function renderRowCountSelection(actions) {
@@ -1059,6 +1076,7 @@
             iconUp: "glyphicon-chevron-up",
             iconAdd: "glyphicon-plus",
             iconRemove: "glyphicon-trash",
+            iconSave: "glyphicon-floppy-disk",
             infos: "infos", // must be a unique class name or constellation of class names within the header and footer,
             left: "text-left",
             pagination: "pagination", // must be a unique class name or constellation of class names within the header and footer
@@ -1218,6 +1236,7 @@
             search: "Найти",
             add: 'Добавить',
             removeSelected: 'Удалить выделенное',
+            saveList: 'Sohranit\' spisok',
             save: 'Сохранить'
         },
 
@@ -1231,6 +1250,7 @@
 
         templates: {
             actionButton: "<button class=\"btn btn-default\" type=\"button\" title=\"{{ctx.text}}\">{{ctx.content}}</button>",
+            actionLink: "<a class=\"btn btn-primary\" type=\"button\" title=\"{{ctx.text}}\" href=\"{{ctx.href}}\" target=\"_blank\">{{ctx.content}}</a>",
             actionDropDown: "<div class=\"{{css.dropDownMenu}}\"><button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>",
             actionDropDownItem: "<li><a data-action=\"{{ctx.action}}\" class=\"{{css.dropDownItem}} {{css.dropDownItemButton}}\">{{ctx.text}}</a></li>",
             actionDropDownCheckboxItem: "<li><label class=\"{{css.dropDownItem}}\"><input name=\"{{ctx.name}}\" type=\"checkbox\" value=\"1\" class=\"{{css.dropDownItemCheckbox}}\" {{ctx.checked}} /> {{ctx.label}}</label></li>",

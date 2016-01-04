@@ -4,40 +4,19 @@
     <%- include ../parts/cabinetHead.ejs %>
 </head>
 <body>
-<%- include ../parts/cabinetNavbar.ejs %>
-<div class="canvas">
-    <%- include ../parts/cabinetTopNavbar.ejs %>
-    <%- include ../parts/overlay.ejs %>
 
-    <div class="hidden" id="listType"><%= type %></div>
+<% var processId = 'listCreating' %>
+<%- include ../parts/cabinetMenu.ejs %>
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+    <%- include ../parts/cabinetNavbar.ejs %>
 
     <div class="container-fluid" id="mainContainer">
 
-        <div class="row">
-            <div class="col-xs-12">
-                <ul class="nav nav-pills">
-                    <li role="presentation" <% if(type === 'person'){ %>class="active"
-                            <% } %>
-                            ><a href="/lists?type=person">Люди</a></li>
-                    <li role="presentation" <% if(type === 'group'){ %>class="active"
-                            <% } %>
-                            ><a href="/lists?type=group">Группы</a></li>
-                    <li role="presentation" <% if(type === 'post'){ %>class="active"
-                            <% } %>
-                            ><a href="/lists?type=post">Посты</a></li>
-                    <li role="presentation" <% if(type === 'photo'){ %>class="active"
-                            <% } %>
-                            ><a href="/lists?type=photo">Фотографии</a></li>
-                </ul>
-            </div>
-        </div>
 
         <div class="row">
-            <div class="col-xs-12 col-lg-8">
-                <% if (type === 'person') { %>
-                <%- include ../widgetTemplates/gridTemplatePerson.ejs %>
-                <% } %>
-            </div>
             <div class="col-xs-12 col-lg-4">
                 <div class="well well-sm widget">
                     <label class="bold float">Настройки</label>
@@ -144,23 +123,47 @@
 
         <div class="row">
             <div class="col-xs-12 col-lg-8">
-                <div class="typeSelector0 hidden">
-                    <%- include ../widgetTemplates/gridTemplatePost.ejs %>
-                </div>
-                <div class="typeSelector1 hidden">
-                    <%- include ../widgetTemplates/gridTemplatePhoto.ejs %>
+                <div class="well well-sm">
+                    <%- include ../templates/grids/groupGrid.ejs %>
                 </div>
             </div>
-
-            <div class="col-xs-12 col-lg-4">
-                <%- include ../widgetTemplates/eventsHolder.ejs %>
+            <div class="col-xs-12  col-lg-4">
+                <div class="well well-sm widget eventsHolder">
+                    <div class="bootgrid-header">
+                        <%- include ../parts/buttonsProcess.ejs %>
+                    </div>
+                    <div class="listHolder">
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
 
     </div>
 </div>
-<%- include ../parts/modalIO.ejs %>
-<script data-main="js/require/socket1" src="js/require.js"></script>
+
+
+<%- include ../templates/modalInput.ejs %>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<script>
+    $(function () {
+
+        $('.selectpicker').on('change', function (e) {
+            var selectedIndex = this.selectedIndex;
+            var $this = $(this);
+            var id = $this.attr('id');
+            var selector = $('.' + id + selectedIndex);
+            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
+            selector.toggleClass('hidden');
+        });
+    });
+
+</script>
+
 </body>
 </html>

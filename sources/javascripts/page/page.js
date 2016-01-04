@@ -39,6 +39,8 @@ class Page {
             this.accountId = account.accountInfo.accountId;
             this.processId = account.processId;
 
+            this.ui.renderAccountHolder(account);
+
             this.socket.socket.emit('switchAccount', {
                 accountId: this.accountId
             });

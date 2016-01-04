@@ -1,0 +1,21 @@
+<script type="text/template" id="accountHolderTemplate">
+
+    <div class="img-thumbnail avatarHolder" onclick="$(document.body).trigger('selectAccount')"
+         style="background-image: url('{{= photo_50 }}');"></div>
+    <div>
+        <div><a href="http://vk.com/id{{=accountId}}" target="_blank">ВОЙНА С ТУРЦИЕЙ</a></div>
+        <div class="pull-left" style="margin-right: 3px">
+            <a href="/config?account={{= accountId }}" class="btn btn-xs btn-default">
+                <span class="glyphicon glyphicon-cog"></span>
+            </a>
+        </div>
+        <div class="pull-left">
+            <a href="/?account={{= accountId }}&next=true" target="_blank" class="btn btn-xs btn-success">
+                <span class="glyphicon glyphicon-plus"></span>
+            </a>
+        </div>
+
+    </div>
+
+
+</script>

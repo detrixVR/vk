@@ -224,6 +224,11 @@ var highLightFields = function (badFields) {
     })
 };
 
+var renderAccountHolder = function(account){
+    console.log(account);
+    $('#accountHolder').html(_.template($('#accountHolderTemplate').html())(account.accountInfo));
+};
+
 var setProcesses = function (processes) {
     if (processes.length) {
         processes.forEach(function (item, i) {
@@ -493,7 +498,10 @@ var init = function () {
             grid.reload(function () {
                 //$.notify({message: 'Успешно удалено'}, {type: 'success'});
             });
-        });
+        })
+    .bind('saveList', function(event){
+        console.log('saveList')
+    });
 
 
     $(document)
@@ -806,6 +814,7 @@ var ui = {
     displayNotification: displayNotification,
     setProcesses: setProcesses,
     getTitleById: getTitleById,
+    renderAccountHolder: renderAccountHolder,
 };
 
 export default ui;

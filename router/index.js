@@ -41,7 +41,7 @@ module.exports = function (app) {
     app.get('/accounts', require('./workplace/accounts').get);
     app.get('/peoples', require('./workplace/peoples').get);
     app.get('/groups', require('./workplace/groups').get);
-    //app.get('/lists', require('./workplace/lists').get);
+    app.get('/lists', require('./workplace/lists').get);
    // app.get('/tasks', require('./workplace/tasks').get);
 
     app.get('/logout',      require('./default/logout').get);
@@ -61,6 +61,8 @@ module.exports = function (app) {
     app.delete('/grid', require('./grid').delete);
 
     app.post('/vkapi', require('./vkapi').post);
+
+    app.get('/save/:type',   require('./save').get);
 
     app.use(function (req, res, next) {
         var err = {

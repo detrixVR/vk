@@ -43,7 +43,7 @@ module.exports.post = function (req, res) {
     }
 
     if (location) {
-       // console.log(location);
+        // console.log(location);
 
 
         var url = location.pathname.substring(1);
@@ -52,7 +52,9 @@ module.exports.post = function (req, res) {
             processId: 'defaultProcess',
             accountInfo: {
                 accountId: 'defaultAccount',
-                photo_50: '/images/camera_50.png'
+                photo_50: '/images/camera_50.png',
+                last_name: 'last_name',
+                first_name: 'first_name'
             }
         };
 

@@ -75,6 +75,7 @@ class Socket {
                     case 'validateAccounts':
                     case 'searchPeoples':
                     case 'searchGroups':
+                    case 'listCreating':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });
