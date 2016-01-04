@@ -110,7 +110,8 @@ var validationModel = {
 var searchPeoples = function (processes, credentials, settings, callback) {
 
     callback(null, { //start process
-        cbType: 2
+        cbType: 2,
+        msg: utils.createMsg({msg: 'Poisk ludey', type: 2, clear: true})
     });
 
     var error = utils.validateSettings(settings, validationModel);
@@ -122,8 +123,6 @@ var searchPeoples = function (processes, credentials, settings, callback) {
             badFields: error.badFields
         })
     }
-
-    //console.log('here');
 
     async.waterfall([
             function (iteration) {
@@ -164,7 +163,8 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     });
 
                     PersonGrid.remove({
-                        username: credentials.username
+                        username: credentials.username,
+                        accountId: credentials.accountId
                     }, function (err) {
                         return iteration(err ? err : null, account);
                     });
@@ -190,7 +190,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     q: settings.q.value,
                     sort: +settings.sort.value,
                     offset: +settings.offset.value,
-                    count: +settings.count.value,
+                    count: 100/*+settings.count.value*/,
                     country: +settings.country.value + 1,
                     city: settings.city.value ? settings.city.value.id : '',
                     hometown: '',
@@ -211,55 +211,137 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                 var result = [];
 
                 async.forever(function (next) {
-                    if (result.length >= +settings.count.value ||
-                        inOptions.offset >= 1000) {
-                        return next({
-                            result: result,
-                            msg: utils.createMsg({msg: 'done'})
-                        });
-                    } else {
+
+                    function processItem(back) {
+
 
                         options.options = {
-                            code: `var peoples = API.users.search(${JSON.stringify(inOptions)}).items;
-                    var i = 0;
-                    var check1 = [];
-                    if (${ settings.canWritePrivateMsg.value }) {
-                        while(i < peoples.length) {
-                             if(peoples[i].can_write_private_message == 1) {
-                                check1.push(peoples[i]);
-                             }
-                             i=i+1;
-                        }
-                    } else {
-                        check1 = peoples;
-                    }
-                    return check1;`
+                            code: `var response = API.users.search(${JSON.stringify(inOptions)});
+                                var peoples = response.items;
+                                var i = 0;
+                                var check1 = [];
+                                if (${ settings.canWritePrivateMsg.value }) {
+                                    while(i < peoples.length) {
+                                         if(peoples[i].can_write_private_message == 1) {
+                                            check1.push(peoples[i]);
+                                         }
+                                         i=i+1;
+                                    }
+                                } else {
+                                    check1 = peoples;
+                                }
+                                return {
+                                    count: response.count,
+                                    items: check1
+                                };`
                         };
-                        //    console.log(options.options.code);
 
                         executeCommand(options, function (err, data) {
-                            // console.log(err);
-                            console.log('one');
                             if (err) {
-                                return next(err);
+                                return back(err);
                             } else {
                                 if (data &&
                                     data.result &&
                                     data.result.response &&
-                                    data.result.response.length) {
-                                    result = result.concat(data.result.response);
-                                    next();
+                                    data.result.response.items) {
+
+                                    result = result.concat(data.result.response.items);
+
+                                    if (inOptions.offset >= data.result.response.count ||
+                                        result.length >= +settings.count.value ||
+                                        inOptions.offset >= 1000) {
+
+                                        result.splice(+settings.count.value);
+
+                                        return back({
+                                            msg: utils.createMsg({
+                                                msg: `done, naydeno ${result.length} polzovateley`,
+                                                type: 2
+                                            })
+                                        });
+                                    } else {
+                                        return back();
+                                    }
+
                                 } else {
-                                    return next({
-                                        result: result,
+                                    return back({
                                         msg: utils.createMsg({msg: 'oshibka'})
                                     });
                                 }
                             }
                         });
+
                         inOptions.offset += +settings.count.value;
+
                     }
+
+                    var curState = utils.getProcessState(processes, credentials);
+
+                    switch (curState) {
+                        case 1:
+
+                            setTimeout(function () {
+                                processItem(function (err) {
+                                    return next(err ? err : null);
+                                });
+                            }, 333);
+
+
+                            break;
+                        case 2:
+
+                            callback(null, {
+                                cbType: 3,
+                                msg: utils.createMsg({msg: 'Пауза'})
+                            });
+
+
+                            var d = null;
+                            var delay = function () {
+
+                                curState = utils.getProcessState(processes, credentials);
+
+                                if (curState === 2) {
+                                    d = setTimeout(delay, 100);
+                                } else {
+                                    clearTimeout(d);
+                                    if (curState !== 0) {
+
+                                        callback(null, { //start process
+                                            cbType: 2
+                                        });
+
+                                        processItem(function (err) {
+                                            return next(err ? err : null);
+                                        });
+                                    } else {
+                                        return next({
+                                            msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
+                                        });
+                                    }
+                                }
+                            };
+                            delay();
+                            break;
+                        case 0:
+
+                            return next({
+                                msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
+                            });
+                        default :
+                            return next();
+                    }
+
                 }, function (err) {
+
+                    switch (err.arg) {
+                        case 5:
+                            console.log('!here');
+                            console.log(err);
+                            err.msg = utils.createMsg({msg: err.msg, type: 3});
+                            return iteration(err);
+
+                    }
 
 
                     callback(null, {
@@ -267,10 +349,12 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                         msg: utils.createMsg({msg: 'sohranenie resultatov'})
                     });
 
-                    async.each(err.result, function (item, yes) {
+
+                    async.each(result, function (item, yes) {
 
 
                         item.username = credentials.username;
+                        item.accountId = credentials.accountId;
 
                         var newPersonGrid = new PersonGrid(item);
 
@@ -278,14 +362,14 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                             return yes(err ? err : null);
                         });
 
-                    }, function (err) {
+                    }, function (error) {
 
                         callback(null, { // process msg
                             cbType: 5,
                             gridId: 'personGrid'
                         });
 
-                        return iteration(err);
+                        return iteration(error ? error : err);
 
                     });
 

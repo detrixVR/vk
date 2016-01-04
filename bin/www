@@ -106,6 +106,7 @@ if (cluster.isMaster) {
                     if (process) {
                         processes.splice(processes.indexOf(process), 1);
                     }
+                    break;
                 case 'getAllProcesses':
                     broadcast({
                         command: 'getAllProcesses',

@@ -111,8 +111,14 @@ var sio = function (server) {
     }
 
     function sendProcessState(data) {
-        s.sockets.in(data.username + ':' + data.accountId + ':' + data.processId).emit('setState', data/*{state: data.state, msg: data.msg}*/);
-        s.sockets.in(data.username + ':' + data.accountId + ':' + 'tasksListen').emit('setState', data/*{state: data.state, msg:  data.msg}*/);
+        s.sockets.in(data.username + ':' + data.accountId + ':' + data.processId).emit('setState', /*data*/{
+            state: data.state,
+            msg: data.msg
+        });
+        s.sockets.in(data.username + ':' + data.accountId + ':' + 'tasksListen').emit('setState', /*data*/{
+            state: data.state,
+            msg: data.msg
+        });
     }
 
     function startProcess(data) {
@@ -123,7 +129,7 @@ var sio = function (server) {
             command: 'startProcess',
             data: data
         });
-        sendProcessState(newProcess);
+        sendProcessState(extend({}, newProcess, data));
     }
 
     function startPauseProcess(data, bSend) {
@@ -148,15 +154,16 @@ var sio = function (server) {
             if (bSend) {
                 if (curProc.getState() !== 0) {
                     curProc.stop();
-                    process.send({
-                        command: 'justStopProcess',
-                        data: data
-                    });
+
                 }
-                curProc.save(function(err){
-                    if(err) {
+                curProc.save(function (err) {
+                    if (err) {
                         console.error(err);
                     } else {
+                        process.send({
+                            command: 'justStopProcess',
+                            data: data
+                        });
                         sendProcessState(extend({}, data, {state: curProc.state}));
                         console.log('process stopped');
                         processes.splice(processes.indexOf(curProc), 1);
@@ -273,7 +280,7 @@ var sio = function (server) {
                                     startProcess(extend({}, credentials, {
                                         settings: settings,
                                         title: title
-                                    }));
+                                    }, cbData));
                                     break;
                                 case 3: //startPauseProcess
                                     startPauseProcess(extend({}, credentials, cbData), true);
@@ -298,8 +305,8 @@ var sio = function (server) {
 
                     var process = getProcess(msg.data);
                     if (!process) {
-                        dbProcess.findOne(credentials).sort({created: -1}).exec(function(err, doc){
-                            if(err) {
+                        dbProcess.findOne(credentials).sort({created: -1}).exec(function (err, doc) {
+                            if (err) {
                                 console.error(err);
                             } else {
                                 s.sockets.in(room).emit('setProcess', doc);

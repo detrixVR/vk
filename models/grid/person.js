@@ -6,6 +6,10 @@ var schema = new Schema({
         type: String,
         required: true
     },
+    accountId: {
+        type: String,
+        required: true
+    },
     content: {
         type: String,
         required: false,

@@ -19,6 +19,7 @@ var redrawSelector = function (selectedItem) {
 
 var setState = function (data) {
     $('.widget').trigger('setState', [data]);
+    $('button, input, a.btn').not('.startPauseButton, .stopButton').attr('disabled',data.state !== 0);
 };
 
 var overlay = function (state) {

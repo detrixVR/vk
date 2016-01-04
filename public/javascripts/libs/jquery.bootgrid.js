@@ -1140,10 +1140,22 @@
                 return "<a href=\"http://vk.com/id" + row.id + "\" target=\"__blank\">" + row.id + "</a>";
             },
             groupLink: function (column, row) {
-                return "<a href=\"http://vk.com/club" + row.id + "\" target=\"__blank\">" + row.id + "</a>";
+                var link = null;
+                switch (row.type) {
+                    case 'group':
+                        link = row.screen_name || 'club' + row.id;
+                        break;
+                    case 'page':
+                        link = row.screen_name || 'club' + row.id;
+                        break;
+                    case 'event':
+                        link = row.screen_name || 'event' + row.id;
+                        break;
+                }
+                return "<a href=\"http://vk.com/" + link + "\" target=\"__blank\">" + row.name + "</a>";
             },
             verified: function (column, row) {
-                return row.verified ? '<i class="fa fa-check"></i>' : '';
+                return row.verified ? '<i class="glyphicon glyphicon-ok"></i>' : '';
             },
             title: function (column, row) {
                 return getTitleById(row.processId);
@@ -1160,7 +1172,7 @@
                     accountId = row.id;
                 }
                 if (photo_50) {
-                    return '<a target="_blank" href="http://vk.com/id'+accountId+'">' +
+                    return '<a target="_blank" href="http://vk.com/id' + accountId + '">' +
                         '<div id="accountHolder">' +
                         '<div class="img-thumbnail avatarHolder" title="' +
                         '" style="background-image: url(' + photo_50 + ');">' +
@@ -1168,6 +1180,26 @@
                         '</div></a>';
                 }
 
+            },
+            groupAvatar: function (column, row) {
+                var link = null;
+                switch (row.type) {
+                    case 'group':
+                        link = row.screen_name || 'club' + row.id;
+                        break;
+                    case 'page':
+                        link = row.screen_name || 'club' + row.id;
+                        break;
+                    case 'event':
+                        link = row.screen_name || 'event' + row.id;
+                        break;
+                }
+                return '<a target="_blank" href="http://vk.com/' + link + '">' +
+                    '<div id="accountHolder">' +
+                    '<div class="img-thumbnail avatarHolder" title="' +
+                    '" style="background-image: url(' + row.photo_50 + ');">' +
+                    '</div>' +
+                    '</div></a>';
             },
             account: function (column, row) {
                 var accountInfo = row.settings.accountInfo;
