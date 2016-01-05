@@ -76,6 +76,8 @@ class Socket {
                     case 'searchPeoples':
                     case 'searchGroups':
                     case 'listCreating':
+                    case 'configurationClean':
+                    case 'configurationCopy':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });

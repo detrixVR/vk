@@ -58,6 +58,8 @@ module.exports.post = function (req, res) {
             }
         };
 
+        var objURL = parseQueryString(location.search);
+
         switch (url) {
             case 'proxies':
                 result.processId = 'validateProxies';
@@ -77,6 +79,20 @@ module.exports.post = function (req, res) {
             case 'tasks':
                 result.processId = 'taskExecution';
                 break;
+            case 'config':
+
+                result.processId = 'configurationClean';
+
+                switch (objURL.type) {
+                    case 'copy':
+                        result.processId = 'configurationCopy';
+                        break;
+                    case'group':
+                        result.processId = 'configurationGroup';
+                        break;
+                }
+
+                break;
         }
 
         const NEED_ACCOUNT = [
@@ -86,7 +102,6 @@ module.exports.post = function (req, res) {
             'tasks'
         ];
 
-        var objURL = parseQueryString(location.search);
 
         if (NEED_ACCOUNT.indexOf(url) > -1) {
 

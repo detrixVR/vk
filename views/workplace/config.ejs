@@ -4,11 +4,14 @@
     <%- include ../parts/cabinetHead.ejs %>
 </head>
 <body>
-<%- include ../parts/cabinetNavbar.ejs %>
-<div class="canvas">
-    <%- include ../parts/cabinetTopNavbar.ejs %>
 
-    <div class="hidden" id="listType"><%= type %></div>
+
+<%- include ../parts/cabinetMenu.ejs %>
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+    <%- include ../parts/cabinetNavbar.ejs %>
 
     <div class="container-fluid">
         <div class="row">
@@ -16,26 +19,24 @@
                 <ul class="nav nav-pills">
                     <li role="presentation" <% if(type === 'clean'){ %>class="active"
                             <% } %>
-                            ><a href="/config?type=clean">Чистка</a></li>
+                    ><a href="/config?type=clean">Чистка</a></li>
                     <li role="presentation" <% if(type === 'copy'){ %>class="active"
                             <% } %>
-                            ><a href="/config?type=copy">Копирование</a></li>
+                    ><a href="/config?type=copy">Копирование</a></li>
                     <li role="presentation" <% if(type === 'group'){ %>class="active"
                             <% } %>
-                            ><a href="/config?type=group">Мои группы</a></li>
+                    ><a href="/config?type=group">Мои группы</a></li>
                 </ul>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-lg-8">
-                <div class="well well-sm">
+                <div class="well well-sm container-fluid">
                     <label class="bold float">Настройки</label>
                     <% if (type == 'clean') { %>
 
-
-                    <div class="row nomargin">
-
-                        <div class="col-xs-6 col-sm-3 col-md-2">
+                    <div class="row">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="checkAll" checked>
                                 <label for="checkAll">
@@ -43,9 +44,8 @@
                                 </label>
                             </div>
                         </div>
-                    </div>
-                    <div class="row nomargin">
-                        <div class=" col-xs-6">
+
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removePhotos" checked>
                                 <label for="removePhotos">
@@ -53,7 +53,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeVideos" checked>
                                 <label for="removeVideos">
@@ -61,7 +61,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeAudios" checked>
                                 <label for="removeAudios">
@@ -69,7 +69,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeDocs" checked>
                                 <label for="removeDocs">
@@ -77,7 +77,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeNotes" checked>
                                 <label for="removeNotes">
@@ -85,7 +85,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeFriends" checked>
                                 <label for="removeFriends">
@@ -93,7 +93,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeDialogs" checked>
                                 <label for="removeDialogs">
@@ -101,7 +101,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="cleanWall" checked>
                                 <label for="cleanWall">
@@ -109,7 +109,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="cleanStatus" checked>
                                 <label for="cleanStatus">
@@ -117,7 +117,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeGroups" checked>
                                 <label for="removeGroups">
@@ -125,7 +125,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="removeRequests" checked>
                                 <label for="removeRequests">
@@ -133,7 +133,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="banFollowers" checked>
                                 <label for="banFollowers">
@@ -141,7 +141,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="clearProfile" checked>
                                 <label for="clearProfile">
@@ -149,7 +149,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class=" col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <div class="checkbox">
                                 <input type="checkbox" id="unSubscribeAll" checked>
                                 <label for="unSubscribeAll">
@@ -159,9 +159,9 @@
                         </div>
                     </div>
                     <% } else if (type === 'copy') { %>
-                    <div class="row nomargin">
+                    <div class="row">
 
-                        <div class="col-xs-6">
+                        <div class="col-xs-6 col-md-3">
                             <label>Откуда копировать</label>
                             <select class="selectpicker" id="copyFromSelector">
                                 <option>Из моих аккаунтов</option>
@@ -172,11 +172,11 @@
                         <div class="copyFromSelector0 hidden">
                             <div class="col-xs-6">
                                 <label>Мои аккаунты</label>
-                                <select class="selectpicker" id="myAccountSelector">
+                                <!--<select class="selectpicker" id="myAccountSelector">
                                     <% for (var i = 0 ; i < accounts.length; i++) { %>
                                     <option data-content='<div><%= accounts[i].first_name %> <%= accounts[i].last_name %><div class="hidden id"><%= accounts[i].id %></div></div>'></option>
                                     <% } %>
-                                </select>
+                                </select>-->
                             </div>
                         </div>
                         <div class="copyFromSelector1 hidden">
@@ -212,25 +212,44 @@
                 </div>
             </div>
             <div class="col-xs-12 col-lg-4">
-                <div class="well well-sm controls">
-                    <label class="bold float">Выполнение</label>
-
-                    <div class="form-group">
-                        <%- include ../parts/eventButtons.ejs %>
+                <div class="well well-sm widget eventsHolder">
+                    <div class="bootgrid-header">
+                        <%- include ../parts/buttonsProcess.ejs %>
                     </div>
-                    <div class="list" id="eventsHolder"></div>
+                    <div class="listHolder">
+                        <ul class="list-group">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<%- include ../templates/modalInput.ejs %>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
 
 <script>
+    $(function(){
+        $('[type=checkbox]').on('change',function(e){
+            var $this = $(this);
 
-
+            if ($this.attr('id') === 'checkAll')
+                $this.closest('.well').find('[type=checkbox]').prop('checked', $this.closest('.well').find('[type=checkbox]').prop('checked'));
+            else {
+                if (!$('[type=checkbox]').not('#checkAll').not(':checked').length) {
+                    $('#checkAll').prop('checked',true);
+                } else {
+                    $('#checkAll').prop('checked',false);
+                }
+            }
+        })
+    })
 </script>
 
-<script data-main="js/require/config" src="js/require.js"></script>
+<%- include ../templates/other/accountHolder.ejs %>
+
 </body>
 </html>

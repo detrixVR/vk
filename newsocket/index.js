@@ -11,6 +11,7 @@ var io = require('socket.io'),
     validateProxies = require('../socket/processes/validateProxies'),
     searchPeoples = require('../socket/processes/searchPeoples'),
     searchGroups = require('../socket/processes/searchGroups'),
+    configurationClean = require('../socket/processes/configurationClean'),
     Process = require('./process');
 
 const COMMANDS_DATA = [
@@ -256,6 +257,7 @@ var sio = function (server) {
                             case 'validateProxies':
                             case 'searchPeoples':
                             case 'searchGroups':
+                            case 'configurationClean':
                                 break;
                             default:
                                 console.log('ХЗ процесс');

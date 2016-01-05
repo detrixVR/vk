@@ -43,6 +43,7 @@ module.exports = function (app) {
     app.get('/groups', require('./workplace/groups').get);
     app.get('/lists', require('./workplace/lists').get);
    // app.get('/tasks', require('./workplace/tasks').get);
+    app.get('/config', require('./workplace/config').get);
 
     app.get('/logout',      require('./default/logout').get);
 

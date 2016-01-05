@@ -212,11 +212,9 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                 async.forever(function (next) {
 
-                    function processItem(back) {
 
-
-                        options.options = {
-                            code: `var response = API.users.search(${JSON.stringify(inOptions)});
+                    options.options = {
+                        code: `var response = API.users.search(${JSON.stringify(inOptions)});
                                 var peoples = response.items;
                                 var i = 0;
                                 var check1 = [];
@@ -234,103 +232,47 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                                     count: response.count,
                                     items: check1
                                 };`
-                        };
+                    };
 
-                        executeCommand(options, function (err, data) {
-                            if (err) {
-                                return back(err);
-                            } else {
-                                if (data &&
-                                    data.result &&
-                                    data.result.response &&
-                                    data.result.response.items) {
+                    executeCommand(options, processes, credentials, callback, function (err, data) {
 
-                                    result = result.concat(data.result.response.items);
+                        console.log(data);
+                        if (err) {
+                            return next(err);
+                        } else {
+                            if (data &&
+                                data.result &&
+                                data.result.response &&
+                                data.result.response.items) {
 
-                                    if (inOptions.offset >= data.result.response.count ||
-                                        result.length >= +settings.count.value ||
-                                        inOptions.offset >= 1000) {
+                                result = result.concat(data.result.response.items);
 
-                                        result.splice(+settings.count.value);
+                                if (inOptions.offset >= data.result.response.count ||
+                                    result.length >= +settings.count.value ||
+                                    inOptions.offset >= 1000) {
 
-                                        return back({
-                                            msg: utils.createMsg({
-                                                msg: `done, naydeno ${result.length} polzovateley`,
-                                                type: 2
-                                            })
-                                        });
-                                    } else {
-                                        return back();
-                                    }
+                                    result.splice(+settings.count.value);
 
-                                } else {
-                                    return back({
-                                        msg: utils.createMsg({msg: 'oshibka'})
+                                    return next({
+                                        msg: utils.createMsg({
+                                            msg: `done, naydeno ${result.length} polzovateley`,
+                                            type: 2
+                                        })
                                     });
-                                }
-                            }
-                        });
-
-                        inOptions.offset += +settings.count.value;
-
-                    }
-
-                    var curState = utils.getProcessState(processes, credentials);
-
-                    switch (curState) {
-                        case 1:
-
-                            setTimeout(function () {
-                                processItem(function (err) {
-                                    return next(err ? err : null);
-                                });
-                            }, 333);
-
-
-                            break;
-                        case 2:
-
-                            callback(null, {
-                                cbType: 3,
-                                msg: utils.createMsg({msg: 'Пауза'})
-                            });
-
-
-                            var d = null;
-                            var delay = function () {
-
-                                curState = utils.getProcessState(processes, credentials);
-
-                                if (curState === 2) {
-                                    d = setTimeout(delay, 100);
                                 } else {
-                                    clearTimeout(d);
-                                    if (curState !== 0) {
-
-                                        callback(null, { //start process
-                                            cbType: 2
-                                        });
-
-                                        processItem(function (err) {
-                                            return next(err ? err : null);
-                                        });
-                                    } else {
-                                        return next({
-                                            msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
-                                        });
-                                    }
+                                    return next();
                                 }
-                            };
-                            delay();
-                            break;
-                        case 0:
 
-                            return next({
-                                msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
-                            });
-                        default :
-                            return next();
-                    }
+                            } else {
+                                return next({
+                                    msg: utils.createMsg({msg: 'oshibka'})
+                                });
+                            }
+                        }
+                    });
+
+                    inOptions.offset += +settings.count.value;
+
 
                 }, function (err) {
 
@@ -377,13 +319,15 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                 });
 
 
-            }],
+            }
+        ],
         function (err) {
             return callback(null, {
                 cbType: 0,
                 msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
             })
-        });
+        }
+    );
 };
 
 module.exports = searchPeoples;

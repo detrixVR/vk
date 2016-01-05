@@ -1,5 +1,7 @@
 var VK = require('vksdk'),
-    config = require('../config');
+    config = require('../config'),
+    utils = require('../modules/utils');
+
 
 var vk = new VK({
     'language': 'ru',
@@ -60,9 +62,9 @@ function processError(error, callback) {
         case 11:
             errorText = 'В тестовом режиме приложение должно быть выключено или пользователь должен быть залогинен';
             break;
-       /* case 13:
-            errorText = error.error_msg;
-            break;*/
+        /* case 13:
+         errorText = error.error_msg;
+         break;*/
         case 14:
             errorText = 'Требуется ввод кода с картинки (Captcha)';
             break;
@@ -131,33 +133,87 @@ function processError(error, callback) {
     });
 }
 
-function executeCommand(options, callback) {
+function executeCommand(options, processes, credentials, callback, next) {
 
-    if (options.token)
-        vk.setToken(options.token);
+    function processItem(back) {
 
-    if (options.proxy)
-        vk.setProxy(options.proxy);
+        if (options.token)
+            vk.setToken(options.token);
+
+        if (options.proxy)
+            vk.setProxy(options.proxy);
 
 
-    console.log('prerequest');
-  //  console.log(options.options);
-
-    vk.request(options.command,
-        options.options,
-        function (_o) {
+        vk.request(options.command, options.options, function (_o) {
             console.log(_o);
             if (_o.error) {
                 processError(_o.error, function (err) {
-                    return callback(err);
+                    return back(err);
                 })
             } else {
-                return callback(null, {
+                return back(null, {
                     msg: 'Команда выполнена без ошибок',
                     result: _o
                 });
             }
         });
+    }
+
+    var curState = utils.getProcessState(processes, credentials);
+
+    switch (curState) {
+        case 1:
+
+            setTimeout(function () {
+                processItem(function (err, data) {
+                    return next(err ? err : null, data);
+                });
+            }, 333);
+
+
+            break;
+        case 2:
+
+            callback(null, {
+                cbType: 3,
+                msg: utils.createMsg({msg: 'Пауза'})
+            });
+
+
+            var d = null;
+            var delay = function () {
+
+                curState = utils.getProcessState(processes, credentials);
+
+                if (curState === 2) {
+                    d = setTimeout(delay, 100);
+                } else {
+                    clearTimeout(d);
+                    if (curState !== 0) {
+
+                        callback(null, { //start process
+                            cbType: 2
+                        });
+
+                        processItem(function (err) {
+                            return next(err ? err : null);
+                        });
+                    } else {
+                        return next({
+                            msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
+                        });
+                    }
+                }
+            };
+            delay();
+            break;
+        case 0:
+            return next({
+                msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
+            });
+        default :
+            return next();
+    }
 }
 
 module.exports.executeCommand = executeCommand;
