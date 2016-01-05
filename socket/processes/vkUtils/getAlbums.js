@@ -20,15 +20,17 @@ var getAlbums = function (type, options, processes, credentials, callback, next)
     }
 
     options.options = {
-        owner_id: 275667666,
-       // count: 100,
-        offset: 0,
-        need_system: 1
+       // owner_id: 275667666,
+        count: 100,
+        offset: 0
+       // need_system: 1,
+       // need_covers: 1,
+       // photo_sizes: 1
     };
 
     var result = [];
 
-    console.log(options);
+   // console.log(options);
     async.forever(function (back) {
 
         executeCommand(options, processes, credentials, callback, function (err, data) {

@@ -1,17 +1,27 @@
 var async = require('async');
 var executeCommand = require('../../../vkapi').executeCommand;
 
-var getServicePhotos = function (serviceAlbum, options, processes, credentials, callback, next) {
+var getItems = function (type, options, processes, credentials, callback, next) {
 
-
-    options.command = 'photos.get';
-
-    options.options = {
-       // owner_id: accountId,
-        album_id: serviceAlbum,
-        count: 1000,
-        offset: 0
-    };
+    switch (type) {
+        case 'video':
+            options.command = 'video.get';
+            options.options = {
+                count: 200,
+                offset: 0
+            };
+            break;
+        case 'audio':
+            options.command = 'audio.get';
+            options.options = {
+                count: 6000,
+                offset: 0
+            };
+            break;
+        default:
+            console.error('#1');
+            return next({error: error});
+    }
 
 
     var result = [];
@@ -74,4 +84,4 @@ var getServicePhotos = function (serviceAlbum, options, processes, credentials, 
 
 };
 
-module.exports = getServicePhotos;
+module.exports = getItems;

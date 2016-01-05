@@ -1,11 +1,10 @@
 var getAlbums = require('./getAlbums');
-var deleteDohuya = require('./deleteDohuya');
+var processDohuya = require('./processDohuya');
 var getServicePhotos = require('./getServicePhotos');
 var utils = require('../../../modules/utils');
 var async = require('async');
 
-
-var deletePhotos = function (options, processes, credentials,  callback, next) {
+var deletePhotos = function (options, processes, credentials, callback, next) {
 
     callback(null, { // process msg
         cbType: 1,
@@ -34,11 +33,11 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Удаляем альбомы'})
         });
 
-        deleteDohuya(accountId, token, albums, 'album', 'photo', function (err) {
+        processDohuya(albums, 'album', 'photo', options, processes, credentials, callback, function (err) {
             if (err) {
                 return yop(err);
             } else {
-                return v();
+                return yop();
             }
         })
     }, function (yop) {
@@ -48,7 +47,7 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Получаем фото со стены'})
         });
 
-        getServicePhotos(accountId, token, 'wall', function (err, photos) {
+        getServicePhotos('wall', options, processes, credentials, callback, function (err, photos) {
             if (err) {
                 return yop(err);
             } else {
@@ -62,7 +61,7 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Удаляем фото со стены'})
         });
 
-        deleteDohuya(accountId, token, photos, 'photo', 'photo', function (err) {
+        processDohuya(photos, 'photo', 'photo', options, processes, credentials, callback, function (err) {
             if (err) {
                 return yop(err);
             } else {
@@ -76,11 +75,11 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Получаем фото со страницы'})
         });
 
-        getServicePhotos(accountId, token, 'profile', function (err, photos) {
+        getServicePhotos('profile', options, processes, credentials, callback, function (err, photos) {
             if (err) {
                 return yop(err);
             } else {
-                return v(null, photos);
+                return yop(null, photos);
             }
         })
     }, function (photos, yop) {
@@ -90,7 +89,7 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Удаляем фото со страницы'})
         });
 
-        deleteDohuya(accountId, token, photos, 'photo', 'photo', function (err) {
+        processDohuya(photos, 'photo', 'photo', options, processes, credentials, callback, function (err) {
             if (err) {
                 return yop(err);
             } else {
@@ -104,7 +103,7 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Получаем сохраненные фото'})
         });
 
-        getServicePhotos(accountId, token, 'saved', function (err, photos) {
+        getServicePhotos('saved', options, processes, credentials, callback, function (err, photos) {
             if (err) {
                 return yop(err);
             } else {
@@ -118,7 +117,7 @@ var deletePhotos = function (options, processes, credentials,  callback, next) {
             msg: utils.createMsg({msg: 'Удаляем сохраненные фото'})
         });
 
-        deleteDohuya(accountId, token, photos, 'photo', 'photo', function (err) {
+        processDohuya(photos, 'photo', 'photo', options, processes, credentials, callback, function (err) {
             if (err) {
                 return yop(err);
             } else {

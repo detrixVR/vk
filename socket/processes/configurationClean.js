@@ -4,7 +4,9 @@
 var utils = require('../../modules/utils'),
     async = require('async'),
     extend = require('extend'),
-    deletePhotos = require('./vkUtils/deletePhotos');
+    deletePhotos = require('./vkUtils/deletePhotos'),
+    deleteAudios = require('./vkUtils/deleteAudios'),
+    deleteVideos = require('./vkUtils/deleteVideos');
 
 var validationModel = {
     banFollowers: {
@@ -168,77 +170,77 @@ var configurationClean = function (processes, credentials, settings, callback) {
                                 return done(err ? err : null);
                             });
                             break;
-                        /*case 'removeVideos':
-                            deleteVideos(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
+                        case 'removeVideos':
+                            deleteVideos(options, processes, credentials, callback, function (err) {
+                                return done(err ? err : null);
                             });
                             break;
                         case 'removeAudios':
-                            deleteAudios(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
+                            deleteAudios(options, processes, credentials, callback, function (err) {
+                                return done(err ? err : null);
                             });
                             break;
-                        case 'removeDocs':
-                            deleteDocs(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'removeNotes':
-                            deleteNotes(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'removeFriends':
-                            deleteFriends(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'removeDialogs':
-                            deleteDialogs(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'cleanWall':
-                            deleteWall(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'cleanStatus':
-                            deleteStatus(window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'removeGroups':
-                            deleteGroups(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'removeRequests':
-                            deleteRequests(window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'banFollowers':
-                            banFollowers(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'unSubscribeAll':
-                            unsubscribeAll(window.account, window.token, function (err) {
-                                return callback(err ? err : null);
-                            });
-                            break;
-                        case 'clearProfile':
-                            // clearProfile(window.account, window.token, function (err) {
-                            return callback();//callback(err ? err : null);
-                            // });
-                            break;
-*/
+                        /*case 'removeDocs':
+                         deleteDocs(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'removeNotes':
+                         deleteNotes(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'removeFriends':
+                         deleteFriends(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'removeDialogs':
+                         deleteDialogs(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'cleanWall':
+                         deleteWall(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'cleanStatus':
+                         deleteStatus(window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'removeGroups':
+                         deleteGroups(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'removeRequests':
+                         deleteRequests(window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'banFollowers':
+                         banFollowers(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'unSubscribeAll':
+                         unsubscribeAll(window.account, window.token, function (err) {
+                         return done(err ? err : null);
+                         });
+                         break;
+                         case 'clearProfile':
+                         // clearProfile(window.account, window.token, function (err) {
+                         return done();//callback(err ? err : null);
+                         // });
+                         break;
+                         */
                         default :
                             return done();
                     }
 
-                  //  return done();
+                    //  return done();
 
 
                 }, function (err) {

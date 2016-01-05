@@ -164,11 +164,12 @@ function executeCommand(options, processes, credentials, callback, next) {
     switch (curState) {
         case 1:
 
-            setTimeout(function () {
+          //  var that = this;
+         //  setTimeout(function () {
                 processItem(function (err, data) {
                     return next(err ? err : null, data);
                 });
-            }, 333);
+         //  }, 333);
 
 
             break;
