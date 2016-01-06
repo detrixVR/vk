@@ -1,6 +1,7 @@
-var getAlbums = require('./getAlbums');
+//var getAlbums = require('./getAlbums');
 var processDohuya = require('./processDohuya');
 var getServicePhotos = require('./getServicePhotos');
+var getItems = require('./getItems');
 var utils = require('../../../modules/utils');
 var async = require('async');
 
@@ -19,7 +20,8 @@ var deletePhotos = function (options, processes, credentials, callback, next) {
             msg: utils.createMsg({msg: 'Получаем альбомы'})
         });
 
-        getAlbums('photo', options, processes, credentials, callback, function (err, albums) {
+       // getAlbums('photo', options, processes, credentials, callback, function (err, albums) {
+        getItems('photoAlbum', options, processes, credentials, callback, function (err, albums) {
             if (err) {
                 return yop(err);
             } else {

@@ -49,6 +49,14 @@ var getAlbums = function (type, options, processes, credentials, callback, next)
 
                 result = result.concat(data.result.response.items);
 
+                if (!options.options.hasOwnProperty('count') ||
+                    !options.options.hasOwnProperty('offset')) {
+
+                    return back({
+                        next: true
+                    });
+                }
+
                 if (options.options.offset >= count ||
                     options.options.offset >= 1000) {
 

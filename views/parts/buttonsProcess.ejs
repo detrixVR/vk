@@ -1,4 +1,4 @@
-<div class="col-xs-6">
+<div class="<% if (processId !== 'configurationClean') { %>col-xs-6<% } else { %>col-xs-12<% } %>">
     <button class="btn btn-default startPauseButton"
             onclick="$(this).closest('.widget').trigger('startPauseProcess','<%= processId %>');"><span
                 class="glyphicon glyphicon-play"></span></button>

@@ -1,4 +1,4 @@
-var getAlbums = require('./getAlbums');
+//var getAlbums = require('./getAlbums');
 var processDohuya = require('./processDohuya');
 var getItems = require('./getItems');
 var utils = require('../../../modules/utils');
@@ -14,10 +14,11 @@ var deleteVideos = function (options, processes, credentials, callback, next) {
     async.waterfall([
         function (yop) {
             callback(null, { // process msg
-            cbType: 1,
-            msg: utils.createMsg({msg: 'Получаем альбомы'})
-        });
-            getAlbums('video',options, processes, credentials, callback, function (err, albums) {
+                cbType: 1,
+                msg: utils.createMsg({msg: 'Получаем альбомы'})
+            });
+            // getAlbums('video',options, processes, credentials, callback, function (err, albums) {
+            getItems('videoAlbum', options, processes, credentials, callback, function (err, albums) {
                 if (err) {
                     return yop(err);
                 } else {
@@ -30,7 +31,7 @@ var deleteVideos = function (options, processes, credentials, callback, next) {
                 cbType: 1,
                 msg: utils.createMsg({msg: 'Удаление albomov'})
             });
-            processDohuya(albums, 'album', 'video', options, processes, credentials, callback,function (err) {
+            processDohuya(albums, 'album', 'video', options, processes, credentials, callback, function (err) {
                 if (err) {
                     return yop(err);
                 } else {
@@ -43,7 +44,7 @@ var deleteVideos = function (options, processes, credentials, callback, next) {
                 cbType: 1,
                 msg: utils.createMsg({msg: 'Получаем видеозаписи'})
             });
-            getItems('video', options, processes, credentials, callback,function (err, videos) {
+            getItems('video', options, processes, credentials, callback, function (err, videos) {
                 if (err) {
                     return yop(err);
                 } else {

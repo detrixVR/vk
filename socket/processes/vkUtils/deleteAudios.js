@@ -1,4 +1,4 @@
-var getAlbums = require('./getAlbums');
+//var getAlbums = require('./getAlbums');
 var processDohuya = require('./processDohuya');
 var getItems = require('./getItems');
 var utils = require('../../../modules/utils');
@@ -17,7 +17,8 @@ var deleteAudios = function (options, processes, credentials, callback, next) {
                 cbType: 1,
                 msg: utils.createMsg({msg: 'Получаем альбомы'})
             });
-            getAlbums('audio', options, processes, credentials, callback, function (err, albums) {
+            //getAlbums('audio', options, processes, credentials, callback, function (err, albums) {
+            getItems('audioAlbum', options, processes, credentials, callback, function (err, albums) {
                 if (err) {
                     return yop(err);
                 } else {
