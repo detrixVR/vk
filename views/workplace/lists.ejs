@@ -66,16 +66,7 @@
                             </select>
                         </div>
 
-                        <div class="whatSelector0 hidden col-xs-6">
-                            <label></label>
 
-                            <div class="checkbox">
-                                <input type="checkbox" id="onlyOwner">
-                                <label for="onlyOwner">
-                                    Только владельца
-                                </label>
-                            </div>
-                        </div>
 
 
                         <div class="col-xs-6">
@@ -95,7 +86,7 @@
 
                             <div class="input-group spinner full-width">
                                 <input type="text" class="form-control hours"
-                                       id="atTimeHours"
+                                       id="fromLatest"
                                        data-settings="true" value="10">
 
                                 <div class="input-group-btn-vertical">
@@ -111,9 +102,19 @@
 
                         <div class="exactSelector2 hidden col-xs-6">
                             <label>Поисковая строка</label>
-                            <input type="text" class="form-control input-sm"/>
+                            <input type="text" class="form-control input-sm" id="queryString"/>
                         </div>
 
+                        <div class="whatSelector0  col-xs-6">
+                            <label class="small control-label" ></label>
+
+                            <div class="checkbox">
+                                <input type="checkbox" id="onlyOwner">
+                                <label for="onlyOwner">
+                                    Только владельца
+                                </label>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -169,7 +170,7 @@
             var $this = $(this);
             var id = $this.attr('id');
             var selector = $('.' + id + selectedIndex);
-            $('[class^=' + id + ']').not(selector).toggleClass('hidden');
+            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
             selector.toggleClass('hidden');
         });
     });

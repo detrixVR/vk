@@ -346,7 +346,14 @@ function createMsg(options) {
     };
 
     return extend(defOptions, options);
-};
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+
 
 module.exports = {
     ruslat: ruslat,
@@ -363,5 +370,5 @@ module.exports = {
     isFloat: isFloat,
     getProcessState: getProcessState,
     getAccountByCredentials: getAccountByCredentials,
-
+    getRandomInt: getRandomInt
 };
