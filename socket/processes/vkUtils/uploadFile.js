@@ -77,29 +77,15 @@ var uploadFile = function (options, callback) {
 
     }, function (response, iteration) {
 
-        var form = new FormData();
-
-        var data = options.memStream.toString();
-
-
-        /*form.append('file1', data, {
-         filename: 'unicycle.jpg',
-         contentType: 'image/jpg',
-         knownLength: data.length
-         });*/
-
-        var formData = {
-            file1: options.buffer//options.memStream.toString()//fs.createReadStream(__dirname + '../../../../public/images/camera_50.png')//options.memStream.toString(),
-            //  my_file: fs.createReadStream(__dirname + '/unicycle.jpg'),
-        };
-
 
 
         var reque = request.post(response.upload_url, function (err, resp, body) {
             if (err) {
                 console.log('Error!');
+                return iteration(err);
             } else {
                 console.log('URL: ' + body);
+                return iteration(null, body);
             }
         });
         var form = reque.form();
@@ -112,19 +98,6 @@ var uploadFile = function (options, callback) {
 
 
 
-        /*request.post({url: response.upload_url, formData: form}, function (err, httpResponse, body) {
-         if (err) {
-         //return console.error('upload failed:', err);
-         return iteration(err);
-         }
-         console.log('Upload successful!  Server responded with:', body);
-         return iteration(null, body);
-         });*/
-
-        /* form.submit(response.upload_url, function(err, res) {
-         if (err) throw err;
-         console.log('Done');
-         });*/
 
     },
 
@@ -136,7 +109,7 @@ var uploadFile = function (options, callback) {
             var body = JSON.parse(body);
             executeOptions.command = 'photos.save';
 
-            body.album_id = 226515222;
+            body.album_id = body.aid;
             // body.photos_list = body;
 
 

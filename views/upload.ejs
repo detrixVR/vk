@@ -19,8 +19,45 @@
     </div>
 </div>
 
-<!--<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript">
-</script>-->
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <textarea type="email" class="form-control" id="exampleInputEmail1" placeholder="Email"></textarea>
+            </div>
+
+            <div class="thumbnail">
+                <img id="blah" src="#" alt="your image" style="width: 75px; height: 75px"/>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="dropdown pull-right">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="true">
+                    <span class="glyphicon glyphicon-plus"> Dobavit'</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="#">Fotografiyu</a></li>
+                    <li><a href="#">Audiozapis'</a></li>
+                    <li><a href="#">Videozapis'</a></li>
+                </ul>
+            </div>
+
+            <button class="btn btn-default  pull-right" onclick="$(this).next().click()"><span
+                        class="glyphicon glyphicon-download-alt"> Zagruzit'</span></button>
+            <input type="file" id="imgInp" class="hidden" multiple>
+        </div>
+    </div>
+</div>
+
+</div>
 
 
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -30,20 +67,84 @@
 
 <script>
     $(function () {
+        function readURL(input, width, height) {
+            var _URL = window.URL || window.webkitURL;
+            var file, img;
+            var thumbnail = $('.thumbnail').empty();
 
-       /* VK.init(function() {
+            for (var i = 0; i < input.files.length; i++) {
 
+                var file = input.files[i];
+                if (file) {
+                    img = new Image();
+                    img.file = file;
+                    img.onload = function () {
+                        var width = 100;
+                        var height = 100;
 
-            VK.api('photos.getUploadServer',{album_id: 226515222},function(data) {
-                if (data.response) {
-                    $('form').attr('action', data.response.upload_url)
+                        if (this.width > this.height) {
+                            width = width * (this.width / this.height);
+                        } else {
+                            height = height * (this.height / this.width);
+                        }
+                        var reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            var img = $('<div class="float-left" style="display: inline-block"><img id="blah" src="#" alt="your image" class="img-thumbnail"/></div>').find('img').css({
+                                width: width,
+                                height: height
+                            }).attr('src', e.target.result);
+                            img.parent().appendTo(thumbnail)
+                        }
+                        reader.readAsDataURL(this.file);
+
+                    };
+                    img.src = _URL.createObjectURL(file);
                 }
-            });
 
-        }, function() {
-            // API initialization failed
-            // Can reload page here
-        }, '5.42');*/
+
+            }
+
+         /*   if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#blah').attr('src', e.target.result);
+                    $('#blah').css({
+                        width: width,
+                        height: height
+                    });
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }*/
+        }
+
+        $("#imgInp").change(function () {
+
+            /*var _URL = window.URL || window.webkitURL;
+            var file, img;
+            var that = this;
+            if ((file = this.files[0])) {
+                img = new Image();
+                img.onload = function () {
+                    var width = this.width;
+                    var height = this.height;
+                    width = 100;
+                    height = 100
+
+                    if (this.width > this.height) {
+                        width = width * (this.width / this.height);
+                    } else {
+                        height = height * (this.height / this.width);
+                    }
+
+
+                };
+                img.src = _URL.createObjectURL(file);
+            }*/
+            readURL(this);
+        });
 
         function upload(file) {
 
@@ -53,7 +154,7 @@
             xhr.upload.onprogress = function (event) {
                 console.log(event.loaded + ' / ' + event.total);
 
-                $('.progress-bar').css('width', (event.loaded / event.total) *100 + '%').attr('aria-valuenow', (event.loaded / event.total)*100);
+                $('.progress-bar').css('width', (event.loaded / event.total) * 100 + '%').attr('aria-valuenow', (event.loaded / event.total) * 100);
             }
 
             // обработчики успеха и ошибки
@@ -72,13 +173,13 @@
         }
 
         /*document.forms.upload.onsubmit = function () {
-            var input = this.elements.file;
-            var file = input.files[0];
-            if (file) {
-                upload(file);
-            }
-            return false;
-        }*/
+         var input = this.elements.file;
+         var file = input.files[0];
+         if (file) {
+         upload(file);
+         }
+         return false;
+         }*/
     });
 
 </script>
