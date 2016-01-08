@@ -15,12 +15,24 @@ var schema = new Schema({
         type: Number,
         required: false
     },
+    title: {
+        type: String,
+        required: false
+    },
+    duration: {
+        type: Number,
+        required: false
+    },
     owner_id: {
         type: Number,
         required: false
     },
-    from_id: {
-        type: Number,
+    access_key: {
+        type: Object,
+        required: false
+    },
+    photo_130: {
+        type: String,
         required: false
     },
     created: {
@@ -30,4 +42,4 @@ var schema = new Schema({
     }
 });
 
-exports.PostGrid = mongoose.model('PostGrid', schema);
+exports.VideoGrid = mongoose.model('VideoGrid', schema);

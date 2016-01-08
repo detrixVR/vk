@@ -19,8 +19,16 @@ var schema = new Schema({
         type: Number,
         required: false
     },
-    from_id: {
+    album_id: {
         type: Number,
+        required: false
+    },
+    user_id: {
+        type: Number,
+        required: false
+    },
+    photo_75: {
+        type: String,
         required: false
     },
     created: {
@@ -30,4 +38,4 @@ var schema = new Schema({
     }
 });
 
-exports.PostGrid = mongoose.model('PostGrid', schema);
+exports.PhotoGrid = mongoose.model('PhotoGrid', schema);

@@ -1,0 +1,69 @@
+<table data-toggle="bootgrid"
+       data-ajax="true"
+       data-url="grid"
+       data-list-type="post"
+       data-selection="true"
+       data-row-select="true"
+       data-multi-select="true"
+       data-keep-selection="true"
+       data-can-add="false"
+       class="table table-condensed table-hover table-striped"
+       id="postGrid">
+    <thead>
+    <tr>
+
+        <th data-column-id="_id"
+            data-visible="false"
+            data-identifier="true"
+            data-visible-in-selection="false"
+            data-type="string">ID
+        </th>
+
+        <th data-column-id="created"
+            data-order="1"
+            data-visible="false"
+            data-visible-in-selection="false">Created
+        </th>
+
+        <th data-column-id="photo_50"
+            data-formatter="groupAvatar"
+            data-visible-in-selection="false"
+            data-width="60px">
+        </th>
+
+        <th data-column-id="name"
+            data-width="100px"
+            data-formatter="groupLink"
+            data-editable="false">Name
+        </th>
+
+        <th data-column-id="members_count"
+            data-width="60px"
+            data-editable="false">Members
+        </th>
+
+
+
+        <th data-column-id="sex"
+            data-formatter="sex"
+            data-width="60px"
+            data-editable="false">Sex
+        </th>
+
+
+
+        <th data-column-id="verified"
+            data-width="60px"
+            data-formatter="verified"
+            data-editable="false">Verified
+        </th>
+
+        <th data-formatter="commandsNotAll"
+            data-sortable="false"
+            data-width="30px"
+            data-visible-in-selection="false">
+
+        </th>
+    </tr>
+    </thead>
+</table>

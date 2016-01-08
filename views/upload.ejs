@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+
+
+<form name="upload" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Загрузить">
+</form>
+
+<div class="progress">
+    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0"
+         aria-valuemax="100" style="width: 45%">
+        <span class="sr-only">45% Complete</span>
+    </div>
+</div>
+
+<!--<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript">
+</script>-->
+
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+
+<script>
+    $(function () {
+
+       /* VK.init(function() {
+
+
+            VK.api('photos.getUploadServer',{album_id: 226515222},function(data) {
+                if (data.response) {
+                    $('form').attr('action', data.response.upload_url)
+                }
+            });
+
+        }, function() {
+            // API initialization failed
+            // Can reload page here
+        }, '5.42');*/
+
+        function upload(file) {
+
+            var xhr = new XMLHttpRequest();
+
+            // обработчик для закачки
+            xhr.upload.onprogress = function (event) {
+                console.log(event.loaded + ' / ' + event.total);
+
+                $('.progress-bar').css('width', (event.loaded / event.total) *100 + '%').attr('aria-valuenow', (event.loaded / event.total)*100);
+            }
+
+            // обработчики успеха и ошибки
+            // если status == 200, то это успех, иначе ошибка
+            xhr.onload = xhr.onerror = function () {
+                if (this.status == 200) {
+                    console.log("success");
+                } else {
+                    console.log("error " + this.status);
+                }
+            };
+
+            xhr.open("POST", "upload", true);
+            xhr.send(file);
+
+        }
+
+        /*document.forms.upload.onsubmit = function () {
+            var input = this.elements.file;
+            var file = input.files[0];
+            if (file) {
+                upload(file);
+            }
+            return false;
+        }*/
+    });
+
+</script>
+
+</body>
+</html>

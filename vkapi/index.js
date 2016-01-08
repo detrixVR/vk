@@ -164,12 +164,12 @@ function executeCommand(options, processes, credentials, callback, next) {
     switch (curState) {
         case 1:
 
-          //  var that = this;
-         //  setTimeout(function () {
-                processItem(function (err, data) {
-                    return next(err ? err : null, data);
-                });
-         //  }, 333);
+            //  var that = this;
+            //  setTimeout(function () {
+            processItem(function (err, data) {
+                return next(err ? err : null, data);
+            });
+            //  }, 333);
 
 
             break;
@@ -217,4 +217,34 @@ function executeCommand(options, processes, credentials, callback, next) {
     }
 }
 
-module.exports.executeCommand = executeCommand;
+function justExecuteCommand(options, next) {
+
+
+    if (options.token)
+        vk.setToken(options.token);
+
+    if (options.proxy)
+        vk.setProxy(options.proxy);
+
+
+    vk.request(options.command, options.options, function (_o) {
+        console.log(_o);
+        if (_o.error) {
+            processError(_o.error, function (err) {
+                return next(err);
+            })
+        } else {
+            return next(null, {
+                msg: 'Команда выполнена без ошибок',
+                result: _o
+            });
+        }
+    });
+
+
+}
+
+module.exports = {
+    executeCommand: executeCommand,
+    justExecuteCommand: justExecuteCommand
+};

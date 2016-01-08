@@ -7,6 +7,10 @@ var utils = require('../../modules/utils'),
 
 var PersonGrid = require('../../models/grid/person').PersonGrid;
 var GroupGrid = require('../../models/grid/group').GroupGrid;
+var PostGrid = require('../../models/grid/post').PostGrid;
+var PhotoGrid = require('../../models/grid/photo').PhotoGrid;
+var VideoGrid = require('../../models/grid/video').VideoGrid;
+
 var executeCommand = require('../../vkapi').executeCommand;
 
 var validationModel = {
@@ -212,7 +216,7 @@ var listCreating = function (processes, credentials, settings, callback) {
                         return iteration(null, [], account);
 
                 }
-            },  function (items, account, iteration) {
+            }, function (items, account, iteration) {
 
                 callback(null, { // process msg
                     cbType: 1,
@@ -230,7 +234,7 @@ var listCreating = function (processes, credentials, settings, callback) {
 
                 async.eachSeries(items, function (item, done) {
 
-                     console.log(item);
+                    console.log(item);
 
                     switch (settings.whatSelector.value) {
                         case 0:
@@ -303,8 +307,66 @@ var listCreating = function (processes, credentials, settings, callback) {
 
                 }, function (err) {
 
-                    console.log(result);
-                    return iteration(err ? err : null);
+
+                    if (err) {
+                        switch (err.arg) {
+                            case 5:
+                                console.log('!here');
+                                console.log(err);
+                                err.msg = utils.createMsg({msg: err.msg, type: 3});
+                                return iteration(err);
+
+                        }
+                    }
+
+
+                    callback(null, {
+                        cbType: 1,
+                        msg: utils.createMsg({msg: 'sohranenie resultatov'})
+                    });
+
+                    var Requester = null;
+                    var gridId = null;
+
+                    switch (settings.whatSelector.value) {
+                        case 0:
+                            Requester = PostGrid;
+                            gridId = 'postGrid';
+                            break;
+                        case 1:
+                            Requester = PhotoGrid;
+                            gridId = 'photoGrid';
+                            break;
+                        case 2:
+                            Requester = VideoGrid;
+                            gridId = 'videoGrid';
+                            break;
+                        default:
+                            return iteration({error: 'error'});
+                    }
+
+                    async.each(result, function (item, yes) {
+
+
+                        item.username = credentials.username;
+                        item.accountId = credentials.accountId;
+
+                        var newRequester = new Requester(item);
+
+                        newRequester.save(function (err) {
+                            return yes(err ? err : null);
+                        });
+
+                    }, function (error) {
+
+                        callback(null, { // process msg
+                            cbType: 5,
+                            gridId: gridId
+                        });
+
+                        return iteration(error ? error : err);
+
+                    });
                 });
 
 

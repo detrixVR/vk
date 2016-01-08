@@ -3,6 +3,11 @@ var loadUser = require('../modules/loadUser');
 
 
 
+var multer  = require('multer');
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+//var upload = multer({ dest: 'uploads2/' })
+
 function nocache(req, res, next) {
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');
@@ -32,6 +37,8 @@ module.exports = function (app) {
 
     app.use(loadUser.loadUser);
 
+    app.use(upload.any());
+
 
     app.get('/', require('./index').get);
 
@@ -46,6 +53,9 @@ module.exports = function (app) {
     app.get('/config', require('./workplace/config').get);
 
     app.get('/logout',      require('./default/logout').get);
+
+    app.get('/upload',     require('./upload').get);
+    app.post('/upload',      require('./upload').post);
 
 
     app.get('/forgot', require('./default/forgot').get);
