@@ -34,7 +34,6 @@ class Socket {
         }
     }
 
-
     listen() {
         var that = this;
 
@@ -78,6 +77,7 @@ class Socket {
                     case 'listCreating':
                     case 'configurationClean':
                     case 'configurationCopy':
+                    case 'taskExecution':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });

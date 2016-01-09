@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <%- include ./parts/cabinetHead.ejs %>
 </head>
 <body>
 
@@ -21,6 +20,14 @@
 
 
 <div class="container">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <textarea class="form-control" id="inputHolder">111</textarea>
+            <textarea class="form-control" id="outputHolder"></textarea>
+            <button class="btn btn-default" id="gen">gen</button>
+        </div>
+    </div>
     <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
@@ -79,17 +86,40 @@
 
 <script>
     $(function () {
+
+        var files = [];
+
+        $(document).on('click', '.remove-icon', function () {
+            var $this = $(this);
+            var preview = $this.closest('.preview-holder');
+            var elemId = preview.attr('id');
+            var founded = files.find(function (item, i) {
+                return item.id === elemId;
+            });
+            files.splice(files.indexOf(founded), 1);
+            preview.remove();
+            console.log(files);
+        })
+
         function readURL(input, width, height) {
+
+            files.length = 0;
+
             var _URL = window.URL || window.webkitURL;
             var file, img;
             var thumbnail = $('.thumbnail').empty();
+
+
             $('form').find('[type=text]').remove();
 
             for (var i = 0; i < input.files.length; i++) {
 
                 var file = input.files[i];
+
+
                 if (file) {
                     img = new Image();
+                    img.file = file;
                     img.onload = function () {
                         var width = 100;
                         var height = 100;
@@ -105,13 +135,22 @@
 
                         var uid = this.src.slice(-12);
 
-                        var div = $('<div class="float-left" style="display: inline-block"><div class="progress" id="' + uid + '">' +
+                        var div = $('<div class="preview-holder float-left" id="' + uid + '">' +
+                                '<div class="progress" >' +
                                 '<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">' +
-                                '<span class="sr-only">0% Complete</span></div></div></div>');
+                                '<span class="sr-only">0% Complete</span>' +
+                                '</div></div>' +
+                                '<div class="remove-icon" >' +
+                                '<span class="glyphicon glyphicon-remove"></span></div>' +
+                                '</div>');
                         $(this).prependTo(div);
                         div.appendTo(thumbnail);
-                        $('form').append('<input type="text" name="ids" value="' + uid + '" class="hidden"/>');
+                        //    $('form').append('<input type="text" name="ids" value="' + uid + '" class="hidden"/>');
 
+                        files.push({
+                            file: this.file,
+                            id: uid
+                        });
                     };
                     img.src = _URL.createObjectURL(file);
                 }
@@ -126,49 +165,22 @@
             readURL(this);
         });
 
-        /* function upload(file) {
-
-         var xhr = new XMLHttpRequest();
-
-         // обработчик для закачки
-         xhr.upload.onprogress = function (event) {
-         console.log(event.loaded + ' / ' + event.total);
-
-         $('.progress-bar').css('width', (event.loaded / event.total) * 100 + '%').attr('aria-valuenow', (event.loaded / event.total) * 100);
-         }
-
-         // обработчики успеха и ошибки
-         // если status == 200, то это успех, иначе ошибка
-         xhr.onload = xhr.onerror = function () {
-         if (this.status == 200) {
-         console.log("success");
-         } else {
-         console.log("error " + this.status);
-         }
-         };
-
-         xhr.open("POST", "upload", true);
-         xhr.send(file);
-
-         }*/
-
-        /*document.forms.upload.onsubmit = function () {
-         var input = this.elements.file;
-         var file = input.files[0];
-         if (file) {
-         upload(file);
-         }
-         return false;
-         }*/
 
         $('form').on('submit', function (e) {
             e.preventDefault();
+
+            var fd = new FormData();
+
+            files.forEach(function (item, k) {
+                fd.append('file', item.file);
+                fd.append('ids', item.id);
+            })
 
             $.ajax({
                 type: "POST",
                 url: "/upload",
                 // contentType: attr("enctype", "multipart/form-data"),
-                data: new FormData(this),
+                data: fd,//new FormData(this),
                 processData: false,
                 //  contentType: "multipart/form-data",
                 contentType: false,
@@ -180,6 +192,91 @@
                 alert('error');
                 console.log('error');
             });
+        })
+
+        function getRandomNumber(from, to) {
+            return Math.floor(Math.random() * (to - from + 1)) + from;
+        }
+
+        function shuffle(array) {
+            var currentIndex = array.length, temporaryValue, randomIndex;
+            while (0 !== currentIndex) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+            return array;
+        }
+
+        function getClosestScopeIndex(part, from, scope, antiscope) {
+            var k = 0;
+            for (var i = from; i < part.length; i++) {
+                if (part[i] === scope) {
+                    k++;
+                } else if (part[i] === antiscope) {
+                    if (k)
+                        k--;
+                    else
+                        return i;
+                }
+            }
+            return i;
+        }
+
+        function processPart(part) {
+
+            var output='';
+            var inner = '';
+            var t = -1;
+            var variants = null;
+
+            for (var i = 0; i < part.length; i++) {
+                if (part[i] === '\\') {
+                    i += 1;
+                    output += part[i];
+                } else if (part[i] === '{' ||
+                        part[i] === '[') {
+
+                    var inScope = part[i];
+                    var outScope = (inScope === '{' ? '}' : ']');
+                    i++;
+                    t = getClosestScopeIndex(part, i, inScope, outScope);
+                    if (t > -1) {
+                        inner = processPart(part.substring(i, t));
+                        variants = inner.split('|');
+                        variants = variants.map(function (item) {
+                            return $.trim(item);
+                        });
+                        var k = getRandomNumber(0, variants.length - 1);
+
+                        if (inScope === '[') {
+                            var separator = '';
+                            var index = variants[0].indexOf('+');
+                            if (index > -1) {
+                                index++;
+                                separator = variants[0].substring(index, variants[0].indexOf('+', index));
+                            }
+                            variants[0] = $.trim(variants[0].replace('+' + separator + '+', ''));
+                            variants = shuffle(variants);
+                            output += variants.join((separator || ' '));
+                        } else {
+                            output += variants[k];
+                        }
+                        i = t++;
+                    }
+                } else {
+                    output += part[i];
+                }
+            }
+
+            return output;
+        }
+
+        $('#gen').on('click', function () {
+            var input = $('#inputHolder').val();
+            $('#outputHolder').val(processPart(input));
         })
     });
 

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+
+<% var processId = 'taskExecuting' %>
+<%- include ../parts/cabinetMenu.ejs %>
+
+
+<div class="canvas">
+
+    <%- include ../templates/overlay.ejs %>
+    <%- include ../parts/cabinetNavbar.ejs %>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+
+                <div class="well well-sm container-fluid">
+
+
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label for="nameInput">Название</label>
+                            <input class="form-control" type="text" value="" placeholder="Задание"
+                                   maxlength="100" id="nameInput"/>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label for="repeatSelector">Когда</label>
+                            <select class="selectpicker" data-width="100%" id="repeatSelector">
+                                <option>Один раз</option>
+                                <option>Каждые</option>
+                                <option>Время</option>
+                            </select>
+                        </div>
+
+
+                        <div class="repeatSelector1 hidden col-xs-6 col-sm-3 col-md-2">
+
+                            <label for="delaySelector">Задержка</label>
+
+                            <div class="input-group spinner full-width">
+                                <input type="text" class="form-control" id="delayInput" value="20">
+
+                                <div class="input-group-btn-vertical">
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-up"></i></button>
+                                    <button class="btn btn-default" type="button"><i
+                                                class="glyphicon glyphicon-chevron-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="repeatSelector1 hidden col-xs-6 col-sm-3 col-md-2">
+                            <label></label>
+                            <select class="selectpicker" data-width="100%" id="delaySelector">
+                                <option>Секунд</option>
+                                <option>Минут</option>
+                                <option>Часов</option>
+                            </select>
+                        </div>
+
+
+                        <div class="repeatSelector2 hidden col-xs-6 col-sm-3 col-md-2">
+
+                            <label for="datePicker">Дата и время</label>
+
+                            <div class="input-group date" data-provide="datepicker">
+                                <input type="text" class="form-control">
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label for="jobSelector">Что делать</label>
+                            <select class="selectpicker" data-width="100%" id="jobSelector">
+                                <option>Пост</option>
+                                <option>Сообщение</option>
+                                <option>Репост</option>
+                                <option>Коммент</option>
+                                <option>Лайк</option>
+                            </select>
+                        </div>
+
+
+                        <div class="jobSelector0 hidden col-xs-6 col-sm-3 col-md-2">
+                            <label for="wallToSelector">Куда</label>
+                            <select class="selectpicker" data-width="100%" id="wallToSelector">
+                                <option>Стена сообщества</option>
+                                <option>Стена пользователя</option>
+                            </select>
+                        </div>
+
+
+                        <div class="jobSelector2 hidden col-xs-6 col-sm-3 col-md-2">
+                            <label>Откуда</label>
+                            <select class="selectpicker" data-width="100%" id="wallFromSelector">
+                                <option>Стена сообщества</option>
+                                <option>Стена пользователя</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Куда</label>
+                            <select class="selectpicker" data-width="100%" id="mySelector">
+                                <option>Моя стена</option>
+                                <option>Мои группы</option>
+                            </select>
+                        </div>
+
+
+                        <div class="mySelector1 col-xs-6 col-sm-3 col-md-2">
+                            <label>Моя группа</label>
+                            <select class="selectpicker" data-width="100%" id="myGroupSelector">
+                                <option>Моя группа 1</option>
+                                <option>Моя группа 2</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Что</label>
+                            <select class="selectpicker" data-width="100%" id="whatSelector">
+                                <option>Последний пост</option>
+                                <option>Случайный пост</option>
+                                <option>Найти пост</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label for="orderSelector">Последовательность</label>
+                            <select class="selectpicker" data-width="100%" id="orderSelector">
+                                <option>По порядку</option>
+                                <option>Случайный</option>
+                                <option>Выделенные</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label>Дополнительно</label>
+
+                            <div class="checkbox">
+                                <input type="checkbox" name="deleteCheck" id="deleteCheck" value="replace"
+                                       checked>
+                                <label for="deleteCheck">
+                                    Удалять юзанные
+                                </label>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <button class="btn btn-sm btn-info full-width" id="createEvent">Создать</button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="well well-sm">
+                    <%- include ../templates/grids/postGrid.ejs %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include ../templates/modalInput.ejs %>
+
+
+<script src="javascripts/libs/moment.min.js"></script>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<%- include ../templates/other/accountHolder.ejs %>
+
+<script>
+    $(function () {
+
+        $('.selectpicker').on('change', function (e) {
+            var selectedIndex = this.selectedIndex;
+            var $this = $(this);
+            var id = $this.attr('id');
+            var selector = $('.' + id + selectedIndex);
+            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
+            selector.toggleClass('hidden');
+        });
+    });
+
+</script>
+
+</body>
+</html>

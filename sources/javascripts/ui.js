@@ -19,7 +19,7 @@ var redrawSelector = function (selectedItem) {
 
 var setState = function (data) {
     $('.widget').trigger('setState', [data]);
-    $('button, input, a.btn').not('.startPauseButton, .stopButton').attr('disabled',data.state !== 0);
+    $('button, input, a.btn').not('.startPauseButton, .stopButton').attr('disabled', data.state !== 0);
 };
 
 var overlay = function (state) {
@@ -31,9 +31,10 @@ var overlay = function (state) {
         $overlay.toggleClass('hidden', true);
     }
 };
-var setProgress = function(progress){
-    $('.progress-bar').css('width', progress.value + '%').attr('aria-valuenow', progress.value);
-}
+
+var setProgress = function (progress) {
+    $('.progress-bar#' + progress.id, '.preview-holder').css('width', progress.value + '%').attr('aria-valuenow', progress.value);
+};
 
 var getSettings = function () {
 
@@ -227,7 +228,7 @@ var highLightFields = function (badFields) {
     })
 };
 
-var renderAccountHolder = function(account){
+var renderAccountHolder = function (account) {
     console.log(account);
     $('#accountHolder').html(_.template($('#accountHolderTemplate').html())(account.accountInfo));
 };
@@ -502,9 +503,9 @@ var init = function () {
                 //$.notify({message: 'Успешно удалено'}, {type: 'success'});
             });
         })
-    .bind('saveList', function(event){
-        console.log('saveList')
-    });
+        .bind('saveList', function (event) {
+            console.log('saveList')
+        });
 
 
     $(document)

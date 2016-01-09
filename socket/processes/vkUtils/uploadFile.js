@@ -39,7 +39,17 @@ var uploadFile = function (options, callback) {
             string = 'Загрузка главной фотографии на страницу пользователя или сообщества';
             break;
         case 3:
+
+
             firstRequest = 'photos.getMessagesUploadServer';
+
+            executeOptions = {
+                command: firstRequest,
+                proxy: options.proxy,
+                token: options.token,
+                options: {}
+            };
+
             string = 'Загрузка фотографии в личное сообщение';
             break;
         case 4:

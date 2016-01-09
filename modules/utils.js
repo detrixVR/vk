@@ -356,8 +356,81 @@ function isArray(vArg) {
     return Object.prototype.toString.call(vArg) === "[object Array]";
 }
 
+function shuffleArray(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
 
+function processPart(part) {
 
+    function getClosestScopeIndex(part, from, scope, antiscope) {
+        var k = 0;
+        for (var i = from; i < part.length; i++) {
+            if (part[i] === scope) {
+                k++;
+            } else if (part[i] === antiscope) {
+                if (k)
+                    k--;
+                else
+                    return i;
+            }
+        }
+        return i;
+    }
+
+    var output='';
+    var inner = '';
+    var t = -1;
+    var variants = null;
+
+    for (var i = 0; i < part.length; i++) {
+        if (part[i] === '\\') {
+            i += 1;
+            output += part[i];
+        } else if (part[i] === '{' ||
+            part[i] === '[') {
+
+            var inScope = part[i];
+            var outScope = (inScope === '{' ? '}' : ']');
+            i++;
+            t = getClosestScopeIndex(part, i, inScope, outScope);
+            if (t > -1) {
+                inner = processPart(part.substring(i, t));
+                variants = inner.split('|');
+                variants.forEach(function (item) {
+                    item = item.trim();
+                });
+                var k = getRandomInt(0, variants.length - 1);
+
+                if (inScope === '[') {
+                    var separator = '';
+                    var index = variants[0].indexOf('+');
+                    if (index > -1) {
+                        index++;
+                        separator = variants[0].substring(index, variants[0].indexOf('+', index));
+                    }
+                    variants[0] = variants[0].replace('+' + separator + '+', '').trim();
+                    variants = shuffleArray(variants);
+                    output += variants.join((separator || ' '));
+                } else {
+                    output += variants[k];
+                }
+                i = t++;
+            }
+        } else {
+            output += part[i];
+        }
+    }
+
+    return output;
+}
 
 module.exports = {
     ruslat: ruslat,
@@ -376,4 +449,6 @@ module.exports = {
     getAccountByCredentials: getAccountByCredentials,
     getRandomInt: getRandomInt,
     isArray: isArray,
+    shuffleArray: shuffleArray,
+    processPart: processPart
 };

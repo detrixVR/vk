@@ -321,7 +321,7 @@ var searchGroups = function (processes, credentials, settings, callback) {
                                 };`
                             };
 
-                            executeCommand(options, function (err, data) {
+                            executeCommand(options,processes, credentials, callback, function (err, data) {
                                 if (err) {
                                     return back(err);
                                 } else {

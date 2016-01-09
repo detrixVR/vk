@@ -166,6 +166,34 @@ ul.navbar-right {
     margin-top: 5px;
     height: 10px;
   }
+
+  .preview-holder {
+
+    display: inline-block;
+    position:relative;
+
+    .remove-icon {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 20px;
+      background: white;
+      text-align: center;
+      line-height: 20px;
+      background-color: rgba(0, 0, 0, 1);
+      border-radius: 4px;
+      color: white;
+      display: none;
+      cursor: pointer;
+    }
+
+    &:hover {
+      .remove-icon {
+        display: block;
+      }
+    }
+  }
+
 }
 
 
