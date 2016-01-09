@@ -352,6 +352,10 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function isArray(vArg) {
+    return Object.prototype.toString.call(vArg) === "[object Array]";
+}
+
 
 
 
@@ -370,5 +374,6 @@ module.exports = {
     isFloat: isFloat,
     getProcessState: getProcessState,
     getAccountByCredentials: getAccountByCredentials,
-    getRandomInt: getRandomInt
+    getRandomInt: getRandomInt,
+    isArray: isArray,
 };

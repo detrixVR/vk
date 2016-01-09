@@ -2,8 +2,9 @@ var utils = require('../../../modules/utils');
 var async = require('async');
 var justExecuteCommand = require('../../../vkapi').justExecuteCommand;
 var request = require('request');
-var FormData = require('form-data');
-var fs = require('fs');
+//var FormData = require('form-data');
+//var fs = require('fs');
+
 
 var uploadFile = function (options, callback) {
 
@@ -78,8 +79,15 @@ var uploadFile = function (options, callback) {
     }, function (response, iteration) {
 
 
-
         var reque = request.post(response.upload_url, function (err, resp, body) {
+
+            var room = options.user.username + ':uploadFile';
+            console.log(room);
+            options.sio.s.sockets.in(room).emit('uploadFile', {
+                itemId: options.itemId,
+                value: 75
+            });
+
             if (err) {
                 console.log('Error!');
                 return iteration(err);
@@ -93,10 +101,6 @@ var uploadFile = function (options, callback) {
             filename: 'CVffSTvWIAAQ46p.jpg',
             contentType: 'image/jpeg'
         });
-
-
-
-
 
 
     },

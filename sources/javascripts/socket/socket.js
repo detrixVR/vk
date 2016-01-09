@@ -95,6 +95,11 @@ class Socket {
                 processResponse.apply(that, [data]);
             });
 
+            this.socket.on('uploadFile', function (data) {
+                console.log(data);
+                that.page.ui.setProgress(data);
+            });
+
             this.socket.on('printEvent', function (data) {
                 processResponse.apply(that, [data]);
             });

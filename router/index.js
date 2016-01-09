@@ -2,10 +2,9 @@ var loadAccounts = require('../modules/loadAccounts');
 var loadUser = require('../modules/loadUser');
 
 
-
-var multer  = require('multer');
+var multer = require('multer');
 var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
+var upload = multer({storage: storage});
 //var upload = multer({ dest: 'uploads2/' })
 
 function nocache(req, res, next) {
@@ -18,11 +17,16 @@ function nocache(req, res, next) {
 module.exports = function (app) {
 
     app.use(function (req, res, next) {
-       // console.log(req.baseUrl);
-       // console.log(req.url);
-       // console.log(req._parsedUrl);
+        // console.log(req.baseUrl);
+        // console.log(req.url);
+        // console.log(req._parsedUrl);
         //console.log(req.client.parser.incoming.originalUrl);
         //console.log(req.originalUrl);
+        return next();
+    });
+
+    app.use(function (req, res, next) {
+        req.sio = app.get('hovan');
         return next();
     });
 
@@ -49,13 +53,13 @@ module.exports = function (app) {
     app.get('/peoples', require('./workplace/peoples').get);
     app.get('/groups', require('./workplace/groups').get);
     app.get('/lists', require('./workplace/lists').get);
-   // app.get('/tasks', require('./workplace/tasks').get);
+    // app.get('/tasks', require('./workplace/tasks').get);
     app.get('/config', require('./workplace/config').get);
 
-    app.get('/logout',      require('./default/logout').get);
+    app.get('/logout', require('./default/logout').get);
 
-    app.get('/upload',     require('./upload').get);
-    app.post('/upload',      require('./upload').post);
+    app.get('/upload', require('./upload').get);
+    app.post('/upload', require('./upload').post);
 
 
     app.get('/forgot', require('./default/forgot').get);
@@ -64,7 +68,7 @@ module.exports = function (app) {
     app.get('/register', require('./default/register').get);
     app.post('/register', require('./default/register').post);
 
-    app.get('/captcha.png',/* nocache,*/ require('./captcha').get);
+    app.get('/captcha.png', /* nocache,*/ require('./captcha').get);
 
     app.get('/grid', require('./grid').get);
     app.post('/grid', require('./grid').post);
@@ -73,7 +77,7 @@ module.exports = function (app) {
 
     app.post('/vkapi', require('./vkapi').post);
 
-    app.get('/save/:type',   require('./save').get);
+    app.get('/save/:type', require('./save').get);
 
     app.use(function (req, res, next) {
         var err = {
@@ -127,7 +131,6 @@ module.exports = function (app) {
         });
     }
 };
-
 
 
 module.exports.get = function (req, res) {

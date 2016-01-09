@@ -158,7 +158,9 @@ if (cluster.isMaster) {
     server.on('error', onError);
     server.on('listening', onListening);
 
-    new Socket(server);
+    app.set('hovan',  new Socket(server));
+
+ //  ;
 
     function onError(error) {
         if (error.syscall !== 'listen') {

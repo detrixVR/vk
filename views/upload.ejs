@@ -7,7 +7,7 @@
 <body>
 
 
-<form name="upload" action="/upload" method="post" enctype="multipart/form-data">
+<!--<form name="upload" action="/upload" method="post" enctype="multipart/form-data">
     <input type="file" name="file">
     <input type="submit" value="Загрузить">
 </form>
@@ -17,7 +17,7 @@
          aria-valuemax="100" style="width: 45%">
         <span class="sr-only">45% Complete</span>
     </div>
-</div>
+</div>-->
 
 
 <div class="container">
@@ -49,10 +49,17 @@
                     <li><a href="#">Videozapis'</a></li>
                 </ul>
             </div>
-
-            <button class="btn btn-default  pull-right" onclick="$(this).next().click()"><span
+            <button class="btn btn-default  pull-left" onclick="$(this).closest('.row').find('form').submit()">
+                Otpravit'
+            </button>
+            <button class="btn btn-default  pull-right" onclick="$(this).next().find('[type=file]').click()"><span
                         class="glyphicon glyphicon-download-alt"> Zagruzit'</span></button>
-            <input type="file" id="imgInp" class="hidden" multiple>
+            <form name="upload" action="/upload" method="post" enctype="multipart/form-data" class="hidden">
+                <input type="file" id="imgInp" name="file" class="hidden" multiple>
+                <input type="text" name="custom" class="hidden">
+                <!-- <input type="submit" value="Загрузить">-->
+            </form>
+            <!-- <input type="file" id="imgInp" class="hidden" multiple>-->
         </div>
     </div>
 </div>
@@ -60,10 +67,15 @@
 </div>
 
 
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-        crossorigin="anonymous"></script>
+<!--<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>-->
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"-->
+<!--integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"-->
+<!--crossorigin="anonymous"></script>-->
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<%- include ./templates/other/accountHolder.ejs %>
 
 <script>
     $(function () {
@@ -71,13 +83,13 @@
             var _URL = window.URL || window.webkitURL;
             var file, img;
             var thumbnail = $('.thumbnail').empty();
+            $('form').find('[type=text]').remove();
 
             for (var i = 0; i < input.files.length; i++) {
 
                 var file = input.files[i];
                 if (file) {
                     img = new Image();
-                    img.file = file;
                     img.onload = function () {
                         var width = 100;
                         var height = 100;
@@ -87,16 +99,18 @@
                         } else {
                             height = height * (this.height / this.width);
                         }
-                        var reader = new FileReader();
+                        this.width = width;
+                        this.height = height;
+                        this.className = 'img-thumbnail';
 
-                        reader.onload = function (e) {
-                            var img = $('<div class="float-left" style="display: inline-block"><img id="blah" src="#" alt="your image" class="img-thumbnail"/></div>').find('img').css({
-                                width: width,
-                                height: height
-                            }).attr('src', e.target.result);
-                            img.parent().appendTo(thumbnail)
-                        }
-                        reader.readAsDataURL(this.file);
+                        var uid = this.src.slice(-12);
+
+                        var div = $('<div class="float-left" style="display: inline-block"><div class="progress" id="' + uid + '">' +
+                                '<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">' +
+                                '<span class="sr-only">0% Complete</span></div></div></div>');
+                        $(this).prependTo(div);
+                        div.appendTo(thumbnail);
+                        $('form').append('<input type="text" name="ids" value="' + uid + '" class="hidden"/>');
 
                     };
                     img.src = _URL.createObjectURL(file);
@@ -105,72 +119,38 @@
 
             }
 
-         /*   if (input.files && input.files[0]) {
-                var reader = new FileReader();
-
-                reader.onload = function (e) {
-                    $('#blah').attr('src', e.target.result);
-                    $('#blah').css({
-                        width: width,
-                        height: height
-                    });
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }*/
         }
 
         $("#imgInp").change(function () {
 
-            /*var _URL = window.URL || window.webkitURL;
-            var file, img;
-            var that = this;
-            if ((file = this.files[0])) {
-                img = new Image();
-                img.onload = function () {
-                    var width = this.width;
-                    var height = this.height;
-                    width = 100;
-                    height = 100
-
-                    if (this.width > this.height) {
-                        width = width * (this.width / this.height);
-                    } else {
-                        height = height * (this.height / this.width);
-                    }
-
-
-                };
-                img.src = _URL.createObjectURL(file);
-            }*/
             readURL(this);
         });
 
-        function upload(file) {
+        /* function upload(file) {
 
-            var xhr = new XMLHttpRequest();
+         var xhr = new XMLHttpRequest();
 
-            // обработчик для закачки
-            xhr.upload.onprogress = function (event) {
-                console.log(event.loaded + ' / ' + event.total);
+         // обработчик для закачки
+         xhr.upload.onprogress = function (event) {
+         console.log(event.loaded + ' / ' + event.total);
 
-                $('.progress-bar').css('width', (event.loaded / event.total) * 100 + '%').attr('aria-valuenow', (event.loaded / event.total) * 100);
-            }
+         $('.progress-bar').css('width', (event.loaded / event.total) * 100 + '%').attr('aria-valuenow', (event.loaded / event.total) * 100);
+         }
 
-            // обработчики успеха и ошибки
-            // если status == 200, то это успех, иначе ошибка
-            xhr.onload = xhr.onerror = function () {
-                if (this.status == 200) {
-                    console.log("success");
-                } else {
-                    console.log("error " + this.status);
-                }
-            };
+         // обработчики успеха и ошибки
+         // если status == 200, то это успех, иначе ошибка
+         xhr.onload = xhr.onerror = function () {
+         if (this.status == 200) {
+         console.log("success");
+         } else {
+         console.log("error " + this.status);
+         }
+         };
 
-            xhr.open("POST", "upload", true);
-            xhr.send(file);
+         xhr.open("POST", "upload", true);
+         xhr.send(file);
 
-        }
+         }*/
 
         /*document.forms.upload.onsubmit = function () {
          var input = this.elements.file;
@@ -180,6 +160,27 @@
          }
          return false;
          }*/
+
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: "/upload",
+                // contentType: attr("enctype", "multipart/form-data"),
+                data: new FormData(this),
+                processData: false,
+                //  contentType: "multipart/form-data",
+                contentType: false,
+                cache: false
+            }).done(function (result) {
+                // if (result == "") self.submit();
+                console.log('done');
+            }).fail(function () {
+                alert('error');
+                console.log('error');
+            });
+        })
     });
 
 </script>

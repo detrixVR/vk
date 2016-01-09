@@ -84,9 +84,10 @@ const COMMANDS_DATA = [
 
 var sio = function (server) {
 
-    var s = io.listen(server);
+    var self = this;
+    this.s = io.listen(server);
 
-    s.adapter(redis({
+    self.s.adapter(redis({
         host: 'localhost',
         port: 6379
     }));
@@ -108,16 +109,16 @@ var sio = function (server) {
     }
 
     function sendProcessEvent(process) {
-        s.sockets.in(process.username + ':' + process.accountId + ':' + process.processId).emit('printEvent', process);
-        s.sockets.in(process.username + ':' + process.accountId + ':' + 'defaultProcess').emit('printEvent', process);
+        self.s.sockets.in(process.username + ':' + process.accountId + ':' + process.processId).emit('printEvent', process);
+        self.s.sockets.in(process.username + ':' + process.accountId + ':' + 'defaultProcess').emit('printEvent', process);
     }
 
     function sendProcessState(data) {
-        s.sockets.in(data.username + ':' + data.accountId + ':' + data.processId).emit('setState', /*data*/{
+        self.s.sockets.in(data.username + ':' + data.accountId + ':' + data.processId).emit('setState', /*data*/{
             state: data.state,
             msg: data.msg
         });
-        s.sockets.in(data.username + ':' + data.accountId + ':' + 'tasksListen').emit('setState', /*data*/{
+        self.s.sockets.in(data.username + ':' + data.accountId + ':' + 'tasksListen').emit('setState', /*data*/{
             state: data.state,
             msg: data.msg
         });
@@ -228,6 +229,8 @@ var sio = function (server) {
         }
     }
 
+
+
     process.on('message', function (msg) {
 
 
@@ -290,10 +293,10 @@ var sio = function (server) {
                                     startPauseProcess(extend({}, credentials, cbData), true);
                                     break;
                                 case 4: //row event
-                                    s.sockets.in(room).emit('refreshRow', extend({}, credentials, cbData));
+                                    self.s.sockets.in(room).emit('refreshRow', extend({}, credentials, cbData));
                                     break;
                                 case 5: //row event
-                                    s.sockets.in(room).emit('reloadGrid', extend({}, credentials, cbData));
+                                    self.s.sockets.in(room).emit('reloadGrid', extend({}, credentials, cbData));
                                     break;
                             }
                         });
@@ -309,15 +312,15 @@ var sio = function (server) {
 
                     var process = getProcess(msg.data);
                     if (!process) {
-                        dbProcess.findOne(credentials).sort({created: -1}).exec(function (err, doc) {
+                        dbProcess.findOne(credentials).sort({created: -1}).exec((err, doc) => {
                             if (err) {
                                 console.error(err);
                             } else {
-                                s.sockets.in(room).emit('setProcess', doc);
+                                self.s.sockets.in(room).emit('setProcess', doc);
                             }
                         })
                     } else {
-                        s.sockets.in(room).emit('setProcess', process);
+                        self.s.sockets.in(room).emit('setProcess', process);
                     }
 
                     break;
@@ -336,13 +339,13 @@ var sio = function (server) {
                     });
                     break;
                 case 'sendMemoryUsage':
-                    s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
+                    self.s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
                     break;
             }
         }
     });
 
-    s.set('authorization', function (handshakeData, accept) {
+    self.s.set('authorization', function (handshakeData, accept) {
 
         if (handshakeData.headers.cookie) {
             var parsedCookies = cookie.parse(handshakeData.headers.cookie);
@@ -358,13 +361,14 @@ var sio = function (server) {
         return accept('Вы не авторизованы', false);
     });
 
-    s.sockets.on('connection', function (socket) {
+    self.s.sockets.on('connection', function (socket) {
 
         var user = {
             username: socket.request.username
         };
 
         socket.join(user.username);
+        socket.join(user.username+':uploadFile');
 
         var onevent = socket.onevent;
 
@@ -376,7 +380,7 @@ var sio = function (server) {
             if (validatePacketData(command, data)) {
 
                 var roomsWhereUserIs = [];
-                for (var k in s.sockets.adapter.rooms) {
+                for (var k in self.s.sockets.adapter.rooms) {
                     if (k.indexOf(user.username) > -1)
                         roomsWhereUserIs.push(k);
                 }

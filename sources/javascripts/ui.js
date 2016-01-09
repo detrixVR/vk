@@ -31,6 +31,9 @@ var overlay = function (state) {
         $overlay.toggleClass('hidden', true);
     }
 };
+var setProgress = function(progress){
+    $('.progress-bar').css('width', progress.value + '%').attr('aria-valuenow', progress.value);
+}
 
 var getSettings = function () {
 
@@ -815,6 +818,7 @@ var ui = {
     setProcesses: setProcesses,
     getTitleById: getTitleById,
     renderAccountHolder: renderAccountHolder,
+    setProgress: setProgress,
 };
 
 export default ui;
