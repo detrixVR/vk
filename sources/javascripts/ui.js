@@ -22,6 +22,10 @@ var setState = function (data) {
     $('button, input, a.btn').not('.startPauseButton, .stopButton').attr('disabled', data.state !== 0);
 };
 
+var setTaskState = function (data) {
+    $('.widget').trigger('setTaskState', [data]);
+};
+
 var overlay = function (state) {
     var $overlay = $('.overlay');
     if (state) {
@@ -101,6 +105,24 @@ var getSettings = function () {
             settings[item.id] = {
                 type: 'typeahead',
                 value: $(item).data('value') || 0
+            }
+        }
+    });
+
+    $('[type=datetimepicker]').each(function (i, item) {
+        if (item.id) {
+            var $parent = $(item).parent();
+            var dp = $parent.data('DateTimePicker');
+            if (dp) {
+                var date = dp.date();
+                if (date) {
+                    var value = date.toDate();
+                    value = value.getTime();
+                    settings[item.id] = {
+                        type: 'datetimepicker',
+                        value: value
+                    }
+                }
             }
         }
     });
@@ -312,8 +334,8 @@ var setProcessButtonsState = function (state, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-            toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-            toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -321,6 +343,48 @@ var setProcessButtonsState = function (state, parent) {
     }
 
 };
+
+var setTaskButtonsState = function (data, parent) {
+
+    if (parent.hasClass('taskHolder')) {
+
+        var elemData = parent.data();
+        if (elemData.task === data.uid) {
+            var stopButton = $('.stopButton', parent);
+            var startPauseButton = $('.startPauseButton', parent);
+
+            stopButton.attr('disabled', false);
+            startPauseButton.attr('disabled', false);
+
+            if (parent.hasClass('taskHolder') && data.state === 0) {
+                startPauseButton.toggleClass('hidden', true);
+                parent.find('.finishIndicator').toggleClass('hidden', false);
+            } else {
+                startPauseButton.find('.glyphicon').
+                    toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                    toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+            }
+
+
+            stopButton.toggleClass('hidden', data.state === 0);
+        }
+
+
+    }
+
+};
+
+var printTasks = function(data) {
+    console.log(data);
+    data.tasks.forEach(function(item){
+        createTask(item);
+    })
+};
+
+var createTask = function (task) {
+    $('.widget').trigger('printTask', task);
+};
+
 
 var init = function () {
 
@@ -581,6 +645,9 @@ var init = function () {
         .bind('setState', '.widget', function (event, data) {
             setProcessButtonsState(data.state, $(event.target));
         })
+        .bind('setTaskState', '.widget', function (event, data) {
+            setTaskButtonsState(data, $(event.target));
+        })
         .bind('printProcess', '.widget', function (event, process, clear) {
 
             var $target = $(event.target);
@@ -592,14 +659,16 @@ var init = function () {
                     tabContainer.empty();
                 }
 
+                var lastMsg = task.messages.pop();
+
                 tabContainer.append(_.template($('#taskRow').html())({
-                    listGroupStyle: getListGroupItemClass(process.messages.pop().type),
+                    listGroupStyle: getListGroupItemClass(lastMsg ? lastMsg.type : 0),
                     accountId: process.accountId,
                     processId: process.processId,
                     processTitle: getTitleById(process.processId),
                     avatarUrl: process.settings.accountInfo.value.photo_50,
-                    lastMessageTime: new Date(process.messages.pop().time).toLocaleString(),
-                    lastMessage: process.messages.pop().msg,
+                    lastMessageTime: new Date(lastMsg.time).toLocaleString(),
+                    lastMessage: lastMsg.msg,
                     startPauseButtonGlyph: (process.state === 2 ? 'glyphicon-play' : 'glyphicon-pause')
                 }));
 
@@ -610,6 +679,62 @@ var init = function () {
             var $target = $(event.target);
             if ($target.hasClass('tasksHolder')) {
                 $('#tab1', $target).html(_.template($('#noProcessesTemplate').html())({}))
+            }
+        })
+        .bind('createTask', '.widget', function () {
+            that.socket.socket.emit('createTask', {
+                settings: getSettings.call(that)
+            });
+        })
+        .bind('printTask', '.widget', function (event, task, clear) {
+
+            var $target = $(event.target);
+
+            if ($target.hasClass('tasksHolder')) {
+
+                var tabContainer = $('#tab1 .row', $target);
+
+                if (clear) {
+                    tabContainer.empty();
+                }
+
+                var lastMsg = task.messages.pop();
+
+                tabContainer.prepend(_.template($('#taskRowTemplate').html())({
+                    listGroupStyle: getListGroupItemClass(lastMsg ? lastMsg.type : 0),
+                    accountId: task.accountId,
+                    taskUid: task.uid,
+                    processTitle: getTitleById(task.uid) || task.settings.taskName.value,
+                    avatarUrl: task.settings.accountInfo.value.photo_50,
+                    lastMessageTime: lastMsg ? new Date(lastMsg.time).toLocaleString() : null,
+                    lastMessage: lastMsg ? lastMsg.msg : null,
+                    startPauseButtonGlyph: (task.state === 2 || task.state === 0 ? 'glyphicon-play' : 'glyphicon-pause'),
+                    taskState: task.state
+                }));
+
+
+            }
+        })
+        .bind('startPauseTask', '.widget', function(event, data){
+            var $target = $(event.target);
+            if ($target.hasClass('taskHolder')) {
+                var $elem = $(data);
+                $elem.attr('disabled', true);
+                var elemData = $target.data();
+                that.socket.socket.emit('startPauseTask', {
+                    uid: elemData.task
+                });
+            }
+        })
+        .bind('stopTask', '.widget', function(event, data){
+            var $target = $(event.target);
+            if ($target.hasClass('taskHolder')) {
+                var $elem = $(data);
+                $elem.attr('disabled', true);
+                var elemData = $target.data();
+                that.socket.socket.emit('stopTask', {
+                    uid: elemData.task
+                });
             }
         })
         .bind('showProcessInfo', '.widget', function (event, rowData) {
@@ -820,6 +945,9 @@ var ui = {
     getTitleById: getTitleById,
     renderAccountHolder: renderAccountHolder,
     setProgress: setProgress,
+    createTask: createTask,
+    setTaskState: setTaskState,
+    printTasks: printTasks,
 };
 
 export default ui;

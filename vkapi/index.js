@@ -5,7 +5,8 @@ var VK = require('vksdk'),
 
 var vk = new VK({
     'language': 'ru',
-    'secure': true
+    'secure': true,
+    'version': '5.42'
 });
 
 function processError(error, callback) {

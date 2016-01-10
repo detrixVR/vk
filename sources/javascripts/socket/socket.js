@@ -54,6 +54,11 @@ class Socket {
                 that.page.ui.setState(processResponse.apply(that, [state]));
             });
 
+            this.socket.on('setTaskState', function (state) {
+                console.log(state);
+                that.page.ui.setTaskState(processResponse.apply(that, [state]));
+            });
+
             this.socket.on('setProcess', function (process) {
                 console.log(process);
                 that.page.ui.setProcess(process);
@@ -77,16 +82,18 @@ class Socket {
                     case 'listCreating':
                     case 'configurationClean':
                     case 'configurationCopy':
-                    case 'taskExecution':
                         that.socket.emit('getCurrentProcess', {
                             processId: that.page.processId
                         });
+                        break;
+                    case 'taskExecution':
+                        that.page.ui.setProcess(null);
+                        that.socket.emit('getAllTasks');
                         break;
                     case 'defaultProcess':
                         that.socket.emit('getAllProcesses');
                         break;
                 }
-
             });
 
 
@@ -114,6 +121,15 @@ class Socket {
 
             this.socket.on('reloadGrid', function (data) {
                 that.page.ui.reloadGrid(processResponse.apply(that, [data]));
+            });
+
+            this.socket.on('createTask', function (data) {
+                that.page.ui.createTask(processResponse.apply(that, [data]));
+            });
+
+            this.socket.on('getAllTasks', function (data) {
+
+                that.page.ui.printTasks(data);
             });
 
             this.socket.on('disconnect', function () {

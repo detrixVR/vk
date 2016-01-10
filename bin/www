@@ -12,6 +12,7 @@ var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CON
 
 var workersArray = [];
 var processes = [];
+var tasks = [];
 var memoryUsage = {};
 
 if (cluster.isMaster) {
@@ -40,6 +41,19 @@ if (cluster.isMaster) {
         return process;
     }
 
+    function getExistingTask(data) {
+        var task = null;
+
+        for (var k = 0; k < tasks.length; k++) {
+            if (tasks[k].uid === data.uid) {
+                task = tasks[k];
+                break;
+            }
+        }
+
+        return task;
+    }
+
     workers--;
 
     for (var i = 0; i < workers; ++i) {
@@ -49,6 +63,7 @@ if (cluster.isMaster) {
         worker.on('message', function (msg) {
 
             var process = null;
+            var task = null;
 
             switch (msg.command) {
                 case 'startPauseProcess':
@@ -113,9 +128,47 @@ if (cluster.isMaster) {
                         data: msg.data
                     });
                     break;
+                case 'getAllTasks':
+                    broadcast({
+                        command: 'getAllTasks',
+                        data: msg.data
+                    });
+                    break;
                 case 'setMemoryUsage':
                     //  console.log('', msg.data.processPid, ': ' + msg.data.memoryUsage.heapTotal / 1024 / 1024, 'mb');
                     memoryUsage[msg.data.processPid] = msg.data.memoryUsage.heapTotal;
+                    break;
+                case 'createTask':
+
+                    task = {
+                        wid: this.id,
+                        username: msg.data.username,
+                        accountId: msg.data.accountId,
+                        uid: msg.data.uid
+                    };
+
+                    tasks.push(task);
+
+                    console.log(tasks);
+                    console.log('tasks length: ', tasks.length);
+
+                    cluster.workers[task.wid].send({
+                        command: msg.command,
+                        data: msg.data
+                    });
+                    break;
+                case 'startPauseTask':
+                case 'stopTask':
+
+                    console.log(msg.data);
+                    task = getExistingTask(msg.data);
+                    if (task) {
+                        console.log('here3')
+                        cluster.workers[task.wid].send({
+                            command: msg.command,
+                            data: msg.data
+                        });
+                    }
                     break;
             }
         });
@@ -158,9 +211,9 @@ if (cluster.isMaster) {
     server.on('error', onError);
     server.on('listening', onListening);
 
-    app.set('hovan',  new Socket(server));
+    app.set('hovan', new Socket(server));
 
- //  ;
+    //  ;
 
     function onError(error) {
         if (error.syscall !== 'listen') {

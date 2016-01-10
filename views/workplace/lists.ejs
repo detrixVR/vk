@@ -13,121 +13,133 @@
     <%- include ../templates/overlay.ejs %>
     <%- include ../parts/cabinetNavbar.ejs %>
 
-    <div class="container-fluid" id="mainContainer">
-
-
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-12 col-lg-4">
-                <div class="well well-sm widget container-fluid">
+            <div class="col-xs-12">
+                <ul class="nav nav-tabs">
+                    <li <% if (subPage === 'person') { %>class="active"
+                            <% } %>
+                            ><a data-toggle="tab" href="/tasks?type=message">Люди</a></li>
+                    <li <% if (subPage === 'group') { %>class="active"
+                            <% } %>
+                            ><a data-toggle="tab" href="/tasks?type=post">Группы</a></li>
+                    <li <% if (subPage === 'post') { %>class="active"
+                            <% } %>
+                            ><a data-toggle="tab" href="/tasks?type=like">Посты</a></li>
+                    <li <% if (subPage === 'audio') { %>class="active"
+                            <% } %>
+                            ><a data-toggle="tab" href="/tasks?type=repost">Аудиозаписи</a></li>
+                    <li <% if (subPage === 'video') { %>class="active"
+                            <% } %>
+                            ><a data-toggle="tab" href="/tasks?type=comment">Видеозаписи</a></li>
+
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade in active">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-xs-12 col-lg-4">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-xs-6">
+                                                <div id="accountHolder">
+
+                                                </div>
+                                            </div>
 
 
-                    <div class="row">
-
-                        <div class="col-xs-6">
-                            <div id="accountHolder">
-
-                            </div>
-                        </div>
-
-                        <div class="col-xs-6">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Какой список использовать">Откуда</label>
+                                            <div class="col-xs-6">
+                                                <label class="small control-label" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="Какой список использовать">Откуда</label>
 
 
-                            <select class="selectpicker" data-width="100%" id="fromSelector">
-                                <option>ЛЮДИ</option>
-                                <option>ГРУППЫ</option>
-                            </select>
+                                                <select class="selectpicker" data-width="100%" id="targetSelect">
+                                                    <option>Все</option>
+                                                    <option>Загруженные</option>
+                                                    <option>Выделенные</option>
+                                                </select>
 
-                        </div>
-
-                        <div class="col-xs-6">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Какой список использовать">Откуда</label>
+                                            </div>
 
 
-                            <select class="selectpicker" data-width="100%" id="targetSelect">
-                                <option>Все</option>
-                                <option>Загруженные</option>
-                                <option>Выделенные</option>
-                            </select>
+                                            <div class="col-xs-6">
+                                                <label class="small control-label" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="Какой список использовать">Взять</label>
 
-                        </div>
-
-
-                        <div class="col-xs-6">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Какой список использовать">Взять</label>
-
-                            <select class="selectpicker" data-width="100%" id="whatSelector">
-                                <option>Пост</option>
-                                <option>Фотографию</option>
-                                <option>Videozapis'</option>
-                            </select>
-                        </div>
+                                                <select class="selectpicker" data-width="100%" id="whatSelector">
+                                                    <option>Пост</option>
+                                                    <option>Фотографию</option>
+                                                    <option>Видеозапись</option>
+                                                </select>
+                                            </div>
 
 
+                                            <div class="col-xs-6">
+                                                <label class="small control-label" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="Какой список использовать">Какой</label>
+                                                <select class="selectpicker" data-width="100%" id="exactSelector">
+                                                    <option>Последний</option>
+                                                    <option>Случайный</option>
+                                                    <option>Найти</option>
+                                                </select>
+                                            </div>
 
 
-                        <div class="col-xs-6">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Какой список использовать">Какой</label>
-                            <select class="selectpicker" data-width="100%" id="exactSelector">
-                                <option>Последний</option>
-                                <option>Случайный</option>
-                                <option>Найти</option>
-                            </select>
-                        </div>
+                                            <div class="exactSelector1 hidden col-xs-6">
+                                                <label class="small control-label" data-toggle="tooltip"
+                                                       data-placement="top" title=""
+                                                       data-original-title="Какой список использовать">Из
+                                                    последних</label>
+
+                                                <div class="input-group spinner full-width">
+                                                    <input type="text" class="form-control hours"
+                                                           id="fromLatest"
+                                                           data-settings="true" value="10">
+
+                                                    <div class="input-group-btn-vertical">
+                                                        <button class="btn btn-default" type="button"><i
+                                                                    class="glyphicon glyphicon-chevron-up"></i></button>
+                                                        <button class="btn btn-default" type="button"><i
+                                                                    class="glyphicon glyphicon-chevron-down"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
 
 
-                        <div class="exactSelector1 hidden col-xs-6">
-                            <label class="small control-label" data-toggle="tooltip" data-placement="top" title=""
-                                   data-original-title="Какой список использовать">Из последних</label>
+                                            <div class="exactSelector2 hidden col-xs-6">
+                                                <label>Поисковая строка</label>
+                                                <input type="text" class="form-control input-sm" id="queryString"/>
+                                            </div>
 
-                            <div class="input-group spinner full-width">
-                                <input type="text" class="form-control hours"
-                                       id="fromLatest"
-                                       data-settings="true" value="10">
+                                            <div class="whatSelector0  col-xs-6">
+                                                <label class="small control-label"></label>
 
-                                <div class="input-group-btn-vertical">
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-up"></i></button>
-                                    <button class="btn btn-default" type="button"><i
-                                                class="glyphicon glyphicon-chevron-down"></i>
-                                    </button>
+                                                <div class="checkbox">
+                                                    <input type="checkbox" id="onlyOwner">
+                                                    <label for="onlyOwner">
+                                                        Только владельца
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="col-xs-12 col-lg-8">
+                                    <% if (subPage == 'person') { %>
+                                    <%- include ../templates/grids/personGrid.ejs %>
+                                    <% } else if (subPage == 'group') { %>
+                                    <% } %>
+                                </div>
+
                             </div>
                         </div>
-
-
-                        <div class="exactSelector2 hidden col-xs-6">
-                            <label>Поисковая строка</label>
-                            <input type="text" class="form-control input-sm" id="queryString"/>
-                        </div>
-
-                        <div class="whatSelector0  col-xs-6">
-                            <label class="small control-label" ></label>
-
-                            <div class="checkbox">
-                                <input type="checkbox" id="onlyOwner">
-                                <label for="onlyOwner">
-                                    Только владельца
-                                </label>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
-            <div class="col-xs-12 col-lg-8">
-                <div class="fromSelector0 well well-sm">
-                    <%- include ../templates/grids/personGrid.ejs %>
-                </div>
-                <div class="fromSelector1 well well-sm hidden">
-                    <%- include ../templates/grids/groupGrid.ejs %>
-                </div>
-            </div>
-
         </div>
 
 
@@ -173,6 +185,7 @@
             $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
             selector.toggleClass('hidden');
         });
+        $('.selectpicker').trigger('change');
     });
 
 </script>

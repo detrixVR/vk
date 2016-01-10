@@ -73,6 +73,9 @@
         loadRows.call(this); // Loads rows from HTML tbody tag if ajax is false
         prepareTable.call(this);
         renderTableHeader.call(this);
+
+        renderListSelector.call(this);
+
         renderSearchField.call(this);
         renderActions.call(this);
         //loadData.call(this);
@@ -566,6 +569,51 @@
             });
             actions.append(dropDown);
         }
+    }
+
+    function renderListSelector() {
+
+            var css = this.options.css,
+                selector = getCssSelector(css.list),
+                listItems = findFooterAndHeaderItems.call(this, selector);
+
+            if (listItems.length > 0) {
+                var that = this,
+                    tpl = this.options.templates,
+                    listSelector = $(tpl.listSelector.resolve(getParams.call(this, {content: 'Список'}))),
+                    menuSelector = getCssSelector(css.dropDownMenu),
+                    menuTextSelector = getCssSelector(css.dropDownMenuText),
+                    menuItemsSelector = getCssSelector(css.dropDownMenuItems),
+                    menuItemSelector = getCssSelector(css.dropDownItemButton);
+
+               /* $.each([{}], function (index, value) {
+                    var item = $(tpl.actionDropDownItem.resolve(getParams.call(that,
+                        {text: getText(value), action: value})))
+                        ._bgSelectAria(value === that.rowCount)
+                        .on("click" + namespace, menuItemSelector, function (e) {
+                            e.preventDefault();
+
+                            var $this = $(this),
+                                newRowCount = $this.data("action");
+                            if (newRowCount !== that.rowCount) {
+                                // todo: sophisticated solution needed for calculating which page is selected
+                                that.current = 1; // that.rowCount === -1 ---> All
+                                that.rowCount = newRowCount;
+                                $this.parents(menuItemsSelector).children().each(function () {
+                                    var $item = $(this),
+                                        currentRowCount = $item.find(menuItemSelector).data("action");
+                                    $item._bgSelectAria(currentRowCount === newRowCount);
+                                });
+                                $this.parents(menuSelector).find(menuTextSelector).text(getText(newRowCount));
+                                loadData.call(that);
+                            }
+                        });
+                    dropDown.find(menuItemsSelector).append(item);
+                });*/
+
+                replacePlaceHolder.call(this, listItems, listSelector);
+            }
+
     }
 
     function renderSearchField() {
@@ -1094,6 +1142,7 @@
             responsiveTable: "table-responsive",
 
             right: "text-right",
+            list: "list btn-group pull-left",
             search: "search form-group", // must be a unique class name or constellation of class names within the header and footer
             searchField: "search-field form-control",
             selectBox: "select-box", // must be a unique class name or constellation of class names within the entire table
@@ -1249,6 +1298,7 @@
         },
 
         templates: {
+            listSelector: '<div class=\"{{css.list}}\"><button class=\"btn btn-default dropdown-toggle full-width\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>',
             actionButton: "<button class=\"btn btn-default\" type=\"button\" title=\"{{ctx.text}}\">{{ctx.content}}</button>",
             actionLink: "<a class=\"btn btn-primary\" type=\"button\" title=\"{{ctx.text}}\" href=\"{{ctx.href}}\" target=\"_blank\">{{ctx.content}}</a>",
             actionDropDown: "<div class=\"{{css.dropDownMenu}}\"><button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>",
@@ -1258,7 +1308,7 @@
             body: "<tbody></tbody>",
             cell: "<td class=\"{{ctx.css}}\" style=\"{{ctx.style}}\">{{ctx.content}}</td>",
             footer: "<div id=\"{{ctx.id}}\" class=\"{{css.footer}}\"><div><p class=\"{{css.pagination}}\"></p></div><div class=\"infoBar pull-right\"><p class=\"{{css.infos}}\"></p></div></div>",
-            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"actionBar\"><p class=\"{{css.search}}\"></p><p class=\"{{css.actions}}\"></p></div></div>",
+            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"actionBar\"><p class=\"{{css.list}}\"></p><p class=\"{{css.search}}\"></p><p class=\"{{css.actions}}\"></p></div></div>",
             headerCell: "<th data-column-id=\"{{ctx.column.id}}\" class=\"{{ctx.css}}\" style=\"{{ctx.style}}\"><a href=\"javascript:void(0);\" class=\"{{css.columnHeaderAnchor}} {{ctx.sortable}}\"><span class=\"{{css.columnHeaderText}}\">{{ctx.column.text}}</span>{{ctx.icon}}</a></th>",
             icon: "<span class=\"{{css.icon}} {{ctx.iconCss}}\"></span>",
             infos: "<div class=\"{{css.infos}}\">{{lbl.infos}}</div>",

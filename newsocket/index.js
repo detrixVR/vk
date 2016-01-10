@@ -13,7 +13,9 @@ var io = require('socket.io'),
     searchGroups = require('../socket/processes/searchGroups'),
     configurationClean = require('../socket/processes/configurationClean'),
     listCreating = require('../socket/processes/listCreating'),
-    Process = require('./process');
+    Process = require('./process'),
+    Task = require('./task'),
+    uuid = require('node-uuid');
 
 const COMMANDS_DATA = [
     {
@@ -93,6 +95,7 @@ var sio = function (server) {
     }));
 
     var processes = [];
+    var tasks = [];
 
     function getProcess(data) {
         var process = null;
@@ -192,6 +195,27 @@ var sio = function (server) {
         return result;
     }
 
+    function getAllTasks(data) {
+        var result = [];
+
+        for (var k = 0; k < tasks.length; k++) {
+            if (tasks[k].username === data.username &&
+                tasks[k].accountId === data.accountId) {
+
+                result.push({
+                    username: tasks[k].username,
+                    accountId: tasks[k].accountId,
+                    settings: tasks[k].settings,
+                    uid: tasks[k].uid,
+                    messages: tasks[k].messages,
+                    state: tasks[k].state
+                });
+            }
+        }
+
+        return result;
+    }
+
     function validatePacketData(command, data) {
 
 
@@ -218,10 +242,6 @@ var sio = function (server) {
         return true;
     }
 
-    function getUserNameString(user) {
-        return user.username + ':' + (user.accountId ? user.accountId + (user.processId ? ':' + user.processId : '') : '');
-    }
-
     function setProcessMessage(data) {
         var process = getProcess(data);
         if (process) {
@@ -229,10 +249,22 @@ var sio = function (server) {
         }
     }
 
+    function getExistingTask(data) {
+        var task = null;
 
+        for (var k = 0; k < tasks.length; k++) {
+            if (tasks[k].uid === data.uid) {
+                task = tasks[k];
+                break;
+            }
+        }
+
+        return task;
+    }
 
     process.on('message', function (msg) {
 
+        var task = null;
 
         if (msg.data && msg.data.username) {
 
@@ -243,7 +275,7 @@ var sio = function (server) {
                 processId: msg.data.processId
             };
 
-            var room = getUserNameString(credentials);
+            var room = self.getUserNameString(credentials);
 
             switch (msg.command) {
                 case  'startProcess':
@@ -324,6 +356,39 @@ var sio = function (server) {
                     }
 
                     break;
+                case 'createTask':
+                    var newTask = new Task(self, msg.data);
+                    tasks.push(newTask);
+                    console.log('tasks length: ', tasks.length);
+                    self.s.sockets.in(room).emit(msg.command, extend({}, msg.data, {
+                        state: newTask.state,
+                        messages: newTask.messages
+                    }));
+                    break;
+                case 'startPauseTask':
+                    task = getExistingTask(msg.data);
+                    console.log('here 1');
+                    if (task) {
+                        console.log('here 2');
+                        task.start();
+                    }
+                    break;
+                case 'stopTask':
+                    task = getExistingTask(msg.data);
+                    if (task) {
+                        task.stop();
+                    }
+                    break;
+                case 'getAllTasks':
+                    var foundedTasks = getAllTasks(msg.data);
+                    console.log(tasks.length)
+                    if (foundedTasks.length) {
+                        console.log(foundedTasks);
+                        self.s.sockets.in(room).emit(msg.command, {
+                            tasks: foundedTasks
+                        });
+                    }
+                    break;
                 default:
                     console.log('default ' + msg.command);
             }
@@ -368,7 +433,7 @@ var sio = function (server) {
         };
 
         socket.join(user.username);
-        socket.join(user.username+':uploadFile');
+        socket.join(user.username + ':uploadFile');
 
         var onevent = socket.onevent;
 
@@ -376,7 +441,7 @@ var sio = function (server) {
             var args = packet.data || [];
             var command = args[0];
             var data = args[1];
-            console.log(process.pid + ': [' + getUserNameString(user) + '] command [' + command + ']');
+            console.log(process.pid + ': [' + self.getUserNameString(user) + '] command [' + command + ']');
             if (validatePacketData(command, data)) {
 
                 var roomsWhereUserIs = [];
@@ -389,7 +454,7 @@ var sio = function (server) {
                 switch (command) {
                     case 'join':
                         user.processId = data.processId;
-                        socket.join(getUserNameString(user));
+                        socket.join(self.getUserNameString(user));
                         return;
                     case 'switchAccount':
                         for (var k in user.roomsWhereUserIs) {
@@ -406,6 +471,7 @@ var sio = function (server) {
                     case 'getCurrentProcess':
                     case 'startPauseProcess':
                     case 'stopProcess':
+
                         process.send({
                             command: command,
                             data: extend({}, user, {
@@ -418,13 +484,42 @@ var sio = function (server) {
                 }
 
                 switch (command) {
+                    case 'createTask':
+                        process.send({
+                            command: command,
+                            data: extend({}, user, {
+                                settings: data.settings,
+                                uid: uuid.v1()
+                            })
+                        });
+                        break;
+                    case 'startPauseTask':
+                    case 'stopTask':
+                        process.send({
+                            command: command,
+                            data: extend({}, user, {
+                                uid: data.uid
+                            })
+                        });
+                        break;
+                    case 'getAllTasks':
+                        process.send({
+                            command: command,
+                            data: extend({}, user, {
+                                // uid: data.uid
+                            })
+                        });
+                        return;
+                }
+
+                switch (command) {
                     default:
                         onevent.call(this, packet);
                 }
 
 
             } else {
-                console.error(process.pid + ': [' + getUserNameString(user) + '] validation error [' + command + ']');
+                console.error(process.pid + ': [' + self.getUserNameString(user) + '] validation error [' + command + ']');
                 this.emit('clientError', {
                     notify: 'Команда сокета не прошла проверку',
                     type: 4
@@ -434,7 +529,7 @@ var sio = function (server) {
 
 
         socket.on('disconnect', function (inData) {
-            console.log(process.pid + ': [' + getUserNameString(user) + '] disconnected');
+            console.log(process.pid + ': [' + self.getUserNameString(user) + '] disconnected');
         });
 
 
@@ -445,6 +540,10 @@ var sio = function (server) {
             });
         });
     })
+};
+
+sio.prototype.getUserNameString = function (data) {
+    return data.username + (data.accountId ? ':' + data.accountId + (data.processId ? ':' + data.processId : '') : '');
 };
 
 module.exports = sio;

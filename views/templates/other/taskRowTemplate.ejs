@@ -1,7 +1,7 @@
-<script type="text/template" id="taskRow">
+<script type="text/template" id="taskRowTemplate">
     <div class="col-xs-12 col-md-6 list-group-item {{= listGroupStyle }}">
         <div class="widget taskHolder " data-account="{{= accountId }}"
-             data-process="{{= processId }}">
+             data-task="{{= taskUid }}">
             <div>
                 <div id="accountHolder">
                     <div class="img-thumbnail avatarHolder"
@@ -11,7 +11,6 @@
             <div class="speechBox" style="">
                 <label class="small">{{= processTitle }}</label>
                 <div class="innerText">
-
                     <ul>
                         {{ if (lastMessageTime) { }}
                         <li><span class="small"><span
@@ -22,14 +21,20 @@
                 </div>
             </div>
             <div>
+
                 <button class="btn btn-default btn-sm startPauseButton"
-                        onclick="$(this).closest('.widget').trigger('startPauseProcess', this)">
+                        onclick="$(this).closest('.widget').trigger('startPauseTask', this)">
                     <span class="glyphicon {{= startPauseButtonGlyph }}"></span>
                 </button>
-                <button class="btn btn-default btn-sm stopButton"
-                        onclick="$(this).closest('.widget').trigger('stopProcess', this)"><span
-                            class="glyphicon glyphicon-stop"></span></button>
-                <span class="glyphicon glyphicon-hand-left finishIndicator hidden"></span>
+
+
+                <button class="btn btn-default btn-sm stopButton
+                {{ if (taskState === 0) { }}
+                hidden
+                {{ } }}"
+                        onclick="$(this).closest('.widget').trigger('stopTask', this)"><span
+                            class="glyphicon glyphicon-stop"></span>
+                </button>
             </div>
         </div>
     </div>
