@@ -45,20 +45,24 @@ function getAccountByCredentials(ceredentials, callback) {
 
 function validateSettings(settings, validationModel) {
     var errors = [];
+
     for (var k in validationModel) {
-        if (settings.hasOwnProperty(k) && settings[k].hasOwnProperty('value')) {
-            var result = validationModel[k].validate(settings[k].value);
+        if (!settings.hasOwnProperty(k) || !settings[k].hasOwnProperty('value')) {
+            errors.push({
+                text: 'Необходим параметр ' + validationModel[k].name
+            });
+        }
+    }
+
+    if (!errors.length) {
+        for (var k in validationModel) {
+            var result = validationModel[k].validate(settings[k].value, settings);
             if (result) {
                 errors.push({
                     text: validationModel[k].name + ' - ' + result,
                     field: k
                 });
             }
-        } else {
-            // console.log(k)
-            errors.push({
-                text: 'Необходим параметр ' + validationModel[k].name
-            });
         }
     }
 

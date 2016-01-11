@@ -48,7 +48,8 @@
                 rowCount: this.rowCount,
                 sort: this.sortDictionary,
                 searchPhrase: this.searchPhrase,
-                listType: this.listType
+                listType: this.listType,
+                listName: this.listName
             },
             post = this.options.post;
 
@@ -216,6 +217,9 @@
                         response = that.options.responseHandler(response);
 
                         that.current = response.current;
+
+                        that.lists = response.lists;
+
                         update(response.rows, response.total);
                     }
 
@@ -573,46 +577,64 @@
 
     function renderListSelector() {
 
-            var css = this.options.css,
-                selector = getCssSelector(css.list),
-                listItems = findFooterAndHeaderItems.call(this, selector);
+        var css = this.options.css,
+            selector = getCssSelector(css.list),
+            listItems = findFooterAndHeaderItems.call(this, selector);
 
-            if (listItems.length > 0) {
-                var that = this,
-                    tpl = this.options.templates,
-                    listSelector = $(tpl.listSelector.resolve(getParams.call(this, {content: 'Список'}))),
-                    menuSelector = getCssSelector(css.dropDownMenu),
-                    menuTextSelector = getCssSelector(css.dropDownMenuText),
-                    menuItemsSelector = getCssSelector(css.dropDownMenuItems),
-                    menuItemSelector = getCssSelector(css.dropDownItemButton);
 
-               /* $.each([{}], function (index, value) {
-                    var item = $(tpl.actionDropDownItem.resolve(getParams.call(that,
-                        {text: getText(value), action: value})))
-                        ._bgSelectAria(value === that.rowCount)
-                        .on("click" + namespace, menuItemSelector, function (e) {
-                            e.preventDefault();
+        function getText(value) {
+            return (value === -1) ? that.options.labels.all : value;
+        }
 
-                            var $this = $(this),
-                                newRowCount = $this.data("action");
-                            if (newRowCount !== that.rowCount) {
-                                // todo: sophisticated solution needed for calculating which page is selected
-                                that.current = 1; // that.rowCount === -1 ---> All
-                                that.rowCount = newRowCount;
-                                $this.parents(menuItemsSelector).children().each(function () {
-                                    var $item = $(this),
-                                        currentRowCount = $item.find(menuItemSelector).data("action");
-                                    $item._bgSelectAria(currentRowCount === newRowCount);
-                                });
-                                $this.parents(menuSelector).find(menuTextSelector).text(getText(newRowCount));
-                                loadData.call(that);
-                            }
-                        });
-                    dropDown.find(menuItemsSelector).append(item);
-                });*/
 
-                replacePlaceHolder.call(this, listItems, listSelector);
+
+        if (listItems.length > 0) {
+
+            if (!this.lists || !this.lists.length) {
+                var name = 'Основной';
+                this.lists = [{
+                    name: name,
+                    type: this.listType
+                }];
+                this.listName = name;
             }
+
+            var that = this,
+                tpl = this.options.templates,
+                listSelector = $(tpl.listSelector.resolve(getParams.call(this, {content: this.listName}))),
+                menuSelector = getCssSelector(css.dropDownMenu),
+                menuTextSelector = getCssSelector(css.dropDownMenuText),
+                menuItemsSelector = getCssSelector(css.dropDownMenuItems),
+                menuItemSelector = getCssSelector(css.dropDownItemButton);
+
+
+
+            $.each(this.lists, function (index, value) {
+                var item = $(tpl.actionDropDownItem.resolve(getParams.call(that,
+                    {text: getText(value.name), action: value.name})))
+                    ._bgSelectAria(value.name === that.listName)
+                    .on("click" + namespace, menuItemSelector, function (e) {
+                        e.preventDefault();
+
+                        var $this = $(this),
+                            newListName = $this.data("action");
+                        if (newListName !== that.listName) {
+                            // todo: sophisticated solution needed for calculating which page is selected
+                            that.listName = newListName;
+                            $this.parents(menuItemsSelector).children().each(function () {
+                                var $item = $(this),
+                                    currentListName = $item.find(menuItemSelector).data("action");
+                                $item._bgSelectAria(currentListName === newListName);
+                            });
+                            $this.parents(menuSelector).find(menuTextSelector).text(getText(newListName));
+                            loadData.call(that);
+                        }
+                    });
+                listSelector.find(menuItemsSelector).append(item);
+            });
+
+            replacePlaceHolder.call(this, listItems, listSelector);
+        }
 
     }
 
@@ -866,7 +888,9 @@
         this.header = null;
         this.footer = null;
         this.xqr = null;
-        this.listType = this.options.listType
+        this.listType = this.options.listType;
+        this.lists = null;
+        this.listName = null;
 
         // todo: implement cache
     };

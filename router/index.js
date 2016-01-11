@@ -75,6 +75,10 @@ module.exports = function (app) {
     app.put('/grid', require('./grid').put);
     app.delete('/grid', require('./grid').delete);
 
+    app.post('/list', loadUser.needAuth, require('./list').post);
+    app.put('/list', loadUser.needAuth, require('./list').put);
+    app.delete('/list', loadUser.needAuth, require('./list').delete);
+
     app.post('/vkapi', require('./vkapi').post);
 
     app.get('/save/:type', require('./save').get);

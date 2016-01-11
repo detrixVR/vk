@@ -1,8 +1,11 @@
+"use strict";
+
 var PersonGrid = require('../../models/grid/person').PersonGrid,
     utils = require('../../modules/utils'),
     async = require('async'),
     request = require('request'),
     extend = require('extend'),
+    mainUtils = require('mainUtils'),
     executeCommand = require('../../vkapi').executeCommand;
 
 var validationModel = {
@@ -21,6 +24,16 @@ var validationModel = {
             return false;
         }
     },
+    canPost: {
+        validate: function (value) {
+            return false;
+        }
+    },
+    canSendFriendRequest: {
+        validate: function (value) {
+            return false;
+        }
+    },
     city: {
         name: 'Таймаут',
         validate: function (value) {
@@ -31,7 +44,7 @@ var validationModel = {
         name: 'Количество',
         validate: function (value) {
             if (!utils.isInt(value) || +value > 1000) {
-                return 'Должно быть числомdo 1000'
+                return 'Должно быть числом до 1000'
             }
             return false;
         }
@@ -94,15 +107,27 @@ var validationModel = {
         }
     },
     sort: {
-        name: 'Адрес проверки',
+        name: 'Сортировать по',
         validate: function (value) {
-            return false;
+            if (!util.isInt(value)) {
+                return 'Должно быть числом';
+            }
+        }
+    },
+    listName: {
+        name: 'Название списка',
+        validate: function (value, settings) {
+            if (!value && settings['replaceSelector'].value === 2) {
+                return 'Должно быть непустым'
+            }
         }
     },
     status: {
-        name: 'Адрес проверки',
+        name: 'Семейное положение',
         validate: function (value) {
-            return false;
+            if (!util.isInt(value)) {
+                return 'Должно быть числом';
+            }
         }
     }
 };
@@ -202,7 +227,21 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     online: settings.online.value ? 1 : 0,
                     has_photo: settings.has_photo.value ? 1 : 0,
                     from_list: settings.from_list.value ? 'friends' : '',
-                    fields: 'sex,online,can_write_private_message,photo_50'
+                    fields: `sex,
+                            bdate,
+                            can_post,
+                            verified,
+                            domain,
+                            nickname,
+                            relation,
+                            can_see_all_posts,
+                            can_see_audio,
+                            can_write_private_message,
+                            can_send_friend_request,
+                            wall_comments,
+                            blacklisted,
+                            blacklisted_by_me,
+                            photo_50`
                 };
 
                 console.log(inOptions);
@@ -228,9 +267,33 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                                 } else {
                                     check1 = peoples;
                                 }
+                                var i = 0;
+                                var check2 = [];
+                                if (${ settings.canPost.value }) {
+                                    while(i < check1.length) {
+                                         if(check1[i].can_post == 1) {
+                                            check2.push(check1[i]);
+                                         }
+                                         i=i+1;
+                                    }
+                                } else {
+                                    check2 = check1;
+                                }
+                                var i = 0;
+                                var check3 = [];
+                                if (${ settings.canSendFriendRequest.value }) {
+                                    while(i < check2.length) {
+                                         if(check2[i].can_send_friend_request == 1) {
+                                            check3.push(check2[i]);
+                                         }
+                                         i=i+1;
+                                    }
+                                } else {
+                                    check3 = check2;
+                                }
                                 return {
                                     count: response.count,
-                                    items: check1
+                                    items: check3
                                 };`
                     };
 
@@ -288,23 +351,11 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                     callback(null, {
                         cbType: 1,
-                        msg: utils.createMsg({msg: 'sohranenie resultatov'})
+                        msg: utils.createMsg({msg: 'Сохранение результатов'})
                     });
 
 
-                    async.each(result, function (item, yes) {
-
-
-                        item.username = credentials.username;
-                        item.accountId = credentials.accountId;
-
-                        var newPersonGrid = new PersonGrid(item);
-
-                        newPersonGrid.save(function (err) {
-                            return yes(err ? err : null);
-                        });
-
-                    }, function (error) {
+                    mainUtils.saveToDbListItems('person', result, settings, credentials, function(error){
 
                         callback(null, { // process msg
                             cbType: 5,
@@ -314,7 +365,6 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                         return iteration(error ? error : err);
 
                     });
-
 
                 });
 

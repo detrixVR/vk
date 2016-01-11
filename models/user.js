@@ -21,6 +21,11 @@ var schema = new Schema({
         required: false,
         default: 0
     },
+    lists: {
+        type: Array,
+        required: false,
+        default: []
+    },
     settings: {
         forgotEmail: {
             type: String,

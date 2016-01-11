@@ -68,7 +68,7 @@ var getSettings = function () {
         }
     });
 
-    $('[data-toggle=bootgrid]').each(function (i, item) {
+    $('[data-toggle=bootgrid]:visible').each(function (i, item) {
         var $this = $(item);
 
         if ($this.data('.rs.jquery.bootgrid')) {
@@ -137,27 +137,27 @@ var getSettings = function () {
 
 var applySettings = function (settings) {
 
-    function applyGridSettings(id, settings) {
+    /*function applyGridSettings(id, settings) {
 
-        var $grid = $("#" + id);
+     var $grid = $("#" + id);
 
-        if (!$grid.length || !$grid.data('.rs.jquery.bootgrid')) {
-            return (0);
-        }
+     if (!$grid.length || !$grid.data('.rs.jquery.bootgrid')) {
+     return (0);
+     }
 
-        var grid = $grid.data('.rs.jquery.bootgrid');
+     var grid = $grid.data('.rs.jquery.bootgrid');
 
-        if (grid) {
-            // console.log('here')
-            grid.setSelectedRows(settings['selectedRows']);
-            grid.setCurrent(settings['current']);
-            grid.setSearchPhrase(settings['searchPhrase']);
-            grid.setRowCount(settings['rowCount']);
-            grid.setSortDictionary(settings['sortDictionary']);
+     if (grid) {
+     // console.log('here')
+     grid.setSelectedRows(settings['selectedRows']);
+     grid.setCurrent(settings['current']);
+     grid.setSearchPhrase(settings['searchPhrase']);
+     grid.setRowCount(settings['rowCount']);
+     grid.setSortDictionary(settings['sortDictionary']);
 
-            // grid.reload();
-        }
-    }
+     // grid.reload();
+     }
+     }*/
 
     for (var k in settings) {
         if (settings.hasOwnProperty(k)) {
@@ -198,7 +198,7 @@ var applySettings = function (settings) {
                 case 'grid':
                     elem = document.getElementById(k);
                     if (elem) {
-                        applyGridSettings(k, settings[k].value);
+                        $('[data-toggle=bootgrid]').trigger('applyGridSettings', [k, settings[k].value]);
                     }
                     break;
             }
@@ -219,7 +219,7 @@ var setProcess = function (process) {
 
     overlay('Загрузка данных');
 
-    $('[data-toggle=bootgrid]').trigger('reload', function () {
+    $('[data-toggle=bootgrid]').trigger('applyAccount').trigger('reload', function () {
         setTimeout(overlay, 100)
     });
 };
@@ -374,9 +374,9 @@ var setTaskButtonsState = function (data, parent) {
 
 };
 
-var printTasks = function(data) {
+var printTasks = function (data) {
     console.log(data);
-    data.tasks.forEach(function(item){
+    data.tasks.forEach(function (item) {
         createTask(item);
     })
 };
@@ -569,6 +569,27 @@ var init = function () {
         })
         .bind('saveList', function (event) {
             console.log('saveList')
+        })
+        .bind('applyGridSettings', function (event, id, settings) {
+            var $grid = $(this);
+            if ($grid.attr('id') === id) {
+                var grid = $grid.data('.rs.jquery.bootgrid');
+                if (grid) {
+                    grid.setSelectedRows(settings['selectedRows']);
+                    grid.setCurrent(settings['current']);
+                    grid.setSearchPhrase(settings['searchPhrase']);
+                    grid.setRowCount(settings['rowCount']);
+                    grid.setSortDictionary(settings['sortDictionary']);
+                }
+            }
+
+        })
+        .bind('applyAccount', function () {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (grid) {
+                grid.setAccountId(that.accountId);
+            }
         });
 
 
@@ -715,7 +736,7 @@ var init = function () {
 
             }
         })
-        .bind('startPauseTask', '.widget', function(event, data){
+        .bind('startPauseTask', '.widget', function (event, data) {
             var $target = $(event.target);
             if ($target.hasClass('taskHolder')) {
                 var $elem = $(data);
@@ -726,7 +747,7 @@ var init = function () {
                 });
             }
         })
-        .bind('stopTask', '.widget', function(event, data){
+        .bind('stopTask', '.widget', function (event, data) {
             var $target = $(event.target);
             if ($target.hasClass('taskHolder')) {
                 var $elem = $(data);
