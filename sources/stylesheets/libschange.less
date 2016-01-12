@@ -170,7 +170,7 @@ ul.navbar-right {
   .preview-holder {
 
     display: inline-block;
-    position:relative;
+    position: relative;
 
     .remove-icon {
       position: absolute;
@@ -196,11 +196,38 @@ ul.navbar-right {
 
 }
 
-.bootgrid-footer .list, .bootgrid-header .list {
+//@breakpoint-alpha: 992px;
+
+.bootgrid-footer .list,
+.bootgrid-header .list {
   display: inline-block;
-  margin: 0 20px 0 0;
+  margin: 0;
   vertical-align: middle;
-  width: 180px;
+  width: 100%;
+
+  @media (max-width: 992px) {
+    margin-bottom: 5px;
+  }
+}
+
+.bootgrid-footer .search,
+.bootgrid-header .search {
+  display: inline-block;
+  margin: 0;
+  vertical-align: middle;
+  width: 100%;
+
+  @media (max-width: 992px) {
+    margin-bottom: 5px;
+  }
+}
+
+.popover-content{
+  padding: 0;
+}
+
+.popover {
+  padding: 0;
 }
 
 

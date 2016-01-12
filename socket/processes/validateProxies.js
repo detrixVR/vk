@@ -34,7 +34,7 @@ var validationModel = {
             return false;
         }
     },
-    targetSelect: {
+    targetSelector: {
         validate: function (value) {
             return false;
         }
@@ -79,7 +79,7 @@ var validateProxies = function (processes, credentials, settings, callback) {
     });
 
     async.waterfall([function (callback) {
-        switch (settings.targetSelect.value) {
+        switch (settings.targetSelector.value) {
             case 0:
                 ProxyGrid.find({
                     username: credentials.username

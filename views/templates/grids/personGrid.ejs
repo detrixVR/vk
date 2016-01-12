@@ -1,11 +1,12 @@
 <table data-toggle="bootgrid"
        data-ajax="true"
-       data-url="grid"
+       data-url="list"
        data-list-type="person"
        data-selection="true"
        data-multi-select="true"
        data-keep-selection="true"
        data-can-add="false"
+       data-row-select="true"
        class="table table-condensed table-hover table-striped"
        id="personGrid">
     <thead>
@@ -25,30 +26,30 @@
         </th>
 
         <th data-column-id="first_name"
-            data-width="100px"
+
             data-editable="false">Imya
         </th>
 
         <th data-column-id="last_name"
-            data-width="100px"
+
             data-editable="false">Familia
         </th>
 
         <th data-column-id="sex"
             data-formatter="sex"
-            data-width="60px"
+
             data-editable="false">Sex
         </th>
 
         <th data-column-id="photo_50"
             data-formatter="avatar"
-            data-visible-in-selection="false"
-            data-width="60px">
+            data-visible-in-selection="false">
+
         </th>
 
         <th data-formatter="commandsNotAll"
             data-sortable="false"
-            data-width="100px"
+
             data-visible-in-selection="false"></th>
     </tr>
     </thead>

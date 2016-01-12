@@ -5,7 +5,7 @@ var PersonGrid = require('../../models/grid/person').PersonGrid,
     async = require('async'),
     request = require('request'),
     extend = require('extend'),
-    mainUtils = require('mainUtils'),
+    dbUtils = require('../../modules/dbUtils'),
     executeCommand = require('../../vkapi').executeCommand;
 
 var validationModel = {
@@ -109,7 +109,7 @@ var validationModel = {
     sort: {
         name: 'Сортировать по',
         validate: function (value) {
-            if (!util.isInt(value)) {
+            if (!utils.isInt(value)) {
                 return 'Должно быть числом';
             }
         }
@@ -125,7 +125,7 @@ var validationModel = {
     status: {
         name: 'Семейное положение',
         validate: function (value) {
-            if (!util.isInt(value)) {
+            if (!utils.isInt(value)) {
                 return 'Должно быть числом';
             }
         }
@@ -136,7 +136,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
     callback(null, { //start process
         cbType: 2,
-        msg: utils.createMsg({msg: 'Poisk ludey', type: 2, clear: true})
+        msg: utils.createMsg({msg: 'Поиск людей', type: 2, clear: true})
     });
 
     var error = utils.validateSettings(settings, validationModel);
@@ -154,7 +154,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                 callback(null, { // process msg
                     cbType: 1,
-                    msg: utils.createMsg({msg: 'zagruzka akkaunta'})
+                    msg: utils.createMsg({msg: 'Загрузка аккаунта'})
                 });
 
                 utils.getAccountByCredentials(credentials, function (err, account) {
@@ -180,30 +180,35 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                 })
 
             }, function (account, iteration) {
-                if (!settings.replaceSelector.value) {
 
-                    callback(null, { // process msg
-                        cbType: 1,
-                        msg: utils.createMsg({msg: 'Ochistka spiska'})
-                    });
+                switch (settings.replaceSelector.value) {
+                    case 0:
 
-                    PersonGrid.remove({
-                        username: credentials.username,
-                        accountId: credentials.accountId
-                    }, function (err) {
-                        return iteration(err ? err : null, account);
-                    });
+                        callback(null, { // process msg
+                            cbType: 1,
+                            msg: utils.createMsg({msg: 'Очистка списка'})
+                        });
 
-                } else {
-                    return iteration(null, account);
+                        var listName = settings.personGrid.value.listName || 'Основной';
+
+                        dbUtils.clearList('person', utils.extend({}, credentials, {listName: listName}), function (err) {
+                            return iteration(err ? err : null, account);
+                        });
+
+                        break;
+                    case 1:
+                        //break;
+                    case 2:
+                        //break;
+                    default :
+                        return iteration(null, account);
                 }
             }, function (account, iteration) {
 
                 callback(null, { // process msg
                     cbType: 1,
-                    msg: utils.createMsg({msg: 'Poisk lyudey'})
+                    msg: utils.createMsg({msg: 'Поиск людей'})
                 });
-
 
                 var options = {
                     token: account.token,
@@ -227,21 +232,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     online: settings.online.value ? 1 : 0,
                     has_photo: settings.has_photo.value ? 1 : 0,
                     from_list: settings.from_list.value ? 'friends' : '',
-                    fields: `sex,
-                            bdate,
-                            can_post,
-                            verified,
-                            domain,
-                            nickname,
-                            relation,
-                            can_see_all_posts,
-                            can_see_audio,
-                            can_write_private_message,
-                            can_send_friend_request,
-                            wall_comments,
-                            blacklisted,
-                            blacklisted_by_me,
-                            photo_50`
+                    fields: `sex,bdate,can_post,verified,domain,nickname,relation,can_see_all_posts,can_see_audio,can_write_private_message,can_send_friend_request,wall_comments,blacklisted,blacklisted_by_me,photo_50`
                 };
 
                 console.log(inOptions);
@@ -318,7 +309,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                                     return next({
                                         msg: utils.createMsg({
-                                            msg: `done, naydeno ${result.length} polzovateley`,
+                                            msg: `Завершено, найдено ${result.length} пользователей`,
                                             type: 2
                                         })
                                     });
@@ -328,7 +319,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                             } else {
                                 return next({
-                                    msg: utils.createMsg({msg: 'oshibka'})
+                                    msg: utils.createMsg({msg: 'Ошибка'})
                                 });
                             }
                         }
@@ -348,6 +339,8 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                     }
 
+                   // console.log(result);
+
 
                     callback(null, {
                         cbType: 1,
@@ -355,7 +348,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     });
 
 
-                    mainUtils.saveToDbListItems('person', result, settings, credentials, function(error){
+                    dbUtils.saveToDbListItems('person', result, settings, credentials, function (error) {
 
                         callback(null, { // process msg
                             cbType: 5,

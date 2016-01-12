@@ -53,6 +53,7 @@ module.exports.post = function (req, res) {
             accountInfo: {
                 accountId: 'defaultAccount',
                 photo_50: '/images/camera_50.png',
+                photo_100: '/images/camera_100.png',
                 last_name: 'last_name',
                 first_name: 'first_name'
             }

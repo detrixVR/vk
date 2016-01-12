@@ -49,7 +49,8 @@
                 sort: this.sortDictionary,
                 searchPhrase: this.searchPhrase,
                 listType: this.listType,
-                listName: this.listName
+                listName: this.listName,
+                accountId: this.accountId
             },
             post = this.options.post;
 
@@ -219,6 +220,8 @@
                         that.current = response.current;
 
                         that.lists = response.lists;
+
+                        renderListSelector.call(that);
 
                         update(response.rows, response.total);
                     }
@@ -614,6 +617,9 @@
                     {text: getText(value.name), action: value.name})))
                     ._bgSelectAria(value.name === that.listName)
                     .on("click" + namespace, menuItemSelector, function (e) {
+
+                        console.log('click listName');
+
                         e.preventDefault();
 
                         var $this = $(this),
@@ -1166,7 +1172,7 @@
             responsiveTable: "table-responsive",
 
             right: "text-right",
-            list: "list btn-group pull-left",
+            list: "list btn-group",
             search: "search form-group", // must be a unique class name or constellation of class names within the header and footer
             searchField: "search-field form-control",
             selectBox: "select-box", // must be a unique class name or constellation of class names within the entire table
@@ -1322,7 +1328,7 @@
         },
 
         templates: {
-            listSelector: '<div class=\"{{css.list}}\"><button class=\"btn btn-default dropdown-toggle full-width\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>',
+            listSelector: "<div class=\"{{css.list}}\"><button class=\"btn btn-default dropdown-toggle full-width\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>",
             actionButton: "<button class=\"btn btn-default\" type=\"button\" title=\"{{ctx.text}}\">{{ctx.content}}</button>",
             actionLink: "<a class=\"btn btn-primary\" type=\"button\" title=\"{{ctx.text}}\" href=\"{{ctx.href}}\" target=\"_blank\">{{ctx.content}}</a>",
             actionDropDown: "<div class=\"{{css.dropDownMenu}}\"><button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\"><span class=\"{{css.dropDownMenuText}}\">{{ctx.content}}</span> <span class=\"caret\"></span></button><ul class=\"{{css.dropDownMenuItems}}\" role=\"menu\"></ul></div>",
@@ -1330,9 +1336,9 @@
             actionDropDownCheckboxItem: "<li><label class=\"{{css.dropDownItem}}\"><input name=\"{{ctx.name}}\" type=\"checkbox\" value=\"1\" class=\"{{css.dropDownItemCheckbox}}\" {{ctx.checked}} /> {{ctx.label}}</label></li>",
             actions: "<div class=\"{{css.actions}}\"></div>",
             body: "<tbody></tbody>",
-            cell: "<td class=\"{{ctx.css}}\" style=\"{{ctx.style}}\">{{ctx.content}}</td>",
+            cell: "<td data-th=\"{{ctx.th}}\" class=\"{{ctx.css}}\" style=\"{{ctx.style}}\">{{ctx.content}}</td>",
             footer: "<div id=\"{{ctx.id}}\" class=\"{{css.footer}}\"><div><p class=\"{{css.pagination}}\"></p></div><div class=\"infoBar pull-right\"><p class=\"{{css.infos}}\"></p></div></div>",
-            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"actionBar\"><p class=\"{{css.list}}\"></p><p class=\"{{css.search}}\"></p><p class=\"{{css.actions}}\"></p></div></div>",
+            header: "<div id=\"{{ctx.id}}\" class=\"{{css.header}}\"><div class=\"row actionBar\"><div class=\"col-xs-12 col-md-4\"><p class=\"{{css.list}}\"></p></div><div class=\"col-xs-12 col-md-4\"><p class=\"{{css.search}}\"></p></div><div class=\"col-xs-12 col-md-4\"><p class=\"{{css.actions}}\"></p></div></div></div>",
             headerCell: "<th data-column-id=\"{{ctx.column.id}}\" class=\"{{ctx.css}}\" style=\"{{ctx.style}}\"><a href=\"javascript:void(0);\" class=\"{{css.columnHeaderAnchor}} {{ctx.sortable}}\"><span class=\"{{css.columnHeaderText}}\">{{ctx.column.text}}</span>{{ctx.icon}}</a></th>",
             icon: "<span class=\"{{css.icon}} {{ctx.iconCss}}\"></span>",
             infos: "<div class=\"{{css.infos}}\">{{lbl.infos}}</div>",
@@ -1368,7 +1374,8 @@
                     cells += tpl.cell.resolve(getParams.call(that, {
                         content: selectBox,
                         css: css.selectCell,
-                        style: 'vertical-align: middle;'
+                        style: 'vertical-align: middle; width:auto',
+                        th: ''
                     }));
                     allRowsSelected = (allRowsSelected && selected);
                     if (selected) {
@@ -1392,7 +1399,8 @@
                             content: (value == null || value === "") ? "&nbsp;" : value,
                             css: ((column.align === "right") ? css.right : (column.align === "center") ?
                                 css.center : css.left) + cssClass,
-                            style: ((column.width == null) ? "" : "width:" + column.width + ";") + " vertical-align: middle;"
+                            style: ((column.width == null) ? "" : "width:" + column.width + ";") + " vertical-align: middle;",
+                            th: column.text.trim()
                         }));
                     }
                 });

@@ -145,18 +145,24 @@ function executeCommand(options, processes, credentials, callback, next) {
             vk.setProxy(options.proxy);
 
 
-        vk.request(options.command, options.options, function (_o) {
-            console.log(_o);
-            if (_o.error) {
-                processError(_o.error, function (err) {
-                    return back(err);
-                })
+        vk.request(options.command, options.options, function (err, _o) {
+
+            if(err) {
+                return next(err);
             } else {
-                return back(null, {
-                    msg: 'Команда выполнена без ошибок',
-                    result: _o
-                });
+                console.log(_o);
+                if (_o.error) {
+                    processError(_o.error, function (err) {
+                        return back(err);
+                    })
+                } else {
+                    return back(null, {
+                        msg: 'Команда выполнена без ошибок',
+                        result: _o
+                    });
+                }
             }
+
         });
     }
 

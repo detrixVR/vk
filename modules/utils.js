@@ -436,6 +436,10 @@ function processPart(part) {
     return output;
 }
 
+function validateDbId(id){
+    return /^[a-fA-F0-9]{24}$/.test(id);
+}
+
 module.exports = {
     ruslat: ruslat,
     processError: processError,
@@ -454,5 +458,6 @@ module.exports = {
     getRandomInt: getRandomInt,
     isArray: isArray,
     shuffleArray: shuffleArray,
+    validateDbId: validateDbId,
     processPart: processPart
 };

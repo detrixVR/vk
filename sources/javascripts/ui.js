@@ -48,6 +48,7 @@ var getSettings = function () {
 
         if (grid) {
             settings['current'] = grid.current;
+            settings['accountId'] = grid.accountId;
             settings['selectedRows'] = grid.getSelectedRows();
             settings['searchPhrase'] = grid.getSearchPhrase();
             settings['rowCount'] = grid.getRowCount();
@@ -253,6 +254,8 @@ var highLightFields = function (badFields) {
 var renderAccountHolder = function (account) {
     console.log(account);
     $('#accountHolder').html(_.template($('#accountHolderTemplate').html())(account.accountInfo));
+
+
 };
 
 var setProcesses = function (processes) {
@@ -948,6 +951,47 @@ var init = function () {
 
     $('[data-toggle="tooltip"]').tooltip();
 
+    $('#accountHolder').popover({
+        html: true,
+        // trigger: 'click',
+        container: '.popoverHolder',
+        trigger: 'manual',
+        template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
+        content: $('#accountPopupTemplate').html()//"<div>And here's some amazing content. It's very engaging. Right?<button class='btn btn-default save'></button></div>"
+    }).on('shown.bs.popover', function (e) {
+        var popup = $(e.target).data('bs.popover');
+        if (popup) {
+            popup.$tip.off('click').on('click', function (e) {
+                if ($(e.target).is('.save')) {
+                    popup.hide();
+                }
+            });
+            popup.$element.off('click').on('click', function () {
+                popup.$element.off('click');
+                popup.hide();
+            })
+
+        }
+
+
+    }).on('hidden.bs.popover', function (e) {
+        var popup = $(e.target).data('bs.popover');
+        if (popup) {
+            popup.$element.off('click').on('click', function () {
+                popup.show();
+            })
+        }
+    })
+
+        .on('account', function () {
+            var $this = $(this);
+            var popup = $this.data('bs.popover');
+            if (popup) {
+                popup.hide();
+                popup.options.content = $('#accountPopupTemplate').html();
+                popup.setContent();
+            }
+        })
 
 };
 

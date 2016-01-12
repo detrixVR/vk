@@ -18,13 +18,14 @@ var schema = new Schema({
     },
     content: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     value: {
-        type: Object,
-        required: true,
+        type: {},
+        required: false,
 
-        id: {
+       /* id: {
             type: Number,
             min: 1,
             required: true
@@ -37,12 +38,12 @@ var schema = new Schema({
             type: String,
             required: true
         },
-        /*deactivated:{
+        /!*deactivated:{
 
          },
          hidden:{
 
-         },*/
+         },*!/
         photo_50: {
             type: String,
             required: false
@@ -85,7 +86,7 @@ var schema = new Schema({
             type: String,
             required: false
         },
-        /*city:{
+        /!*city:{
 
          },
          country:{
@@ -123,12 +124,12 @@ var schema = new Schema({
          },
          lists:{
 
-         },*/
+         },*!/
         domain: {
             type: String,
             required: false
         },
-        /*has_mobile:{
+        /!*has_mobile:{
 
          },
          contacts:{
@@ -166,19 +167,19 @@ var schema = new Schema({
          },
          occupation:{
 
-         },*/
+         },*!/
         nickname: {
             type: String,
             required: false
         },
-        /*relatives:{
+        /!*relatives:{
 
-         },*/
+         },*!/
         relation: {
             type: Number,
             required: false
         },
-        /*personal:{
+        /!*personal:{
 
          },
          connections:{
@@ -186,12 +187,12 @@ var schema = new Schema({
          },
          exports:{
 
-         },*/
+         },*!/
         wall_comments: {
             type: Number,
             required: false
         },
-        /*activities:{
+        /!*activities:{
 
          },
          interests:{
@@ -221,7 +222,7 @@ var schema = new Schema({
 
          quotes:{
 
-         },*/
+         },*!/
         can_post: {
             type: Number,
             required: false
@@ -242,7 +243,7 @@ var schema = new Schema({
             type: Number,
             required: false
         },
-        /*is_favorite:{
+        /!*is_favorite:{
 
          },
          is_hidden_from_feed:{
@@ -271,7 +272,7 @@ var schema = new Schema({
          },
          military:{
 
-         },*/
+         },*!/
         blacklisted: {
             type: Number,
             required: false
@@ -279,7 +280,7 @@ var schema = new Schema({
         blacklisted_by_me: {
             type: Number,
             required: false
-        }
+        }*/
     },
     created: {
         type: Date,
@@ -288,4 +289,4 @@ var schema = new Schema({
     }
 });
 
-module.exports = mongoose.model('AudioListItem', schema);
+module.exports = mongoose.model('UserListItem', schema);

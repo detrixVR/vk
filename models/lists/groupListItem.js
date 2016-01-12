@@ -20,9 +20,9 @@ var schema = new Schema({
         type: String,
         required: true
     },
-    value: {
-        type: Object,
-        required: true,
+    value: mongoose.Schema({
+       /* type: {},
+        required: true,*/
 
         gid: {
             type: Number,
@@ -85,7 +85,7 @@ var schema = new Schema({
             required: false
         },
         ban_info: {
-            type: Object,
+            type: {},
             required: false,
 
             end_date : {
@@ -98,7 +98,7 @@ var schema = new Schema({
             }
         },
         city: {
-            type: Object,
+            type: {},
             required: false,
 
             id: {
@@ -111,7 +111,7 @@ var schema = new Schema({
             }
         },
         country: {
-            type: Object,
+            type: {},
             required: false,
 
             id: {
@@ -138,13 +138,13 @@ var schema = new Schema({
         /*counters:{
             type: Object,
             required: false
-        }*/
+        },*/
         start_date: {
-            type: Mixed,
+            type: {},
             required: false
         },
         finish_date: {
-            type: Mixed,
+            type: {},
             required: false
         },
         public_date_label: {
@@ -174,7 +174,7 @@ var schema = new Schema({
             required: false
         },
         activity:{
-            type: Mixed,
+            type: {},
             required: false
         },
         status:{
@@ -217,7 +217,7 @@ var schema = new Schema({
             type: Number,
             required: false
         }
-    },
+    }),
     created: {
         type: Date,
         required: false,

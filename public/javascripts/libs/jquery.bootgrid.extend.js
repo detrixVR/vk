@@ -16,10 +16,11 @@
                         options: JSON.stringify({
                             listType: that.listType,
                             listName: that.listName,
+                            accountId: that.accountId,
                             rows: rows
                         })
                     },
-                    url: '/grid'
+                    url: '/list'
                 }).done(function () {
                     return callback();
                 }).fail(function (fail) {
@@ -40,10 +41,11 @@
                             options: JSON.stringify({
                                 listType: that.listType,
                                 listName: that.listName,
+                                accountId: that.accountId,
                                 ids: rowIds
                             })
                         },
-                        url: '/grid'
+                        url: '/list'
                     }).done(function () {
                         callback();
                     }).fail(function (fail) {
@@ -55,7 +57,6 @@
             }
             return this;
         }
-
     };
 
     $.extend($.fn.bootgrid.Constructor.prototype, extensionMethods)

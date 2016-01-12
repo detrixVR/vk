@@ -1,0 +1,27 @@
+<script type="text/template" id="accountPopupTemplate">
+
+    <div>
+        <div style="height: 50px;" class="list-group-item-info">
+
+        </div>
+
+        <div style="display: block;margin: -25px auto 0;width: 100px;height: 100px">
+            <img class="img-rounded" src="{{= photo_100 }}" alt="...">
+        </div>
+
+
+        <div style="padding: 5px">
+            <h3>{{=first_name}} {{=last_name}}</h3>
+        </div>
+        <div style="padding: 5px;" class="list-group-item-info">
+            <a href="/config?account={{= accountId }}" class="btn btn-xs btn-primary">
+                <span class="glyphicon glyphicon-cog"></span>
+            </a>
+            <a href="/?account={{= accountId }}&next=true" target="_blank" class="btn btn-xs btn-primary">
+                <span class="glyphicon glyphicon-plus"></span>
+            </a>
+        </div>
+    </div>
+
+
+</script>

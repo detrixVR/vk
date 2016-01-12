@@ -18,8 +18,8 @@
             <div class="col-xs-12">
                 <div class="well well-sm container-fluid">
                     <div class="row">
-                        <div class="col-xs-6 col-sm-3 col-md-2">
-                            <div id="accountHolder">
+                        <div class="col-xs-6 col-sm-3 col-md-2" style="width: 54px;    width: 54px;padding: 0; margin: 0 15px;">
+                            <div id="accountHolder" onclick="$(this).popover('show')">
 
                             </div>
                         </div>
@@ -34,7 +34,8 @@
                         </div>
                         <div class="replaceSelector2 col-xs-6 col-sm-3 col-md-2">
                             <label class="small control-label"></label>
-                            <input type="text" class="form-control" value="" placeholder="Название списка" id="listName"/>
+                            <input type="text" class="form-control" value="" placeholder="Название списка"
+                                   id="listName"/>
                         </div>
                     </div>
                     <div class="row">
@@ -268,11 +269,13 @@
 
 <%- include ../templates/modalInput.ejs %>
 
+<%- include ../templates/other/accountHolder.ejs %>
+<%- include ../templates/other/accountPopup.ejs %>
 
 <script src="javascripts/libs.js"></script>
 <script src="javascripts/app.js"></script>
 
-<%- include ../templates/other/accountHolder.ejs %>
+
 
 <script>
     $(function () {
@@ -319,6 +322,13 @@
 
         $('[type=checkbox]').trigger('change');
     });
+
+</script>
+
+<script>
+    $(function () {
+
+    })
 
 </script>
 
