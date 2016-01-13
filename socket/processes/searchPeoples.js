@@ -6,131 +6,10 @@ var PersonGrid = require('../../models/grid/person').PersonGrid,
     request = require('request'),
     extend = require('extend'),
     dbUtils = require('../../modules/dbUtils'),
+    validationModel = require('./settings').searchPeoples,
     executeCommand = require('../../vkapi').executeCommand;
 
-var validationModel = {
-    age_from: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    age_to: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    canWritePrivateMsg: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    canPost: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    canSendFriendRequest: {
-        validate: function (value) {
-            return false;
-        }
-    },
-    city: {
-        name: 'Таймаут',
-        validate: function (value) {
-            return false;
-        }
-    },
-    count: {
-        name: 'Количество',
-        validate: function (value) {
-            if (!utils.isInt(value) || +value > 1000) {
-                return 'Должно быть числом до 1000'
-            }
-            return false;
-        }
-    },
-    country: {
-        name: 'Страна',
-        validate: function (value) {
-            return false;
-        }
-    },
-    from_list: {
-        name: 'Поиск среди друзей',
-        validate: function (value) {
-            return false;
-        }
-    },
-    has_photo: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    interests: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    offset: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            if (!utils.isInt(value) || +value > 1000) {
-                return 'Должно быть числомdo 1000'
-            }
-            return false;
-        }
-    },
-    online: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    q: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    personGrid: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    replaceSelector: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    sort: {
-        name: 'Сортировать по',
-        validate: function (value) {
-            if (!utils.isInt(value)) {
-                return 'Должно быть числом';
-            }
-        }
-    },
-    listName: {
-        name: 'Название списка',
-        validate: function (value, settings) {
-            if (!value && settings['replaceSelector'].value === 2) {
-                return 'Должно быть непустым'
-            }
-        }
-    },
-    status: {
-        name: 'Семейное положение',
-        validate: function (value) {
-            if (!utils.isInt(value)) {
-                return 'Должно быть числом';
-            }
-        }
-    }
-};
+
 
 var searchPeoples = function (processes, credentials, settings, callback) {
 
@@ -215,6 +94,8 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     proxy: account.proxy,
                     command: 'execute'
                 };
+
+
 
                 var inOptions = {
                     q: settings.q.value,

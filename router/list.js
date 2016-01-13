@@ -27,6 +27,8 @@ module.exports.post = function (req, res) {
     options.listName = options.listName || 'Основной';
     options.username = req.user.username;
 
+    console.log(options.listName);
+
     dbUtils.getFromDbForGrid(options.listType, options, function (err, count, docs) {
         if (err) {
             var resp = utils.processError(err);

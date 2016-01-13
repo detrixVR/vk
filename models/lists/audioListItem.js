@@ -18,7 +18,8 @@ var schema = new Schema({
     },
     content: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     value: {
         type: Object,

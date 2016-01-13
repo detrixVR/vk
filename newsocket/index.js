@@ -12,7 +12,9 @@ var io = require('socket.io'),
     searchPeoples = require('../socket/processes/searchPeoples'),
     searchGroups = require('../socket/processes/searchGroups'),
     configurationClean = require('../socket/processes/configurationClean'),
-    listCreating = require('../socket/processes/listCreating'),
+
+    listCreatingFromPerson = require('../socket/processes/listCreating/listCreatingFromPerson'),
+
     Process = require('./process'),
     Task = require('./task'),
     uuid = require('node-uuid');
@@ -294,7 +296,11 @@ var sio = function (server) {
                             case 'searchPeoples':
                             case 'searchGroups':
                             case 'configurationClean':
-                            case 'listCreating':
+                            case 'listCreatingFromPerson':
+                            case 'listCreatingFromGroup':
+                            case 'listCreatingFromAudio':
+                            case 'listCreatingFromVideo':
+                            case 'listCreatingFromPost':
                                 break;
                             default:
                                 console.log('ХЗ процесс');

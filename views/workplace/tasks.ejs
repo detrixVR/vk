@@ -199,31 +199,11 @@
 
 
 
+
 <%- include ../templates/other/accountHolder.ejs %>
 <%- include ../templates/other/taskRowTemplate.ejs %>
 
-<script>
-    $(function () {
 
-        $('.selectpicker').on('change', function (e) {
-            var selectedIndex = this.selectedIndex;
-            var $this = $(this);
-            var id = $this.attr('id');
-            var selector = $('.' + id + selectedIndex);
-            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
-            selector.toggleClass('hidden');
-        });
-
-        $('.selectpicker').trigger('change');
-
-        $('#datetimepicker1').datetimepicker({
-            locale: 'ru',
-            defaultDate: new Date()
-        });
-
-    });
-
-</script>
 <!--
 <div class="col-xs-6 col-sm-3 col-md-2">
     <label for="taskName">Название</label>

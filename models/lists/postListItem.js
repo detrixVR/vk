@@ -18,12 +18,13 @@ var schema = new Schema({
     },
     content: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     value: {
         type: Object,
         required: true,
-
+/*
         id: {
             type: Number,
             required: true
@@ -56,7 +57,7 @@ var schema = new Schema({
             type: Number,
             required: false
         },
-        /*comments: {
+        /!*comments: {
 
         },
         likes: {
@@ -64,12 +65,12 @@ var schema = new Schema({
         },
         reposts: {
 
-        },*/
+        },*!/
         post_type: {
             type: String,
             required: false
         },
-        /*post_source: {
+        /!*post_source: {
 
         },
         attachments: {
@@ -77,14 +78,14 @@ var schema = new Schema({
         },
         geo: {
 
-        },*/
+        },*!/
         signer_id: {
             type: Number,
             required: false
         },
-        /*copy_history: {
+        /!*copy_history: {
 
-        },*/
+        },*!/
         can_pin: {
             type: Number,
             required: false
@@ -92,7 +93,7 @@ var schema = new Schema({
         is_pinned: {
             type: Number,
             required: false
-        }
+        }*/
     },
     created: {
         type: Date,

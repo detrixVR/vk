@@ -18,13 +18,14 @@ var schema = new Schema({
     },
     content: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     value: mongoose.Schema({
-       /* type: {},
-        required: true,*/
+        type: {},
+        required: false
 
-        gid: {
+       /* gid: {
             type: Number,
             required: true
         },
@@ -135,10 +136,10 @@ var schema = new Schema({
             type: Number,
             required: false
         },
-        /*counters:{
+        /!*counters:{
             type: Object,
             required: false
-        },*/
+        },*!/
         start_date: {
             type: {},
             required: false
@@ -216,7 +217,7 @@ var schema = new Schema({
         main_section: {
             type: Number,
             required: false
-        }
+        }*/
     }),
     created: {
         type: Date,

@@ -79,7 +79,13 @@ class Socket {
                     case 'validateAccounts':
                     case 'searchPeoples':
                     case 'searchGroups':
-                    case 'listCreating':
+
+                    case 'listCreatingFromPerson':
+                    case 'listCreatingFromGroup':
+                    case 'listCreatingFromAudio':
+                    case 'listCreatingFromVideo':
+                    case 'listCreatingFromPost':
+
                     case 'configurationClean':
                     case 'configurationCopy':
                         that.socket.emit('getCurrentProcess', {

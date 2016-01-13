@@ -75,7 +75,7 @@ module.exports.post = function (req, res) {
                 result.processId = 'searchGroups';
                 break;
             case 'lists':
-                result.processId = 'listCreating';
+                result.processId = 'listCreatingFromPerson';
                 break;
             case 'tasks':
                 result.processId = 'taskExecution';
@@ -88,8 +88,20 @@ module.exports.post = function (req, res) {
                     case 'copy':
                         result.processId = 'configurationCopy';
                         break;
-                    case'group':
+                    case 'group':
                         result.processId = 'configurationGroup';
+                        break;
+                    case 'group':
+                        result.processId = 'listCreatingFromGroup';
+                        break;
+                    case 'audio':
+                        result.processId = 'listCreatingFromAudio';
+                        break;
+                    case 'video':
+                        result.processId = 'listCreatingFromVideo';
+                        break;
+                    case 'post':
+                        result.processId = 'listCreatingFromPost';
                         break;
                 }
 

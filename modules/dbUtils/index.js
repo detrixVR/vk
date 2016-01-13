@@ -58,6 +58,7 @@ var getForGrid = function (Requester, options, callback) {
     Requester.find({
         username: options.username,
         accountId: options.accountId,
+        listName: options.listName || 'Основной',
         content: {"$regex": options.searchPhrase, "$options": "i"}
     }).sort(options.sort).skip((options.current - 1) * options.rowCount).limit(options.rowCount > 0 ? options.rowCount : 0).exec(function (err, docs) {
         return callback(err ? err : null, docs);
@@ -102,13 +103,14 @@ var saveToDbListItems = function (type, result, settings, credentials, next) {
                     content: ''
                 }, {value: item});
 
-
+                //console.log(itemToSave);
 
                 var newRequester = new Requester(itemToSave);
 
-               // console.log(newRequester);
+                console.log(newRequester);
 
                 newRequester.save(function (err) {
+                    console.log(err);
                     return yes(err ? err : null);
                 });
 
@@ -159,17 +161,19 @@ var getFromDbBySettings = function (type, settings, credentials, callback) {
         return callback({error: 'error'});
     }
 
+    var gridOptions = settings[type + 'Grid'].value;
+
     switch (settings.targetSelector.value) {
         case 0:
             Requester.find({
                 username: credentials.username,
-                accountId: credentials.accountId
+                accountId: credentials.accountId,
+                listName: gridOptions.listName || 'Основной',
             }, function (err, docs) {
                 return callback(err ? err : null, docs);
             });
             break;
         case 1:
-            var options = settings[type + 'Grid'].value;
             getForGrid(Requester, extend({}, credentials, options), function (err, docs) {
                 return callback(err ? err : null, docs);
             });
@@ -178,6 +182,7 @@ var getFromDbBySettings = function (type, settings, credentials, callback) {
             Requester.find({
                 username: credentials.username,
                 accountId: credentials.accountId,
+                listName: gridOptions.listName || 'Основной',
                 _id: {$in: settings[type + 'Grid'].value.selectedRows}
             }, function (err, docs) {
                 return callback(err ? err : null, docs);

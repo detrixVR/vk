@@ -16,11 +16,14 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12">
-                <div class="well well-sm container-fluid">
+                <div class="well well-sm container-fluid" id="test">
                     <div class="row">
-                        <div class="col-xs-6 col-sm-3 col-md-2" style="width: 54px;    width: 54px;padding: 0; margin: 0 15px;">
-                            <div id="accountHolder" onclick="$(this).popover('show')">
+                        <div class="col-xs-6 col-sm-3 col-md-2"
+                             style="width: 54px;    width: 54px;padding: 0; margin: 0 15px;">
+                            <div class="popoverHolder">
+                                <div id="accountHolder" onclick="$(this).popover('toggle')">
 
+                                </div>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
@@ -274,7 +277,6 @@
 
 <script src="javascripts/libs.js"></script>
 <script src="javascripts/app.js"></script>
-
 
 
 <script>

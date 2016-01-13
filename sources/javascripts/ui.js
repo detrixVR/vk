@@ -214,11 +214,14 @@ var setProcess = function (process) {
         if (process.state)
             setState(process);
         applySettings(process.settings);
+
     }
 
     $('.widget').trigger('printEvent', [process ? process.messages : [], true]);
 
     overlay('Загрузка данных');
+
+    afterInit();
 
     $('[data-toggle=bootgrid]').trigger('applyAccount').trigger('reload', function () {
         setTimeout(overlay, 100)
@@ -254,6 +257,8 @@ var highLightFields = function (badFields) {
 var renderAccountHolder = function (account) {
     console.log(account);
     $('#accountHolder').html(_.template($('#accountHolderTemplate').html())(account.accountInfo));
+
+    $('#accountHolder').trigger('account', account.accountInfo);
 
 
 };
@@ -447,6 +452,23 @@ var init = function () {
                             $.notify({message: 'Произошла ошибка'}, {type: 'error'});
                         }
                     });
+                };
+
+                selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
+            }
+        })
+        .bind('gridRefreshItem', function(event, elem){
+            var $elem = $(elem);
+            var rowId = $elem.data('row-_id');
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+            if (grid) {
+                var content = 'Обновить запись?';
+                var selector = $('#modalConfirm');
+                $('.modal-body', selector).html(content);
+
+                var bindFunc = function () {
+                    console.log(rowId)
                 };
 
                 selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
@@ -955,6 +977,8 @@ var init = function () {
         html: true,
         // trigger: 'click',
         container: '.popoverHolder',
+        placement: 'right',
+        viewport: '#test',
         trigger: 'manual',
         template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
         content: $('#accountPopupTemplate').html()//"<div>And here's some amazing content. It's very engaging. Right?<button class='btn btn-default save'></button></div>"
@@ -966,10 +990,10 @@ var init = function () {
                     popup.hide();
                 }
             });
-            popup.$element.off('click').on('click', function () {
-                popup.$element.off('click');
-                popup.hide();
-            })
+            /* popup.$element.off('click').on('click', function () {
+             popup.$element.off('click');
+             popup.hide();
+             })*/
 
         }
 
@@ -977,23 +1001,47 @@ var init = function () {
     }).on('hidden.bs.popover', function (e) {
         var popup = $(e.target).data('bs.popover');
         if (popup) {
-            popup.$element.off('click').on('click', function () {
-                popup.show();
-            })
+            /* popup.$element.off('click').on('click', function () {
+             popup.show();
+             })*/
+        }
+    }).on('account', function (event, account) {
+        var $this = $(this);
+        var popup = $this.data('bs.popover');
+        if (popup) {
+            //popup.hide();
+            // popup.options.content = $('#accountPopupTemplate').html();
+            popup.options.content = _.template($('#accountPopupTemplate').html())(account);
+            popup.setContent();
         }
     })
 
-        .on('account', function () {
-            var $this = $(this);
-            var popup = $this.data('bs.popover');
-            if (popup) {
-                popup.hide();
-                popup.options.content = $('#accountPopupTemplate').html();
-                popup.setContent();
-            }
-        })
-
 };
+
+function afterInit() {
+
+    $('.selectpicker').on('change', function (e) {
+        console.log('selectpicker tst chage');
+        var selectedIndex = this.selectedIndex;
+        var $this = $(this);
+        var id = $this.attr('id');
+        var selector = $('.' + id + selectedIndex);
+        $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
+        selector.toggleClass('hidden', false);
+    });
+
+    $('.selectpicker').trigger('change');
+
+    $('[type=checkbox]').on('change', function () {
+        var $this = $(this);
+        var id = $this.attr('id');
+        var selector = $('.' + id + ($this.prop('checked') ? 1 : 0));
+        $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
+        selector.toggleClass('hidden');
+    });
+
+    $('[type=checkbox]').trigger('change');
+}
 
 var ui = {
     init: init,

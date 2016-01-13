@@ -47,7 +47,19 @@ function validateSettings(settings, validationModel) {
     var errors = [];
 
     for (var k in validationModel) {
-        if (!settings.hasOwnProperty(k) || !settings[k].hasOwnProperty('value')) {
+
+        if (validationModel[k].hasOwnProperty('required')) {
+
+            if (validationModel[k].required(settings)) {
+
+                if (!settings.hasOwnProperty(k) || !settings[k].hasOwnProperty('value')) {
+                    errors.push({
+                        text: 'Необходим параметр ' + validationModel[k].name
+                    });
+                }
+            }
+
+        } else if (!settings.hasOwnProperty(k) || !settings[k].hasOwnProperty('value')) {
             errors.push({
                 text: 'Необходим параметр ' + validationModel[k].name
             });
@@ -56,13 +68,16 @@ function validateSettings(settings, validationModel) {
 
     if (!errors.length) {
         for (var k in validationModel) {
-            var result = validationModel[k].validate(settings[k].value, settings);
-            if (result) {
-                errors.push({
-                    text: validationModel[k].name + ' - ' + result,
-                    field: k
-                });
+            if (settings[k]) {
+                var result = validationModel[k].validate(settings[k].value, settings);
+                if (result) {
+                    errors.push({
+                        text: validationModel[k].name + ' - ' + result,
+                        field: k
+                    });
+                }
             }
+
         }
     }
 

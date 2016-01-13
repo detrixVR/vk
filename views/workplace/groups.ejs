@@ -17,6 +17,23 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="well well-sm container-fluid">
+                    <div class="row">
+
+                        <div class="col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label"></label>
+                            <select class="selectpicker" data-style="btn-primary" data-width="100%"
+                                    id="replaceSelector">
+                                <option>Заменить список</option>
+                                <option>Добавить в список</option>
+                                <option>Создать новый</option>
+                            </select>
+                        </div>
+                        <div class="replaceSelector2 col-xs-6 col-sm-3 col-md-2">
+                            <label class="small control-label"></label>
+                            <input type="text" class="form-control" value="" placeholder="Название списка"
+                                   id="listName"/>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <!--<div class="col-xs-6 col-sm-3 col-md-2">
@@ -121,49 +138,53 @@
                     <div class="row ">
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isOpened">
                                 <label for="isOpened">
-                                    Открытая группа
+                                    <input type="checkbox" id="isOpened"> Открытая группа
                                 </label>
                             </div>
+                            <!--<div class="checkbox">
+                                <label>
+                                    <input type="checkbox"> Checkbox
+                                </label>
+                            </div>-->
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isOpenWall">
+
                                 <label for="isOpenWall">
-                                    Открытая стена
+                                    <input type="checkbox" id="isOpenWall"> Открытая стена
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isCanPost">
+
                                 <label for="isCanPost">
-                                    Можно постить
+                                    <input type="checkbox" id="isCanPost"> Можно постить
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isCanComment">
+
                                 <label for="isCanComment" title="Замедляет поиск">
-                                    Можно комментировать
+                                    <input type="checkbox" id="isCanComment"> Можно комментировать
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isOfficial">
+
                                 <label for="isOfficial">
-                                    Неофициальное сообщество
+                                    <input type="checkbox" id="isOfficial"> Неофициальное сообщество
                                 </label>
                             </div>
                         </div>
                         <div class="col-xs-6 col-sm-3 col-md-2 hidden type2">
                             <div class="checkbox">
-                                <input type="checkbox" id="isFuture">
+
                                 <label for="isFuture">
-                                    Budushie sobitiya
+                                    <input type="checkbox" id="isFuture"> Будущие события
                                 </label>
                             </div>
                         </div>
@@ -198,27 +219,11 @@
 <script src="javascripts/app.js"></script>
 
 <%- include ../templates/other/accountHolder.ejs %>
+<%- include ../templates/other/accountPopup.ejs %>
 
 <script>
     $(function () {
-        $('#country').on('change', function () {
-            var $city = $('#city');
-            $city.val('').focus();
-            var cityTypeahead = $city.data('typeahead');
-            if (cityTypeahead) {
-                cityTypeahead.hide();
-                cityTypeahead.country = this.selectedIndex + 1;
-            }
-        })
 
-        $('.selectpicker').on('change', function (e) {
-            var selectedIndex = this.selectedIndex;
-            var $this = $(this);
-            var id = $this.attr('id');
-            var selector = $('.' + id + selectedIndex);
-            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
-            selector.toggleClass('hidden');
-        });
     });
 
 </script>

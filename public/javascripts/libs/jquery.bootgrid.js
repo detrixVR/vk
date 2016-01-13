@@ -190,6 +190,17 @@
             that.element._bgBusyAria(false).trigger("loaded" + namespace);
         }
 
+        function parseResult(rows) {
+
+            rows = $.map(rows, function (row) {
+                row = $.extend({}, row, row.value);
+                delete  row.value;
+                return row;
+            });
+
+            return rows;
+        }
+
         if (this.options.ajax) {
             var request = getRequest.call(this),
                 url = getUrl.call(this);
@@ -590,7 +601,6 @@
         }
 
 
-
         if (listItems.length > 0) {
 
             if (!this.lists || !this.lists.length) {
@@ -609,7 +619,6 @@
                 menuTextSelector = getCssSelector(css.dropDownMenuText),
                 menuItemsSelector = getCssSelector(css.dropDownMenuItems),
                 menuItemSelector = getCssSelector(css.dropDownItemButton);
-
 
 
             $.each(this.lists, function (index, value) {
@@ -1198,6 +1207,10 @@
 
             //const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
 
+            date: function(column,row) {
+                return (new Date(row.value.date*1000)).toLocaleString();
+            },
+
             status: function (column, row) {
                 switch (row.status) {
                     case 0:
@@ -1219,10 +1232,11 @@
                     " <button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
             },
             commandsNotAll: function (column, row) {
-                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>";
+                return "<button type=\"button\" class=\"btn btn-xs btn-primary command-delete\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridDelete', this);\"><span class=\"glyphicon glyphicon-trash\"></span></button>" +
+                    " <button type=\"button\" class=\"btn btn-xs btn-primary command-refresh\" data-row-_id=\"" + row._id + "\" onclick=\"$(this).closest('[data-toggle=bootgrid]').trigger('gridRefreshItem', this);\"><span class=\"glyphicon glyphicon-refresh\"></span></button>";
             },
             sex: function (column, row) {
-                switch (row.sex) {
+                switch (row.value.sex) {
                     case 1:
                         return "Ж";
                     case 2:
@@ -1234,25 +1248,25 @@
                 }
             },
             userLink: function (column, row) {
-                return "<a href=\"http://vk.com/id" + row.id + "\" target=\"__blank\">" + row.id + "</a>";
+                return "<a href=\"http://vk.com/id" + row.value.id + "\" target=\"__blank\">" + row.value.id + "</a>";
             },
             groupLink: function (column, row) {
                 var link = null;
-                switch (row.type) {
+                switch (row.value.type) {
                     case 'group':
-                        link = row.screen_name || 'club' + row.id;
+                        link = row.value.screen_name || 'club' + row.value.id;
                         break;
                     case 'page':
-                        link = row.screen_name || 'club' + row.id;
+                        link = row.value.screen_name || 'club' + row.value.id;
                         break;
                     case 'event':
-                        link = row.screen_name || 'event' + row.id;
+                        link = row.value.screen_name || 'event' + row.value.id;
                         break;
                 }
-                return "<a href=\"http://vk.com/" + link + "\" target=\"__blank\">" + row.name + "</a>";
+                return "<a href=\"http://vk.com/" + link + "\" target=\"__blank\">" + row.value.name + "</a>";
             },
             verified: function (column, row) {
-                return row.verified ? '<i class="glyphicon glyphicon-ok"></i>' : '';
+                return row.value.verified ? '<i class="glyphicon glyphicon-ok"></i>' : '';
             },
             title: function (column, row) {
                 return getTitleById(row.processId);
@@ -1264,9 +1278,9 @@
                 if (accountInfo && accountInfo.value) {
                     photo_50 = accountInfo.value.photo_50;
                     accountId = accountInfo.accountId;
-                } else if (row.photo_50) {
-                    photo_50 = row.photo_50;
-                    accountId = row.id;
+                } else if (row.value.photo_50) {
+                    photo_50 = row.value.photo_50;
+                    accountId = row.value.id;
                 }
                 if (photo_50) {
                     return '<a target="_blank" href="http://vk.com/id' + accountId + '">' +
@@ -1282,19 +1296,19 @@
                 var link = null;
                 switch (row.type) {
                     case 'group':
-                        link = row.screen_name || 'club' + row.id;
+                        link = row.value.screen_name || 'club' + row.value.id;
                         break;
                     case 'page':
-                        link = row.screen_name || 'club' + row.id;
+                        link = row.value.screen_name || 'club' + row.value.id;
                         break;
                     case 'event':
-                        link = row.screen_name || 'event' + row.id;
+                        link = row.value.screen_name || 'event' + row.value.id;
                         break;
                 }
                 return '<a target="_blank" href="http://vk.com/' + link + '">' +
                     '<div id="accountHolder">' +
                     '<div class="img-thumbnail avatarHolder" title="' +
-                    '" style="background-image: url(' + row.photo_50 + ');">' +
+                    '" style="background-image: url(' + row.value.photo_50 + ');">' +
                     '</div>' +
                     '</div></a>';
             },
@@ -1303,6 +1317,78 @@
                 if (accountInfo && accountInfo.value) {
                     return accountInfo.value.first_name + ' ' + accountInfo.value.last_name + '</span><br><span class="text-muted small">' + accountInfo.value.id + '</span>';
                 }
+            },
+            wallLink: function (column, row) {
+                var link = 'wall' + row.value.owner_id + '_' + row.value.id;
+                /*switch (row.value.type) {
+                 case 'group':
+                 link = row.value.screen_name || 'club' + row.value.id;
+                 break;
+                 case 'page':
+                 link = row.value.screen_name || 'club' + row.value.id;
+                 break;
+                 case 'event':
+                 link = row.value.screen_name || 'event' + row.value.id;
+                 break;
+                 }*/
+                return "<a href=\"http://vk.com/" + link + "\" target=\"__blank\">" + row.value.id + "</a>";
+            },
+            personLink: function (column, row) {
+                var link = 'id' + row.value.owner_id;
+                /*switch (row.value.type) {
+                 case 'group':
+                 link = row.value.screen_name || 'club' + row.value.id;
+                 break;
+                 case 'page':
+                 link = row.value.screen_name || 'club' + row.value.id;
+                 break;
+                 case 'event':
+                 link = row.value.screen_name || 'event' + row.value.id;
+                 break;
+                 }*/
+                return "<a href=\"http://vk.com/" + link + "\" target=\"__blank\">" + row.value.owner_id + "</a>";
+            },
+            groupLabeles: function (column, row) {
+
+
+                var result = '';
+
+                for (var k in row.value) {
+
+
+                    switch (k) {
+                        case 'is_closed':
+                            if (row.value[k])
+                                result += '<span class="label label-warning" title="Закрытая группа" style="margin-right: 3px;"><span class="glyphicon glyphicon-globe"></span></span>';
+                            break;
+                        case 'can_see_all_posts':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Открытая стена" style="margin-right: 3px;"><span class="glyphicon glyphicon-eye-open"></span></span>';
+                            break;
+                        case 'can_post':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Можно постить" style="margin-right: 3px;"><span class="glyphicon glyphicon-pencil"></span></span>';
+                            break;
+                        case 'wall_comments':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Можно комментировать" style="margin-right: 3px;"><span class="glyphicon glyphicon-comment"></span></span>';
+                            break;
+                        case 'is_admin':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Аккаунт администратор группы" style="margin-right: 3px;"><span class="glyphicon glyphicon-heart"></span></span>';
+                            break;
+                        case 'is_member':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Аккаунт состоит в группе" style="margin-right: 3px;"><span class="glyphicon glyphicon-user"></span></span>';
+                            break;
+                        case 'verified':
+                            if (row.value[k])
+                                result += '<span class="label label-success" title="Официальная" style="margin-right: 3px;"><span class="glyphicon glyphicon-ok"></span></span>';
+                            break;
+                    }
+                }
+
+                return result;
             }
         },
 
@@ -1391,9 +1477,18 @@
 
                 $.each(that.columns, function (j, column) {
                     if (column.visible) {
+
+                        if (column.id) {
+                            var split = column.id.split('.');
+                            var temp = split.reduce(function (result, current) {
+                                return result[current];
+                            }, row);
+                        }
+
+
                         var value = ($.isFunction(column.formatter)) ?
                                 column.formatter.call(that, column, row) :
-                                column.converter.to(row[column.id]),
+                                column.converter.to(temp || row[column.id]),
                             cssClass = (column.cssClass.length > 0) ? " " + column.cssClass : "";
                         cells += tpl.cell.resolve(getParams.call(that, {
                             content: (value == null || value === "") ? "&nbsp;" : value,

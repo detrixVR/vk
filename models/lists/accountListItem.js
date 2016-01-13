@@ -14,7 +14,8 @@ var schema = new Schema({
     },
     content: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     status: {
         type: Number,

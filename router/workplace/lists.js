@@ -1,4 +1,3 @@
-
 var url = require('url');
 
 module.exports.get = function (req, res) {
@@ -17,9 +16,12 @@ module.exports.get = function (req, res) {
             break;
     }
 
+    query.type = subPage.charAt(0).toUpperCase() + subPage.slice(1);
+
     res.render('workplace/lists', {
         user: req.user,
         page: 'lists',
-        subPage: subPage
+        subPage: subPage,
+        processId: 'listCreatingFrom' + query.type
     });
 };

@@ -5,107 +5,16 @@ var GroupGrid = require('../../models/grid/group').GroupGrid,
     async = require('async'),
     request = require('request'),
     extend = require('extend'),
+    dbUtils = require('../../modules/dbUtils'),
+    validationModel = require('./settings').searchGroups,
     executeCommand = require('../../vkapi').executeCommand;
 
-var validationModel = {
-    city: {
-        name: 'Таймаут',
-        validate: function (value) {
-            return false;
-        }
-    },
-    count: {
-        name: 'Количество',
-        validate: function (value) {
-            if (!utils.isInt(value) || +value > 1000) {
-                return 'Должно быть числомdo 1000'
-            }
-            return false;
-        }
-    },
-    country: {
-        name: 'Страна',
-        validate: function (value) {
-            return false;
-        }
-    },
-    offset: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            if (!utils.isInt(value) || +value > 1000) {
-                return 'Должно быть числомdo 1000'
-            }
-            return false;
-        }
-    },
-    q: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    groupGrid: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-
-    type: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isOpened: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isOpenWall: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isCanPost: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isCanComment: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isOfficial: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    isFuture: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    },
-    minMembersCount: {
-        name: 'Адрес проверки',
-        validate: function (value) {
-            return false;
-        }
-    }
-};
 
 var searchGroups = function (processes, credentials, settings, callback) {
 
     callback(null, { //start process
         cbType: 2,
-        msg: utils.createMsg({msg: 'Poisk grupp', type: 2, clear: true})
+        msg: utils.createMsg({msg: 'Поиск групп', type: 2, clear: true})
 
     });
 
@@ -126,7 +35,7 @@ var searchGroups = function (processes, credentials, settings, callback) {
 
                 callback(null, { // process msg
                     cbType: 1,
-                    msg: utils.createMsg({msg: 'zagruzka akkaunta'})
+                    msg: utils.createMsg({msg: 'Загрузка аккаунта'})
                 });
 
                 utils.getAccountByCredentials(credentials, function (err, account) {
@@ -152,28 +61,33 @@ var searchGroups = function (processes, credentials, settings, callback) {
                 })
 
             }, function (account, iteration) {
-                if (!settings.replaceSelector.value) {
+                switch (settings.replaceSelector.value) {
+                    case 0:
 
-                    callback(null, { // process msg
-                        cbType: 1,
-                        msg: utils.createMsg({msg: 'Ochistka spiska'})
-                    });
+                        callback(null, { // process msg
+                            cbType: 1,
+                            msg: utils.createMsg({msg: 'Очистка списка'})
+                        });
 
-                    GroupGrid.remove({
-                        username: credentials.username,
-                        accountId: credentials.accountId
-                    }, function (err) {
-                        return iteration(err ? err : null, account);
-                    });
+                        var listName = settings.groupGrid.value.listName || 'Основной';
 
-                } else {
-                    return iteration(null, account);
+                        dbUtils.clearList('group', utils.extend({}, credentials, {listName: listName}), function (err) {
+                            return iteration(err ? err : null, account);
+                        });
+
+                        break;
+                    case 1:
+                    //break;
+                    case 2:
+                    //break;
+                    default :
+                        return iteration(null, account);
                 }
             }, function (account, iteration) {
 
                 callback(null, { // process msg
                     cbType: 1,
-                    msg: utils.createMsg({msg: 'Poisk lyudey'})
+                    msg: utils.createMsg({msg: 'Поиск групп'})
                 });
 
 
@@ -204,6 +118,7 @@ var searchGroups = function (processes, credentials, settings, callback) {
                     step = 20;
                 }
 
+
                 var inOptions = {
                     q: settings.q.value,
                     type: groupType,
@@ -215,22 +130,13 @@ var searchGroups = function (processes, credentials, settings, callback) {
                 };
 
                 var result = [];
-                //   let init = false;
 
                 async.forever(function (next) {
 
-                    function processItem(back) {
-
-                        if (result.length >= +settings.count.value ||
-                            inOptions.offset >= 1000) {
-                            return back({
-                                msg: utils.createMsg({msg: 'done'})
-                            });
-                        } else {
-
-                            options.options = {
-                                code: `var searchResult = API.groups.search(${JSON.stringify(inOptions)}).items;
-                                if ( searchResult@.id ) {
+                    options.options = {
+                        code: `var response = API.groups.search(${JSON.stringify(inOptions)});
+                                    var searchResult = response.items;
+                                if ( response@.id ) {
                                     var groups = API.groups.getById({"group_ids": searchResult@.id, "fields":"city,country,wall_comments,members_count,counters,can_post,can_see_all_posts,activity,fixed_post,verified,ban_info"});
                                     var i = 0;
                                     var check1 = [];
@@ -315,88 +221,60 @@ var searchGroups = function (processes, credentials, settings, callback) {
                                     } else {
                                         check6 = check5;
                                     }
-                                    return check6;
+                                    return {
+                                        count: response.count,
+                                        items: check6
+                                    };
                                 } else {
-                                    return [];
+                                    return {
+                                        count: 0,
+                                        items: []
+                                    };
                                 };`
-                            };
+                    };
 
-                            executeCommand(options,processes, credentials, callback, function (err, data) {
-                                if (err) {
-                                    return back(err);
+                    executeCommand(options, processes, credentials, callback, function (err, data) {
+
+                        console.log(err);
+                        if (err) {
+                            return next(err);
+                        } else {
+                            if (data &&
+                                data.result &&
+                                data.result.response &&
+                                data.result.response.items) {
+
+
+                                result = result.concat(data.result.response.items);
+
+                                if (inOptions.offset >= data.result.response.count ||
+                                    result.length >= +settings.count.value ||
+                                    inOptions.offset >= 1000) {
+
+                                    result.splice(+settings.count.value);
+
+                                    //   console.log(result);
+
+                                    return next({
+                                        msg: utils.createMsg({
+                                            msg: `Завершено, найдено ${result.length} групп`,
+                                            type: 2
+                                        })
+                                    });
                                 } else {
-                                    if (data &&
-                                        data.result &&
-                                        data.result.response) {
-                                        result = result.concat(data.result.response);
-                                        back();
-                                    } else {
-                                        return back({
-                                            msg: utils.createMsg({msg: 'oshibka'})
-                                        });
-                                    }
+                                    return next();
                                 }
-                            });
-                            inOptions.offset += step;
-                        }
-                    }
 
-                    var curState = utils.getProcessState(processes, credentials);
-
-                    switch (curState) {
-                        case 1:
-
-                            setTimeout(function () {
-                                console.log('inn')
-                                processItem(function (err) {
-                                    return next(err ? err : null);
+                            } else {
+                                return next({
+                                    msg: utils.createMsg({msg: 'Ошибка'})
                                 });
-                            }, 333);
+                            }
+                        }
+                    });
 
-                            break;
-                        case 2:
+                    inOptions.offset += step;
 
-                            callback(null, {
-                                cbType: 3,
-                                msg: utils.createMsg({msg: utils.createMsg({msg: 'Пауза'})})
-                            });
-
-
-                            var d = null;
-                            var delay = function () {
-
-                                curState = utils.getProcessState(processes, credentials);
-
-                                if (curState === 2) {
-                                    d = setTimeout(delay, 100);
-                                } else {
-                                    clearTimeout(d);
-                                    if (curState !== 0) {
-
-                                        callback(null, { //start process
-                                            cbType: 2
-                                        });
-
-                                        processItem(function (err) {
-                                            return next(err ? err : null);
-                                        });
-                                    } else {
-                                        return next({
-                                            msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
-                                        });
-                                    }
-                                }
-                            };
-                            delay();
-                            break;
-                        case 0:
-
-                            return next({
-                                msg: utils.createMsg({msg: 'Процесс был прерван', type: 2})
-                            });
-                        default :
-                            return next();
-                    }
 
                 }, function (err) {
 
@@ -412,22 +290,11 @@ var searchGroups = function (processes, credentials, settings, callback) {
 
                     callback(null, {
                         cbType: 1,
-                        msg: utils.createMsg({msg: 'sohranenie resultatov'})
+                        msg: utils.createMsg({msg: 'Сохранение результатов'})
                     });
 
-                    async.each(result, function (item, yes) {
 
-
-                        item.username = credentials.username;
-                        item.accountId = credentials.accountId;
-
-                        var newGroupGrid = new GroupGrid(item);
-
-                        newGroupGrid.save(function (err) {
-                            return yes(err ? err : null);
-                        });
-
-                    }, function (error) {
+                    dbUtils.saveToDbListItems('group', result, settings, credentials, function (error) {
 
                         callback(null, { // process msg
                             cbType: 5,
@@ -438,7 +305,6 @@ var searchGroups = function (processes, credentials, settings, callback) {
 
                     });
 
-
                 });
 
 
@@ -447,8 +313,9 @@ var searchGroups = function (processes, credentials, settings, callback) {
 
             return callback(null, {
                 cbType: 0,
-                msg: err ? err.msg ? err.msg : utils.createMsg({msg: 'Проверка завершена'}) : utils.createMsg({msg: 'Проверка завершена'})
+                msg: (err && err.hasOwnProperty('msg')) ? err.msg : 'Ошибка'
             })
+
         });
 };
 

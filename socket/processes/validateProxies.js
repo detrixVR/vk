@@ -35,6 +35,7 @@ var validationModel = {
         }
     },
     targetSelector: {
+        name: 'Откуда',
         validate: function (value) {
             return false;
         }
