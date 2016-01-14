@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+
+<body>
+
+
+<%- include ../parts/cabinetMenu.ejs %>
+
+<div class="canvas">
+
+    <%- include ../parts/cabinetNavbar.ejs %>
+
+    <div class="container-fluid">
+        <div class="row" id="memoryUsageHolder">
+
+        </div>
+    </div>
+</div>
+
+<%- include ../templates/modalInput.ejs %>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<%- include ../templates/other/accountHolder.ejs %>
+<%- include ../templates/other/taskRowTemplate.ejs %>
+<%- include ../templates/other/memoryUsage.ejs %>
+
+</body>
+</html>

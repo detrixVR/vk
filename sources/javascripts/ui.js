@@ -2,6 +2,10 @@
 
 import {_} from 'underscore';
 
+var drawMemoryUsage = function (data) {
+    $('#memoryUsageHolder').html(_.template($('#memoryUsageTemplate').html())({data: data}));
+};
+
 var redrawSelector = function (selectedItem) {
     var url = 'url(' + selectedItem.photo_50 + ')';
     var selector = $('#accountHolder');
@@ -352,11 +356,20 @@ var setProcessButtonsState = function (state, parent) {
 
 };
 
+var setTaskName = function (data) {
+    $('[data-task-name]').attr('data-task-name', data.uid).data('taskName', data.uid);
+};
+
+var switchToDefault = function () {
+    $('[data-task-name]').attr('data-task-name', 'default').data('taskName', 'default');
+};
+
 var setTaskButtonsState = function (data, parent) {
 
     if (parent.hasClass('taskHolder')) {
 
         var elemData = parent.data();
+
         if (elemData.task === data.uid) {
             var stopButton = $('.stopButton', parent);
             var startPauseButton = $('.startPauseButton', parent);
@@ -378,6 +391,24 @@ var setTaskButtonsState = function (data, parent) {
         }
 
 
+    } else if (parent.hasClass('eventsHolder')) {
+        var stopButton = $('.stopButton', parent);
+        var startPauseButton = $('.startPauseButton', parent);
+
+        stopButton.attr('disabled', false);
+        startPauseButton.attr('disabled', false);
+
+        if (parent.hasClass('taskHolder') && data.state === 0) {
+            startPauseButton.toggleClass('hidden', true);
+            parent.find('.finishIndicator').toggleClass('hidden', false);
+        } else {
+            startPauseButton.find('.glyphicon').
+                toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+        }
+
+
+        stopButton.toggleClass('hidden', data.state === 0);
     }
 
 };
@@ -457,7 +488,7 @@ var init = function () {
                 selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
             }
         })
-        .bind('gridRefreshItem', function(event, elem){
+        .bind('gridRefreshItem', function (event, elem) {
             var $elem = $(elem);
             var rowId = $elem.data('row-_id');
             var $grid = $(this);
@@ -468,7 +499,12 @@ var init = function () {
                 $('.modal-body', selector).html(content);
 
                 var bindFunc = function () {
-                    console.log(rowId)
+                    console.log(rowId);
+                    that.socket.socket.emit('startPauseTask', {
+                        taskName: 'gridRefreshItem',
+                        listType: grid.listType,
+                        itemId: rowId
+                    });
                 };
 
                 selector.modal().unbind('confirmOk').bind('confirmOk', bindFunc);
@@ -693,6 +729,11 @@ var init = function () {
         })
         .bind('setTaskState', '.widget', function (event, data) {
             setTaskButtonsState(data, $(event.target));
+            if (!data.state) {
+                switchToDefault();
+            } else {
+                setTaskName(data);
+            }
         })
         .bind('printProcess', '.widget', function (event, process, clear) {
 
@@ -761,27 +802,15 @@ var init = function () {
 
             }
         })
-        .bind('startPauseTask', '.widget', function (event, data) {
-            var $target = $(event.target);
-            if ($target.hasClass('taskHolder')) {
-                var $elem = $(data);
-                $elem.attr('disabled', true);
-                var elemData = $target.data();
-                that.socket.socket.emit('startPauseTask', {
-                    uid: elemData.task
-                });
-            }
+        .bind('startPauseTask', '.widget', function (event, uid) {
+            that.socket.socket.emit('startPauseTask', {
+                taskName: uid
+            });
         })
-        .bind('stopTask', '.widget', function (event, data) {
-            var $target = $(event.target);
-            if ($target.hasClass('taskHolder')) {
-                var $elem = $(data);
-                $elem.attr('disabled', true);
-                var elemData = $target.data();
-                that.socket.socket.emit('stopTask', {
-                    uid: elemData.task
-                });
-            }
+        .bind('stopTask', '.widget', function (event, uid) {
+            that.socket.socket.emit('stopTask', {
+                taskName: uid
+            });
         })
         .bind('showProcessInfo', '.widget', function (event, rowData) {
             var $target = $(event.target);
@@ -1061,6 +1090,7 @@ var ui = {
     createTask: createTask,
     setTaskState: setTaskState,
     printTasks: printTasks,
+    drawMemoryUsage: drawMemoryUsage,
 };
 
 export default ui;

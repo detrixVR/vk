@@ -1,0 +1,17 @@
+<script type="text/template" id="memoryUsageTemplate">
+        {{ for (var k in data) { }}
+
+            <div class="col-xs-12 col-md-3">
+                <div>
+                    <h2>Pid: {{=k}}</h2>
+                </div>
+                <div>
+                    <h3>{{=(data[k].memory/1024/1024).toFixed(2)}} mb</h3>
+                </div>
+                <div>
+                    <h3>{{=data[k].tasks.length}}</h3>
+                </div>
+            </div>
+
+        {{ } }}
+</script>

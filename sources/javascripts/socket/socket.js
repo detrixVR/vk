@@ -86,6 +86,10 @@ class Socket {
                     case 'listCreatingFromVideo':
                     case 'listCreatingFromPost':
 
+                    //case 'listCreatingFromPost':
+
+
+
                     case 'configurationClean':
                     case 'configurationCopy':
                         that.socket.emit('getCurrentProcess', {
@@ -99,9 +103,22 @@ class Socket {
                     case 'defaultProcess':
                         that.socket.emit('getAllProcesses');
                         break;
+                    case 'adminPanel':
+                        that.page.ui.setProcess(null);
+                        that.socket.emit('join', {
+                            processId: 'memoryUsage'
+                        });
+                        break;
+
                 }
             });
 
+            this.socket.on('memoryUsage', function (data) {
+                console.log(data);
+
+                that.page.ui.drawMemoryUsage(data);
+              //  processResponse.apply(that, [data]);
+            });
 
             this.socket.on('updatechat', function (data) {
                 console.log(data);

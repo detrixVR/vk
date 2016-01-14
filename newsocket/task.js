@@ -1,6 +1,9 @@
 "use strict";
 var extend = require('extend');
+var utils = require('../modules/utils');
 var dbTask = require('../models/task').Task;
+
+var gridRefreshItem = require('./tasks/gridRefreshItem');
 
 
 class Task {
@@ -10,8 +13,8 @@ class Task {
         this.room = sio.getUserNameString(data);
         this.username = data.username;
         this.accountId = data.accountId;
-        this.settings = data.settings;
         this.uid = data.uid;
+        this.settings = data.settings;
         this.messages = [];
         this.state = 0;
     }
@@ -21,32 +24,61 @@ class Task {
 
         switch (this.getState()) {
             case 0:
-                var that = this;
-
-
-                this.interval = setInterval(function(){
-
-                    var state = that.getState();
-
-                    switch(state) {
-                        case 1:
-                            console.log('working');
-                            break;
-                        case 2:
-                            console.log('paused');
-                            break;
-                        case 0:
-                            console.log('stoped');
-                            clearInterval(that.interval);
-
-                            that.save(function(err){
-                                console.log('saved');
-                            });
-                            break;
-                    }
-                },1000);
-
                 this.state = 1;
+
+                this.taskName = this.uid.split('_')[0];
+
+
+                console.log(this.taskName);
+                console.log(this.uid);
+
+                switch (this.taskName) {
+                    case 'gridRefreshItem':
+
+                        eval(this.taskName)(this, (err, cbData) => {
+
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                switch (cbData.cbType) {
+                                    case 0:
+                                        this.stop(() => {
+
+                                            process.send({
+                                                command: 'justStopTask',
+                                                data: {
+                                                    username: this.username,
+                                                    accountId: this.accountId,
+                                                    uid: this.uid
+                                                }
+                                            });
+
+                                            return (0);
+                                        });
+                                }
+                            }
+
+                        });
+
+                        break;
+                    default:
+
+                        this.pushMesssage(utils.createMsg({msg: 'Неизвестный процесс'}));
+
+                        this.stop(() => {
+
+                            process.send({
+                                command: 'justStopTask',
+                                data: {
+                                    username: this.username,
+                                    accountId: this.accountId,
+                                    uid: this.uid
+                                }
+                            });
+
+                            return (0);
+                        });
+                }
 
 
                 break;
@@ -63,21 +95,56 @@ class Task {
 
     pause() {
         this.state = 2;
-
-        this.sendState();
     }
 
     sendState() {
         this.sio.s.sockets.in(this.room).emit('setTaskState', {
-            state: this.getState(),
-            uid: this.uid
+            username: this.username,
+            accountId: this.accountId,
+            uid: this.uid,
+            state: this.getState()
         });
     }
 
-    stop() {
+    sendMessage(msg) {
+        this.sio.s.sockets.in(this.room).emit('printEvent', extend({}, {
+            username: this.username,
+            accountId: this.accountId,
+            uid: this.uid
+        }, {
+            msg: msg
+        }));
+    }
+
+    sendEvent(data) {
+        this.sio.s.sockets.in(this.room).emit(data.eventName, extend({}, {
+            username: this.username,
+            accountId: this.accountId,
+            uid: this.uid
+        }, data));
+    }
+
+    justStop() {
+        this.state = 0;
+    }
+
+    stop(callback) {
+
         this.state = 0;
 
         this.sendState();
+
+        this.save(function () {
+            return callback();
+        });
+    }
+
+
+    pushMesssage(msg) {
+
+        this.messages.push(msg);
+
+        this.sendMessage(msg);
     }
 
     getState() {

@@ -61,6 +61,8 @@ module.exports = function (app) {
     app.get('/upload', require('./upload').get);
     app.post('/upload', require('./upload').post);
 
+    app.get('/admin', require('./workplace/admin').get);
+
 
     app.get('/forgot', require('./default/forgot').get);
     app.get('/login', require('./default/login').get);

@@ -14,10 +14,10 @@ var io = require('socket.io'),
     configurationClean = require('../socket/processes/configurationClean'),
 
     listCreatingFromPerson = require('../socket/processes/listCreating/listCreatingFromPerson'),
-
+    _ = require('underscore'),
     Process = require('./process'),
-    Task = require('./task'),
-    uuid = require('node-uuid');
+    Task = require('./task');
+
 
 const COMMANDS_DATA = [
     {
@@ -255,7 +255,9 @@ var sio = function (server) {
         var task = null;
 
         for (var k = 0; k < tasks.length; k++) {
-            if (tasks[k].uid === data.uid) {
+            if (tasks[k].username === data.username &&
+                tasks[k].accountId === data.accountId &&
+                (tasks[k].uid === data.uid || tasks[k].uid === data.taskName)) {
                 task = tasks[k];
                 break;
             }
@@ -348,8 +350,8 @@ var sio = function (server) {
                     break;
                 case 'getCurrentProcess':
 
-                    var process = getProcess(msg.data);
-                    if (!process) {
+                    var proc = getProcess(msg.data);
+                    if (!proc) {
                         dbProcess.findOne(credentials).sort({created: -1}).exec((err, doc) => {
                             if (err) {
                                 console.error(err);
@@ -358,18 +360,19 @@ var sio = function (server) {
                             }
                         })
                     } else {
-                        self.s.sockets.in(room).emit('setProcess', process);
+                        self.s.sockets.in(room).emit('setProcess', proc);
                     }
 
                     break;
                 case 'createTask':
-                    var newTask = new Task(self, msg.data);
-                    tasks.push(newTask);
-                    console.log('tasks length: ', tasks.length);
-                    self.s.sockets.in(room).emit(msg.command, extend({}, msg.data, {
-                        state: newTask.state,
-                        messages: newTask.messages
-                    }));
+                    /*var newTask = new Task(self, msg.data);
+                     tasks.push(newTask);
+                     console.log('tasks length: ', tasks.length);
+                     self.s.sockets.in(room).emit(msg.command, extend({}, msg.data, {
+                     state: newTask.state,
+                     messages: newTask.messages
+                     }));*/
+                    console.error('here11111111');
                     break;
                 case 'startPauseTask':
                     task = getExistingTask(msg.data);
@@ -377,12 +380,19 @@ var sio = function (server) {
                     if (task) {
                         console.log('here 2');
                         task.start();
+                    } else {
+                        console.log('new task:');
+                        console.log(msg.data);
+                        var newTask = new Task(self, msg.data);
+                        tasks.push(newTask);
+                        newTask.start();
                     }
                     break;
                 case 'stopTask':
+                    console.log('stopTask');
                     task = getExistingTask(msg.data);
                     if (task) {
-                        task.stop();
+                        task.justStop();
                     }
                     break;
                 case 'getAllTasks':
@@ -405,7 +415,14 @@ var sio = function (server) {
                         command: 'setMemoryUsage',
                         data: {
                             processPid: process.pid,
-                            memoryUsage: process.memoryUsage()
+                            memoryUsage: process.memoryUsage(),
+                            tasks: _.map(tasks, function (task) {
+                                return {
+                                    username: task.username,
+                                    accountId: task.accountId,
+                                    uid: task.uid,
+                                }
+                            })
                         }
                     });
                     break;
@@ -459,8 +476,15 @@ var sio = function (server) {
 
                 switch (command) {
                     case 'join':
-                        user.processId = data.processId;
-                        socket.join(self.getUserNameString(user));
+
+                        switch (data.processId) {
+                            case 'memoryUsage':
+                                socket.join(data.processId);
+                                break;
+                            default :
+                                user.processId = data.processId;
+                                socket.join(self.getUserNameString(user));
+                        }
                         return;
                     case 'switchAccount':
                         for (var k in user.roomsWhereUserIs) {
@@ -491,30 +515,34 @@ var sio = function (server) {
 
                 switch (command) {
                     case 'createTask':
-                        process.send({
-                            command: command,
-                            data: extend({}, user, {
-                                settings: data.settings,
-                                uid: uuid.v1()
-                            })
-                        });
-                        break;
+                        /* process.send({
+                         command: command,
+                         data: extend({}, user, {
+                         settings: data.settings,
+                         uid: uuid.v1()
+                         })
+                         });
+                         break;*/
+                        console.error('21111111');
                     case 'startPauseTask':
                     case 'stopTask':
+
+                        //  console.log('socket data: ');
+                        // console.log(data);
+
                         process.send({
                             command: command,
-                            data: extend({}, user, {
-                                uid: data.uid
-                            })
+                            data: extend({}, user, data)
                         });
                         break;
                     case 'getAllTasks':
-                        process.send({
-                            command: command,
-                            data: extend({}, user, {
-                                // uid: data.uid
-                            })
-                        });
+                        /* process.send({
+                         command: command,
+                         data: extend({}, user, {
+                         // uid: data.uid
+                         })
+                         });*/
+                        console.error('21111112');
                         return;
                 }
 

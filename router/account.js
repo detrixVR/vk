@@ -62,6 +62,9 @@ module.exports.post = function (req, res) {
         var objURL = parseQueryString(location.search);
 
         switch (url) {
+            case 'admin':
+                result.processId = 'adminPanel';
+                break;
             case 'proxies':
                 result.processId = 'validateProxies';
                 break;
