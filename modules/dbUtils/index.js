@@ -88,13 +88,13 @@ var saveToDbListItems = function (type, result, settings, credentials, next) {
                 return callback({error: 'error'});
             }
 
-            var listName = settings.replaceSelector.value === 2 ? settings.listName.value : settings[type+'Grid'].value.listName ? settings[type+'Grid'].value.listName: 'Основной';
+            var listName = settings.replaceSelector.value === 2 ? settings.listName.value : settings[type + 'Grid'].value.listName ? settings[type + 'Grid'].value.listName : 'Основной';
 
             async.eachSeries(result, function (item, yes) {
 
                 /*item.username = credentials.username;
-                item.accountId = credentials.accountId;
-                item.listName = listName;*/
+                 item.accountId = credentials.accountId;
+                 item.listName = listName;*/
 
                 var itemToSave = utils.extend({}, {
                     username: credentials.username,
@@ -322,11 +322,49 @@ var clearList = function (type, options, callback) {
 
 };
 
+var getAccountByCredentials = function (credentials, callback) {
+    AccountListItem.findOne({
+        username: credentials.user,
+        accountId: credentials.accountId
+    }, function (err, account) {
+        return callback(err ? err : null, account);
+    })
+};
+
+var getItemFromDbById = function (type, id, callback) {
+
+    var Requester = getRequester(type);
+
+    if (!Requester) {
+        return callback({error: 'error'});
+    }
+
+    Requester.findOne({_id: id}, function (err, item) {
+        return callback(err ? err : null, item);
+    });
+};
+
+var removeItemFromDbById = function (type, id, callback) {
+
+    var Requester = getRequester(type);
+
+    if (!Requester) {
+        return callback({error: 'error'});
+    }
+
+    Requester.findByIdAndRemove({_id: id}, function (err) {
+        return callback(err ? err : null);
+    });
+};
+
 module.exports = {
     saveToDbListItems: saveToDbListItems,
     getFromDbBySettings: getFromDbBySettings,
     getFromDbForGrid: getFromDbForGrid,
     removeFromDbForGrid: removeFromDbForGrid,
     putToDbForGrid: putToDbForGrid,
+    getAccountByCredentials: getAccountByCredentials,
+    getItemFromDbById: getItemFromDbById,
+    removeItemFromDbById: removeItemFromDbById,
     clearList: clearList
 };

@@ -1,5 +1,7 @@
 "use strict";
 
+
+
 var PersonGrid = require('../../models/grid/person').PersonGrid,
     utils = require('../../modules/utils'),
     async = require('async'),
@@ -7,8 +9,8 @@ var PersonGrid = require('../../models/grid/person').PersonGrid,
     extend = require('extend'),
     dbUtils = require('../../modules/dbUtils'),
     validationModel = require('./settings').searchPeoples,
+    config = require('config'),
     executeCommand = require('../../vkapi').executeCommand;
-
 
 
 var searchPeoples = function (processes, credentials, settings, callback) {
@@ -76,9 +78,9 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                         break;
                     case 1:
-                        //break;
+                    //break;
                     case 2:
-                        //break;
+                    //break;
                     default :
                         return iteration(null, account);
                 }
@@ -94,7 +96,6 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     proxy: account.proxy,
                     command: 'execute'
                 };
-
 
 
                 var inOptions = {
@@ -113,7 +114,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
                     online: settings.online.value ? 1 : 0,
                     has_photo: settings.has_photo.value ? 1 : 0,
                     from_list: settings.from_list.value ? 'friends' : '',
-                    fields: `sex,bdate,can_post,verified,domain,nickname,relation,can_see_all_posts,can_see_audio,can_write_private_message,can_send_friend_request,wall_comments,blacklisted,blacklisted_by_me,photo_50`
+                    fields: config.get('vk.person.fields')
                 };
 
                 console.log(inOptions);
@@ -220,7 +221,7 @@ var searchPeoples = function (processes, credentials, settings, callback) {
 
                     }
 
-                   // console.log(result);
+                    // console.log(result);
 
 
                     callback(null, {

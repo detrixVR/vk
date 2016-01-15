@@ -1207,8 +1207,8 @@
 
             //const STATUSES = ['Проверяется', 'Не проверен', 'Неверный прокси', 'Валидный', 'Невалидный'];
 
-            date: function(column,row) {
-                return (new Date(row.value.date*1000)).toLocaleString();
+            date: function (column, row) {
+                return (new Date(row.value.date * 1000)).toLocaleString();
             },
 
             status: function (column, row) {
@@ -1472,7 +1472,7 @@
 
                 var status = row.status != null && that.options.statusMapping[row.status];
                 if (status) {
-                    rowCss += status;
+                    rowCss += ' ' + status;
                 }
 
                 $.each(that.columns, function (j, column) {

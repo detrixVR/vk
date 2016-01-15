@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+//require('app-module-path').addPath(__dirname)
+
+var path = require('path');
+
+require('app-module-path').addPath(path.join(__dirname, '../'));
+
 var cluster = require('cluster'),
     extend = require('extend'),
     express = require('express'),
@@ -19,6 +25,8 @@ var tasks = [];
 var memoryUsage = {};
 
 if (cluster.isMaster) {
+
+    console.log(__dirname);
 
     console.log('Start cluster with %s workers', workers - 1);
 
@@ -137,6 +145,12 @@ if (cluster.isMaster) {
                     broadcast({
                         command: 'getAllTasks',
                         data: msg.data
+                    });
+                    break;
+                case 'getMemoryUsage':
+                    worker.send({
+                        command: 'sendMemoryUsage',
+                        data: memoryUsage
                     });
                     break;
                 case 'setMemoryUsage':

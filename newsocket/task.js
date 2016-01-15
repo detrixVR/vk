@@ -2,6 +2,7 @@
 var extend = require('extend');
 var utils = require('../modules/utils');
 var dbTask = require('../models/task').Task;
+var utils = require('modules/utils');
 
 var gridRefreshItem = require('./tasks/gridRefreshItem');
 
@@ -38,21 +39,19 @@ class Task {
                         eval(this.taskName)(this, (err, cbData) => {
 
                             if (err) {
+
+                                var resp = utils.processAnyError(err);
+
+
                                 console.error(err);
+
+                                this.stop(() => {
+                                    return (0);
+                                });
                             } else {
                                 switch (cbData.cbType) {
                                     case 0:
                                         this.stop(() => {
-
-                                            process.send({
-                                                command: 'justStopTask',
-                                                data: {
-                                                    username: this.username,
-                                                    accountId: this.accountId,
-                                                    uid: this.uid
-                                                }
-                                            });
-
                                             return (0);
                                         });
                                 }
@@ -66,16 +65,6 @@ class Task {
                         this.pushMesssage(utils.createMsg({msg: 'Неизвестный процесс'}));
 
                         this.stop(() => {
-
-                            process.send({
-                                command: 'justStopTask',
-                                data: {
-                                    username: this.username,
-                                    accountId: this.accountId,
-                                    uid: this.uid
-                                }
-                            });
-
                             return (0);
                         });
                 }
@@ -133,6 +122,21 @@ class Task {
         this.state = 0;
 
         this.sendState();
+
+        this.sio.justStopTask({
+            username: this.username,
+            accountId: this.accountId,
+            uid: this.uid
+        });
+
+        process.send({
+            command: 'justStopTask',
+            data: {
+                username: this.username,
+                accountId: this.accountId,
+                uid: this.uid
+            }
+        });
 
         this.save(function () {
             return callback();

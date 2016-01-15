@@ -20,5 +20,11 @@
     },
     "userAgent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36",
     "secretCookies": "HKJrgkjf21sAHW8Kjdb90ufjfiowe",
-    "secretSessions": "HKJrgkjf21sAHW8Kjdb90ufjfiowe"
+    "secretSessions": "HKJrgkjf21sAHW8Kjdb90ufjfiowe",
+
+    "vk": {
+        "person": {
+            "fields": "sex,bdate,can_post,verified,domain,nickname,relation,can_see_all_posts,can_see_audio,can_write_private_message,can_send_friend_request,wall_comments,blacklisted,blacklisted_by_me,photo_50"
+        }
+    }
 }

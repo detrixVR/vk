@@ -240,6 +240,10 @@ var refreshRow = function (data) {
     $('[data-toggle=bootgrid]').trigger('refreshRow', data);
 };
 
+var disableRow = function (data) {
+    $('[data-toggle=bootgrid]').trigger('disableRow', data);
+};
+
 var reloadGrid = function (data) {
     console.log(data);
     $('[data-toggle=bootgrid]#' + data.gridId).trigger('reloadGrid');
@@ -434,26 +438,61 @@ var init = function () {
     };
 
     $('[data-toggle=bootgrid]')
-        .bind('refreshRow', function (event, options) {
+        /*.bind('refreshRow', function (event, options) {
+         var $grid = $(this);
+         var grid = $grid.data('.rs.jquery.bootgrid');
+         var findedItem = grid.currentRows.find(function (item) {
+         return item._id === options.id
+         });
+
+         console.log(options);
+
+         if (findedItem) {
+         options.columns.forEach(function (item, i) {
+         findedItem[item] = options.values[i];
+         });
+         if (options.update) {
+         grid.append([findedItem], function (err) {
+         if (!err) {
+         grid.renderRows(grid.currentRows);
+         $.notify({message: 'Успешно обновлено'}, {type: 'success'});
+         }
+         });
+         } else {
+         grid.renderRows(grid.currentRows);
+         }
+         }
+         })*/
+        .bind('refreshRow', function (event, rowData) {
             var $grid = $(this);
             var grid = $grid.data('.rs.jquery.bootgrid');
-            var findedItem = grid.currentRows.find(function (item) {
-                return item._id === options.id
+
+            var foundedItem = grid.currentRows.find(function (item) {
+                return item._id === rowData._id
             });
-            if (findedItem) {
-                options.columns.forEach(function (item, i) {
-                    findedItem[item] = options.values[i];
-                });
-                if (options.update) {
-                    grid.append([findedItem], function (err) {
-                        if (!err) {
-                            grid.renderRows(grid.currentRows);
-                            $.notify({message: 'Успешно обновлено'}, {type: 'success'});
-                        }
-                    });
-                } else {
-                    grid.renderRows(grid.currentRows);
-                }
+
+            if (foundedItem) {
+
+                $.extend(foundedItem, rowData);
+
+                grid.renderRows(grid.currentRows);
+            }
+        })
+        .bind('disableRow', function (event, rowData) {
+            var $grid = $(this);
+            var grid = $grid.data('.rs.jquery.bootgrid');
+
+            var foundedItem = grid.currentRows.find(function (item) {
+                return item._id === rowData._id
+            });
+
+            if (foundedItem) {
+
+
+
+                foundedItem.status = 4;
+
+                grid.renderRows(grid.currentRows);
             }
         })
         .bind('gridDelete', function (event, elem) {
@@ -502,8 +541,12 @@ var init = function () {
                     console.log(rowId);
                     that.socket.socket.emit('startPauseTask', {
                         taskName: 'gridRefreshItem',
-                        listType: grid.listType,
-                        itemId: rowId
+                        settings: {
+                            listType: grid.listType,
+                            items: [grid.currentRows.find(function (item) {
+                                return item._id === rowId
+                            })]
+                        }
                     });
                 };
 
@@ -812,6 +855,9 @@ var init = function () {
                 taskName: uid
             });
         })
+        .bind('getMemoryUsage', '.widget', function (event) {
+            that.socket.socket.emit('getMemoryUsage');
+        })
         .bind('showProcessInfo', '.widget', function (event, rowData) {
             var $target = $(event.target);
             if ($target.hasClass('freezedEventsHolder')) {
@@ -1080,6 +1126,7 @@ var ui = {
     overlay: overlay,
     printEvent: printEvent,
     refreshRow: refreshRow,
+    disableRow: disableRow,
     reloadGrid: reloadGrid,
     highLightFields: highLightFields,
     displayNotification: displayNotification,

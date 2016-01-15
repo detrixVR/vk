@@ -130,6 +130,12 @@ class Socket {
                 that.page.ui.setProgress(data);
             });
 
+
+            this.socket.on('disableRow', function (data) {
+                that.page.ui.disableRow(processResponse.apply(that, [data]));
+            });
+
+
             this.socket.on('printEvent', function (data) {
                 processResponse.apply(that, [data]);
             });

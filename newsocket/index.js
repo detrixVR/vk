@@ -97,7 +97,8 @@ var sio = function (server) {
     }));
 
     var processes = [];
-    var tasks = [];
+
+    this.tasks = [];
 
     function getProcess(data) {
         var process = null;
@@ -201,16 +202,16 @@ var sio = function (server) {
         var result = [];
 
         for (var k = 0; k < tasks.length; k++) {
-            if (tasks[k].username === data.username &&
-                tasks[k].accountId === data.accountId) {
+            if (this.tasks[k].username === data.username &&
+                this.tasks[k].accountId === data.accountId) {
 
                 result.push({
-                    username: tasks[k].username,
-                    accountId: tasks[k].accountId,
-                    settings: tasks[k].settings,
-                    uid: tasks[k].uid,
-                    messages: tasks[k].messages,
-                    state: tasks[k].state
+                    username: this.tasks[k].username,
+                    accountId: this.tasks[k].accountId,
+                    settings: this.tasks[k].settings,
+                    uid: this.tasks[k].uid,
+                    messages: this.tasks[k].messages,
+                    state: this.tasks[k].state
                 });
             }
         }
@@ -254,11 +255,11 @@ var sio = function (server) {
     function getExistingTask(data) {
         var task = null;
 
-        for (var k = 0; k < tasks.length; k++) {
-            if (tasks[k].username === data.username &&
-                tasks[k].accountId === data.accountId &&
-                (tasks[k].uid === data.uid || tasks[k].uid === data.taskName)) {
-                task = tasks[k];
+        for (var k = 0; k < this.tasks.length; k++) {
+            if (this.tasks[k].username === data.username &&
+                this.tasks[k].accountId === data.accountId &&
+                (this.tasks[k].uid === data.uid || this.tasks[k].uid === data.taskName)) {
+                task = this.tasks[k];
                 break;
             }
         }
@@ -375,7 +376,7 @@ var sio = function (server) {
                     console.error('here11111111');
                     break;
                 case 'startPauseTask':
-                    task = getExistingTask(msg.data);
+                    task = self.getExistingTask(msg.data);
                     console.log('here 1');
                     if (task) {
                         console.log('here 2');
@@ -384,20 +385,20 @@ var sio = function (server) {
                         console.log('new task:');
                         console.log(msg.data);
                         var newTask = new Task(self, msg.data);
-                        tasks.push(newTask);
+                        self.tasks.push(newTask);
                         newTask.start();
                     }
                     break;
                 case 'stopTask':
                     console.log('stopTask');
-                    task = getExistingTask(msg.data);
+                    task = self.getExistingTask(msg.data);
                     if (task) {
                         task.justStop();
                     }
                     break;
                 case 'getAllTasks':
                     var foundedTasks = getAllTasks(msg.data);
-                    console.log(tasks.length)
+                   // console.log(tasks.length)
                     if (foundedTasks.length) {
                         console.log(foundedTasks);
                         self.s.sockets.in(room).emit(msg.command, {
@@ -416,7 +417,7 @@ var sio = function (server) {
                         data: {
                             processPid: process.pid,
                             memoryUsage: process.memoryUsage(),
-                            tasks: _.map(tasks, function (task) {
+                            tasks: _.map(self.tasks, function (task) {
                                 return {
                                     username: task.username,
                                     accountId: task.accountId,
@@ -546,6 +547,16 @@ var sio = function (server) {
                         return;
                 }
 
+                switch (command){
+                    case 'getMemoryUsage':
+                        process.send({
+                            command: command,
+                            data: extend({}, user, data)
+                        });
+                        return;
+
+                }
+
                 switch (command) {
                     default:
                         onevent.call(this, packet);
@@ -578,6 +589,28 @@ var sio = function (server) {
 
 sio.prototype.getUserNameString = function (data) {
     return data.username + (data.accountId ? ':' + data.accountId + (data.processId ? ':' + data.processId : '') : '');
+};
+
+sio.prototype.getExistingTask = function (data) {
+    var task = null;
+
+    for (var k = 0; k < this.tasks.length; k++) {
+        if (this.tasks[k].username === data.username &&
+            this.tasks[k].accountId === data.accountId &&
+            (this.tasks[k].uid === data.uid || this.tasks[k].uid === data.taskName)) {
+            task = this.tasks[k];
+            break;
+        }
+    }
+
+    return task;
+};
+
+sio.prototype.justStopTask = function (data) {
+    var task = this.getExistingTask(data);
+    if(task){
+        this.tasks.splice(this.tasks.indexOf(task), 1);
+    }
 };
 
 module.exports = sio;
