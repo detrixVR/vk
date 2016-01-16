@@ -64,6 +64,10 @@ module.exports = function (app) {
     app.get('/admin', require('./workplace/admin').get);
 
 
+    app.get('/check', require('./check').get);
+
+
+
     app.get('/forgot', require('./default/forgot').get);
     app.get('/login', require('./default/login').get);
     app.post('/login', require('./default/login').post);

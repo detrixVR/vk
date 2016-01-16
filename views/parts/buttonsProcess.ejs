@@ -1,8 +1,8 @@
 
     <button class="btn btn-default startPauseButton"
-            onclick="$(this).closest('.widget').trigger('startPauseTask', $(this).data('taskName'));" data-task-name="gridRefreshItem"><span class="glyphicon glyphicon-play"></span></button>
+            onclick="$(this).closest('.widget').trigger('startPauseTask', $(this).data('taskName'));" data-task-name="<%=processId%>" data-default-task="<%=processId%>"><span class="glyphicon glyphicon-play"></span></button>
     <button class="btn btn-default hidden stopButton"
-            onclick="$(this).closest('.widget').trigger('stopTask', $(this).data('taskName'));" data-task-name="gridRefreshItem"><span class="glyphicon glyphicon-stop"></span></button>
+            onclick="$(this).closest('.widget').trigger('stopTask', $(this).data('taskName'));" data-task-name="<%=processId%>" data-default-task="<%=processId%>"><span class="glyphicon glyphicon-stop"></span></button>
 
 
 <% if (processId !== 'configurationClean') { %>

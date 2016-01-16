@@ -1,6 +1,6 @@
-var utils = require('../../modules/utils');
-var justExecuteCommand = require('../../vkapi').justExecuteCommand;
-var dbUtils = require('../../modules/dbUtils');
+var utils = require('modules/utils');
+var justExecuteCommand = require('vkapi').justExecuteCommand;
+var dbUtils = require('modules/dbUtils');
 var extend = require('extend');
 var config = require('config');
 
@@ -38,9 +38,9 @@ var gridRefreshItem1 = function (task, callback) {
 
 var gridRefreshItem = function (task, callback) {
 
-    console.log('task in');
+    console.log('task in gridRefreshItem');
 
-    async.waterfall([function (next) {
+    async.waterfall([function (iteration) {
 
         dbUtils.getAccountByCredentials({
             username: task.username,
@@ -61,14 +61,13 @@ var gridRefreshItem = function (task, callback) {
              msg: utils.createMsg({msg: 'Akkaunt ne nayden', type: 1})
              })
              }*/
-            return next(null, {
+            return iteration(null, {
                 token: 'c8d7eee470f0fe3714263ab5083f462959c40399f17ebcaed9a0e1d5d41a04f755aa458243721a9ef0feb',
                 proxy: null
             })
         })
 
-    }, function (account, next) {
-
+    }, function (account, iteration) {
 
         async.eachSeries(task.settings.items, function (item, done) {
 
@@ -100,11 +99,10 @@ var gridRefreshItem = function (task, callback) {
 
                     break;
                 default:
-                    return done({
+                    return iteration({
                         error: 'error'
                     });
             }
-
 
             justExecuteCommand(options, function (err, data) {
                 if (err) {
@@ -163,9 +161,8 @@ var gridRefreshItem = function (task, callback) {
                 }
             });
 
-
         }, function (err) {
-            return next(err);
+            return iteration(err);
         });
 
     }], function (err) {
@@ -174,16 +171,6 @@ var gridRefreshItem = function (task, callback) {
             cbType: 0
         })
     });
-
-
-    /*console.log(task.settings);
-
-     console.log('task out');
-
-     return callback(null, {
-     cbType: 0
-     });*/
-
 };
 
 module.exports = gridRefreshItem;

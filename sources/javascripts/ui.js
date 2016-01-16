@@ -350,8 +350,8 @@ var setProcessButtonsState = function (state, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-                toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+            toggleClass(state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+            toggleClass(state === 2 || state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -365,7 +365,9 @@ var setTaskName = function (data) {
 };
 
 var switchToDefault = function () {
-    $('[data-task-name]').attr('data-task-name', 'default').data('taskName', 'default');
+    var $taskName = $('[data-task-name]');
+    var defaultTaskName = $taskName.attr('data-default-task');
+    $taskName.attr('data-task-name', defaultTaskName).data('taskName', defaultTaskName);
 };
 
 var setTaskButtonsState = function (data, parent) {
@@ -386,8 +388,8 @@ var setTaskButtonsState = function (data, parent) {
                 parent.find('.finishIndicator').toggleClass('hidden', false);
             } else {
                 startPauseButton.find('.glyphicon').
-                    toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                    toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+                toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+                toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
             }
 
 
@@ -407,8 +409,8 @@ var setTaskButtonsState = function (data, parent) {
             parent.find('.finishIndicator').toggleClass('hidden', false);
         } else {
             startPauseButton.find('.glyphicon').
-                toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
-                toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
+            toggleClass(data.state === 1 ? 'glyphicon-play' : 'glyphicon-pause', false).
+            toggleClass(data.state === 2 || data.state === 0 ? 'glyphicon-play' : 'glyphicon-pause', true);
         }
 
 
@@ -438,31 +440,31 @@ var init = function () {
     };
 
     $('[data-toggle=bootgrid]')
-        /*.bind('refreshRow', function (event, options) {
-         var $grid = $(this);
-         var grid = $grid.data('.rs.jquery.bootgrid');
-         var findedItem = grid.currentRows.find(function (item) {
-         return item._id === options.id
-         });
+    /*.bind('refreshRow', function (event, options) {
+     var $grid = $(this);
+     var grid = $grid.data('.rs.jquery.bootgrid');
+     var findedItem = grid.currentRows.find(function (item) {
+     return item._id === options.id
+     });
 
-         console.log(options);
+     console.log(options);
 
-         if (findedItem) {
-         options.columns.forEach(function (item, i) {
-         findedItem[item] = options.values[i];
-         });
-         if (options.update) {
-         grid.append([findedItem], function (err) {
-         if (!err) {
-         grid.renderRows(grid.currentRows);
-         $.notify({message: 'Успешно обновлено'}, {type: 'success'});
-         }
-         });
-         } else {
-         grid.renderRows(grid.currentRows);
-         }
-         }
-         })*/
+     if (findedItem) {
+     options.columns.forEach(function (item, i) {
+     findedItem[item] = options.values[i];
+     });
+     if (options.update) {
+     grid.append([findedItem], function (err) {
+     if (!err) {
+     grid.renderRows(grid.currentRows);
+     $.notify({message: 'Успешно обновлено'}, {type: 'success'});
+     }
+     });
+     } else {
+     grid.renderRows(grid.currentRows);
+     }
+     }
+     })*/
         .bind('refreshRow', function (event, rowData) {
             var $grid = $(this);
             var grid = $grid.data('.rs.jquery.bootgrid');
@@ -487,7 +489,6 @@ var init = function () {
             });
 
             if (foundedItem) {
-
 
 
                 foundedItem.status = 4;
@@ -846,9 +847,21 @@ var init = function () {
             }
         })
         .bind('startPauseTask', '.widget', function (event, uid) {
-            that.socket.socket.emit('startPauseTask', {
+
+            var splitArray = uid.split('_');
+            var additionalOptions = {};
+
+            if (splitArray.length === 1) {
+                switch (splitArray[0]) {
+                    case 'searchGroups':
+                        additionalOptions.settings = getSettings.call(that);
+                        break;
+                }
+            }
+
+            that.socket.socket.emit('startPauseTask', $.extend({
                 taskName: uid
-            });
+            }, additionalOptions));
         })
         .bind('stopTask', '.widget', function (event, uid) {
             that.socket.socket.emit('stopTask', {

@@ -325,5 +325,5 @@ var listCreatingFromPerson = {
 module.exports = {
     searchGroups: searchGroups,
     searchPeoples: searchPeoples,
-    listCreatingFromPerson: listCreatingFromPerson,
-}
+    listCreatingFromPerson: listCreatingFromPerson
+};

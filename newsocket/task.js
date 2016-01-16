@@ -1,10 +1,12 @@
 "use strict";
 var extend = require('extend');
-var utils = require('../modules/utils');
 var dbTask = require('../models/task').Task;
 var utils = require('modules/utils');
+var settings = require('socket/processes/settings');
 
-var gridRefreshItem = require('./tasks/gridRefreshItem');
+//var gridRefreshItem = require('./tasks/gridRefreshItem');
+
+var tasks = require('newsocket/tasks');
 
 
 class Task {
@@ -35,29 +37,49 @@ class Task {
 
                 switch (this.taskName) {
                     case 'gridRefreshItem':
+                    case 'searchGroups':
 
-                        eval(this.taskName)(this, (err, cbData) => {
+                        var error = utils.validateSettings(this.settings, settings[this.taskName]);
 
-                            if (err) {
+                        if (error) {
+                            console.log(error);
 
-                                var resp = utils.processAnyError(err);
+                            this.pushMesssage(utils.createMsg({
+                                msg: error.msg,
+                                clear: true,
+                                type: 1,
+                                badFields: error.badFields
+                            }));
+
+                            this.stop(() => {
+                                return (0);
+                            });
+                        } else {
+                            eval(tasks[this.taskName])(this, (err, cbData) => {
+
+                                if (err) {
+
+                                    //var resp = utils.processAnyError(err);
 
 
-                                console.error(err);
+                                   // console.error( resp);
+                                    console.error(err);
 
-                                this.stop(() => {
-                                    return (0);
-                                });
-                            } else {
-                                switch (cbData.cbType) {
-                                    case 0:
-                                        this.stop(() => {
-                                            return (0);
-                                        });
+                                    this.stop(() => {
+                                        return (0);
+                                    });
+                                } else {
+                                    switch (cbData.cbType) {
+                                        case 0:
+                                            this.stop(() => {
+                                                return (0);
+                                            });
+                                    }
                                 }
-                            }
 
-                        });
+                            });
+                        }
+
 
                         break;
                     default:

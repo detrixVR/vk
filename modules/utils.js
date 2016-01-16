@@ -46,6 +46,12 @@ function getAccountByCredentials(ceredentials, callback) {
 function validateSettings(settings, validationModel) {
     var errors = [];
 
+    if (!validationModel || !settings) {
+        return {
+            msg: 'V korne nevernie nastroyki',
+        }
+    }
+
     for (var k in validationModel) {
 
         if (validationModel[k].hasOwnProperty('required')) {
@@ -77,7 +83,6 @@ function validateSettings(settings, validationModel) {
                     });
                 }
             }
-
         }
     }
 
