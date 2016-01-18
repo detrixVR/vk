@@ -2,12 +2,25 @@
 
 var url = require('url');
 
-var request = require('request');
+//var request = require('request');
 var extend = require('extend');
 var async = require('async');
 
+var http = require('http');
+var https = require('https');
+
 var HttpsProxyAgent = require('https-proxy-agent');
 var SocksProxyAgent = require('socks-proxy-agent');
+
+var shttps = require('socks5-https-client');
+
+var Agent = require('socks5-https-client/lib/Agent');
+//var Curl = require( 'node-libcurl' ).Curl;
+
+
+var shttp = require('socks5-http-client');
+
+var socksv5 = require('socksv5');
 
 class Validator {
 
@@ -15,115 +28,106 @@ class Validator {
         this.string = string;
     }
 
-    doRequest(socks, ssl, callback) {
+    implode(glue, pieces) {
+        return ( ( pieces instanceof Array ) ? pieces.join(glue) : pieces );
+    }
+
+    buildQuery(params) {
+        var arr = [];
+        for (var name in params) {
+            var value = params[name];
+
+            if ("undefined" !== typeof value) {
+                arr.push(name + '=' + encodeURIComponent(value));
+            }
+        }
+
+        return this.implode('&', arr);
+    }
+
+    doRequest(socks1, callback) {
 
         var pref = 'http://';
 
-        if (socks) {
+        if (socks1) {
             pref = 'socks://';
         }
 
-        var opts = url.parse(pref + this.string);
-
-        request({
+        var options = {
+            host: 'api.vk.com',
+            port: 443,
             method: 'GET',
-            uri: `${ssl ? 'https' : 'http'}://google.com/`,
-           // followAllRedirects: false,
-           // followRedirects: false,
-          //  followRedirect: false,
-            timeout: 7000,
-            headers: {
-              //  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          //      'Accept-Encoding': 'gzip, deflate, sdch',
-           //     'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4',
-           //     'Connection': 'keep-alive',
-           //     'Cookie': 'cookiestring',
-               // 'Host': 'proxylist.hidemyass.com',
-          //      'Pragma': 'no-cache',
-           //     'Referer': `${ssl ? 'https' : 'http'}://www.yandex.ru`,
-            //    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
-           //     'X-Compress': null
-            },
-            /*agent: (socks ? new SocksProxyAgent(opts) : new HttpsProxyAgent(extend(opts, {
-                secureProxy: ssl,
-                secureEndpoint: ssl
-            })))*/
-            proxy: pref + this.string
+        };
 
-        }, function (error, response, body) {
-            if (error) {
+        console.log()
 
-                switch (error.code) {
-                    case 'ECONNREFUSED':
-                        console.log('ECONNREFUSED');
-                        break;
-                    case 'ECONNRESET':
-                        console.log(socks)
-                        console.log('ECONNRESET');
-                        break;
-                    case 'ETIMEDOUT':
-                        console.log(socks)
-                        console.log('ETIMEDOUT');
-                        break;
-                }
-             //   console.log(error.message);
+        var request = null;
+        var requester = socks1 ? shttps : https;
 
-                var result = null;
+        if (socks1) {
+            options.socksHost = url.parse(pref + this.string).hostname;
+            options.socksPort = url.parse(pref + this.string).port;
+        } else {
+            options.agent = new HttpsProxyAgent(pref + this.string);
+        }
 
-                if (ssl) {
-                    result = {https: !error};
-                } else if (socks) {
-                    result = {socks: !error};
-                } else {
-                    result = {http: !error};
-                }
+        request = requester.request(options, function (res) {
 
+            console.log(res.statusCode);
 
-                return callback(result);
-            }
-
-            console.log(response.statusCode);
-            console.log(response.headers);
-
-
-            var error = null;
-
-            if (response.statusCode >= 400) {
-                error = {
-                    statusCode: response.statusCode
-                }
-            }
-
-            if (error) {
-                for (var k in response.headers) {
-                    if (k.toLowerCase().indexOf('x-') > -1) {
-                        error[k] = response.headers[k]
-                    }
-                }
-            }
+           // this.abort();
 
             var result = null;
 
-            if (ssl) {
-                result = {https: !error};
-            } else if (socks) {
-                result = {socks: !error};
+            if (socks1) {
+                result = {socks: res.statusCode === 403};
             } else {
-                result = {http: !error};
+                result = {http: res.statusCode === 403};
             }
-
 
             return callback(result);
 
         });
 
-       /* req.on('socket', (socket)=> {
-            console.log('on socket');
-            socket.setTimeout(1500);
-            socket.on('timeout', function () {
-                req.abort();
+       // var callback = callback;
+       // console.log(request);
+
+        request.callback = callback(request);
+        request.on('error', function (e) {
+
+            console.log(socks1);
+
+            console.log(`Got error: ${e.message}`);
+
+            var result = null;
+
+            if (socks1) {
+                result = {socks: !e};
+            } else {
+                result = {http: !e};
+            }
+
+            console.log(socks1);
+
+            return this.callback(result);
+
+        }).on('socket', function (socket) {
+
+            console.log('socket');
+
+            var that = this;
+            socket.setTimeout(15000, function (e) {
+
+                that.abort();
+
+                if (socks1)
+                    that.emit('error', new Error('TLS handshake timeout1'));
             });
-        })*/
+
+
+        }).end();
+
+
     }
 
     validate(callback) {
@@ -132,20 +136,21 @@ class Validator {
 
         async.parallel([
             function (next) { //socket
-                that.doRequest(true, false, function (result) {
+
+                that.doRequest(true, function (result) {
+                    console.log('here1')
                     return next(null, result);
                 })
+                // return next(null, null);
+
             },
             function (next) { //http
-                that.doRequest(false, false, function (httpResult) {
-                    if (httpResult.http) {
-                        that.doRequest(false, true, function (httpsResult) {
-                            return next(null, extend(httpsResult, httpResult));
-                        })
-                    } else {
-                        return next(null, httpResult);
-                    }
+
+                that.doRequest(false, function (result) {
+                    console.log('here2')
+                    return next(null, result);
                 })
+                // return next(null, result);
             }
         ], function (err, results) {
             if (err) {
