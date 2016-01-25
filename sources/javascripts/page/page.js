@@ -14,7 +14,7 @@ class Page {
     constructor() {
         this.accountInfo = null;
         this.accountId = null;
-        this.processId = null;
+        this.pageId = null;
         this.socket = new Socket(this);
         this.ui = ui;
     }
@@ -23,7 +23,7 @@ class Page {
         this.socket.listen();
         this.ui.init.call(this);
 
-        this.test();
+       // this.test();
     }
 
     pageReload(accountId) {
@@ -37,7 +37,7 @@ class Page {
 
             this.accountInfo = account.accountInfo;
             this.accountId = account.accountInfo.accountId;
-            this.processId = account.processId;
+            this.pageId = account.pageId;
 
             this.ui.renderAccountHolder(account);
 
@@ -57,11 +57,6 @@ class Page {
                 callback(account);
             });
         }
-    }
-
-    test() {
-        var compiled = _.template("hello: {{= name }}");
-        console.log(compiled({name : 'moe'}));
     }
 }
 

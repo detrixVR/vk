@@ -2,34 +2,23 @@ var mongoose = require('../mongodb');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
+    username: {
+        type: String,
+        required: true
+    },
     content: {
         type: String,
         required: false,
         default: ''
     },
-    username: {
-        type: String,
-        required: true
-    },
     accountId: {
         type: String,
         required: true
     },
-    accountUid: {
-        type: String,
-        required: true
-    },
-    settings: {
-        type: Object,
-        required: true
-    },
-    messages: {
+    tasks: {
         type: Array,
-        required: true
-    },
-    state: {
-        type: Number,
-        required: true
+        required: false,
+        default: []
     },
     uid: {
         type: String,
@@ -42,4 +31,4 @@ var schema = new Schema({
     }
 });
 
-exports.Task = mongoose.model('Task', schema);
+exports.Account = mongoose.model('Account', schema);

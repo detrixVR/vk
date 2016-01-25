@@ -1,26 +1,9 @@
+<button class="btn btn-default startPauseButton"
+        onclick="$(this).closest('.widget').trigger('startPauseTask', $(this).data('taskName'));"
+        data-task-name="<%= pageId %>" data-default-task="<%= pageId %>"><span class="glyphicon glyphicon-play"></span>
+</button>
+<button class="btn btn-default hidden stopButton"
+        onclick="$(this).closest('.widget').trigger('stopTask', $(this).data('taskName'));"
+        data-task-name="<%= pageId %>" data-default-task="<%= pageId %>"><span class="glyphicon glyphicon-stop"></span>
+</button>
 
-    <button class="btn btn-default startPauseButton"
-            onclick="$(this).closest('.widget').trigger('startPauseTask', $(this).data('taskName'));" data-task-name="<%=processId%>" data-default-task="<%=processId%>"><span class="glyphicon glyphicon-play"></span></button>
-    <button class="btn btn-default hidden stopButton"
-            onclick="$(this).closest('.widget').trigger('stopTask', $(this).data('taskName'));" data-task-name="<%=processId%>" data-default-task="<%=processId%>"><span class="glyphicon glyphicon-stop"></span></button>
-
-
-<% if (processId !== 'configurationClean') { %>
-<!--<div class="col-xs-6">
-    <select class="selectpicker" data-style="btn-primary" data-width="100%"
-            id="replaceSelector">
-        <option>Заменить список</option>
-        <option>Добавить в список</option>
-        <option>Создать новый</option>
-    </select>
-</div>
-<div class="col-xs-6">
-    <input type="text" class="form-control"/>
-</div>-->
-<!--<div class="popoverHolder">
-    <button id="popover" class="btn btn-default" title="Dismissible popover" onclick="$(this).popover('show')" >sdddddddddd</button>
-</div>-->
-
-
-
-<% } %>

@@ -107,7 +107,7 @@ var saveToDbListItems = function (type, result, settings, credentials, next) {
 
                 var newRequester = new Requester(itemToSave);
 
-                console.log(newRequester);
+               // console.log(newRequester);
 
                 newRequester.save(function (err) {
                     console.log(err);

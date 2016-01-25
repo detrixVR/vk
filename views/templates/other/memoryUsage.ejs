@@ -1,19 +1,31 @@
 <script type="text/template" id="memoryUsageTemplate">
-        {{ for (var k in data) { }}
+    {{ for (var k in data) { }}
 
-            <div class="col-xs-12 col-md-3">
-                <div>
-                    <h2>Pid: {{=k}}</h2>
-                </div>
-                <div>
-                    <h3>{{=(data[k].memory/1024/1024).toFixed(2)}} mb</h3>
-                </div>
-                <div>
-                    <h3>{{=data[k].tasks.length}}</h3>
-                </div>
+    <div class="col-xs-12 col-md-3">
+        <div>
+            <h2>Pid: {{=k}}</h2>
+        </div>
+        <div>
+            <h3>{{=(data[k].memory/1024/1024).toFixed(2)}} mb</h3>
+        </div>
+        <div>
+            <h3>{{=data[k].accounts.length}}</h3>
 
-            </div>
+            <ul>
+                {{ for (var i = 0; i < data[k].accounts.length; i++) { }}
+                <li>{{=data[k].accounts[i].uid}}
+                    <ul>
+                        {{ for (var j = 0; i < data[k].accounts[i].tasks.length; j++) { }}
+                        <li>{{=data[k].accounts[i].tasks[j].uid}}</li>
+                        {{ } }}
+                    </ul>
+                </li>
+                {{ } }}
+            </ul>
+        </div>
 
-        {{ } }}
+    </div>
+
+    {{ } }}
 
 </script>

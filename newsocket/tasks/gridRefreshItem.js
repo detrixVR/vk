@@ -1,3 +1,5 @@
+"use strict";
+
 var utils = require('modules/utils');
 var justExecuteCommand = require('vkapi').justExecuteCommand;
 var dbUtils = require('modules/dbUtils');
@@ -12,16 +14,16 @@ var gridRefreshItem1 = function (task, callback) {
 
     var interval = setInterval(function () {
 
-        var state = task.getState();
+        var state = Task.getState();
 
         switch (state) {
             case 1:
                 console.log('working');
-                task.pushMesssage(utils.createMsg({msg: 'working'}));
+                Task.pushMesssage(utils.createMsg({msg: 'working'}));
                 break;
             case 2:
                 console.log('paused');
-                task.pushMesssage(utils.createMsg({msg: 'paused'}));
+                Task.pushMesssage(utils.createMsg({msg: 'paused'}));
                 break;
             case 0:
                 console.log('stoped');
@@ -36,15 +38,15 @@ var gridRefreshItem1 = function (task, callback) {
 
 };
 
-var gridRefreshItem = function (task, callback) {
+var gridRefreshItem = function (Task, callback) {
 
     console.log('task in gridRefreshItem');
 
     async.waterfall([function (iteration) {
 
         dbUtils.getAccountByCredentials({
-            username: task.username,
-            accountId: task.accountId
+            username: Task.username,
+            accountId: Task.accountId
         }, function (err, account) {
             /*if (err) {
              return iteration(err);
@@ -69,16 +71,18 @@ var gridRefreshItem = function (task, callback) {
 
     }, function (account, iteration) {
 
-        async.eachSeries(task.settings.items, function (item, done) {
+        var options = {
+            token: account.token,
+            proxy: account.proxy,
+            command: 'execute',
+            options: {}
+        };
 
-            var options = {
-                token: account.token,
-                proxy: account.proxy,
-                command: 'execute',
-                options: {}
-            };
+        function processItem(item, callback) {
 
-            switch (task.settings.listType) {
+            Task.pushMesssage(utils.createMsg({msg: 'Обновление элемента'}));
+
+            switch (Task.settings.listType.value) {
                 case 'post':
 
                     options.command = 'wall.getById';
@@ -89,33 +93,29 @@ var gridRefreshItem = function (task, callback) {
                     break;
                 case 'person':
 
-                    console.log(item.value.id);
-
                     options.command = 'users.get';
                     options.options = {
                         user_ids: item.value.id,
-                        fields: config.get('vk.person.fields')
+                        fields: config.get('vk:person:fields')
                     };
 
                     break;
                 default:
-                    return iteration({
-                        error: 'error'
-                    });
+                    return callback(new Error({name: 'HUYAXERROR', message: 'Тип списка не задан'}));
             }
 
             justExecuteCommand(options, function (err, data) {
                 if (err) {
-                    return done(err);
+                    return callback(err);
                 } else if (data &&
                     data.result &&
                     data.result.response) {
 
                     if (data.result.response.length) {
 
-                        dbUtils.getItemFromDbById(task.settings.listType, item._id, function (err, dbItem) {
+                        dbUtils.getItemFromDbById(Task.settings.listType.value, item._id, function (err, dbItem) {
                             if (err) {
-                                return done(err);
+                                return callback(err);
                             } else if (dbItem && dbItem.value) {
 
                                 extend(dbItem.value, data.result.response[0]);
@@ -124,42 +124,91 @@ var gridRefreshItem = function (task, callback) {
 
                                 dbItem.markModified('value');
 
+                                Task.pushMesssage(utils.createMsg({msg: 'Сохранение элемента'}));
+
                                 dbItem.save(function (err, newItem) {
 
-                                    console.error(err);
+                                    if (err) {
+                                        return callback(err);
+                                    } else {
 
-                                    task.sendEvent(extend({
-                                        eventName: 'refreshRow'
-                                    }, newItem));
+                                        Task.sendEvent(extend({
+                                            eventName: 'refreshRow'
+                                        }, newItem));
 
-                                    return done();
+                                        return callback();
+                                    }
+
+
                                 })
 
                             } else {
-                                return done({error: 'error'});
+                                return callback({error: 'error'});
                             }
                         });
                     } else {
-                        console.error('net resultatov');
+                        console.error('Нет результатов');
 
-                        dbUtils.removeItemFromDbById(task.settings.listType, item._id, function (err) {
+                        dbUtils.removeItemFromDbById(Task.settings.listType.value, item._id, function (err) {
                             if (err) {
-                                return done(err);
+                                return callback(err);
                             } else {
-                                task.pushMesssage(utils.createMsg({msg: 'Запись не найдена'}));
+                                Task.pushMesssage(utils.createMsg({msg: 'Запись не найдена'}));
 
-                                task.sendEvent(extend({
+                                Task.sendEvent(extend({
                                     eventName: 'disableRow'
-                                }, { _id: item._id }));
+                                }, {_id: item._id}));
 
-                                return done();
+                                return callback();
                             }
                         });
                     }
                 } else {
-                    return done({error: 'error'});
+                    return callback({error: 'error'});
                 }
             });
+        }
+
+        async.eachSeries(Task.settings.items.value, function (item, done) {
+
+            let state = Task.getState();
+
+            switch (state) {
+                case 0:
+                    break;
+                case 2:
+                    Task.pushMesssage(utils.createMsg({msg: 'Пауза'}));
+
+                    let d = null;
+                    var delay = function () {
+
+                        state = Task.getState();
+
+                        if (state === 2) {
+                            d = setTimeout(delay, 100);
+                        } else {
+                            clearTimeout(d);
+                            if (state !== 0) {
+                                processItem(item, function (err) {
+                                    return done(err ? err : null);
+                                });
+                            } else {
+
+                                Task.pushMesssage(utils.createMsg({msg: 'Выполнение прервано'}));
+
+                                return callback(err ? err : null, {
+                                    cbType: 0
+                                })
+                            }
+                        }
+                    };
+                    delay();
+                    break;
+                default:
+                    processItem(item, function (err) {
+                        return done(err ? err : null);
+                    })
+            }
 
         }, function (err) {
             return iteration(err);

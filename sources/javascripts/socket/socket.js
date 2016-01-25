@@ -59,7 +59,7 @@ class Socket {
                 that.page.ui.setTaskState(processResponse.apply(that, [state]));
             });
 
-            this.socket.on('setProcess', function (process) {
+            this.socket.on('setTask', function (process) {
                 console.log(process);
                 that.page.ui.setProcess(process);
             });
@@ -71,10 +71,12 @@ class Socket {
             });
 
             this.socket.on('switchAccount', function () {
+                console.log('switchAccount');
+
                 that.socket.emit('join', {
-                    processId: that.page.processId
+                    pageId: that.page.pageId
                 });
-                switch (that.page.processId) {
+                switch (that.page.pageId) {
                     case 'validateProxies':
                     case 'validateAccounts':
                     case 'searchPeoples':
@@ -92,8 +94,8 @@ class Socket {
 
                     case 'configurationClean':
                     case 'configurationCopy':
-                        that.socket.emit('getCurrentProcess', {
-                            processId: that.page.processId
+                        that.socket.emit('getCurrentTask', {
+                            pageId: that.page.pageId
                         });
                         break;
                     case 'taskExecution':
@@ -106,7 +108,7 @@ class Socket {
                     case 'adminPanel':
                         that.page.ui.setProcess(null);
                         that.socket.emit('join', {
-                            processId: 'memoryUsage'
+                            pageId: 'memoryUsage'
                         });
                         break;
 

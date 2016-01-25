@@ -16,7 +16,7 @@ var io = require('socket.io'),
     listCreatingFromPerson = require('../socket/processes/listCreating/listCreatingFromPerson'),
     _ = require('underscore'),
     Process = require('./process'),
-    Task = require('./task');
+    Task = require('./Classes/task');
 
 
 const COMMANDS_DATA = [

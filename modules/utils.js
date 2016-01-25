@@ -48,7 +48,7 @@ function validateSettings(settings, validationModel) {
 
     if (!validationModel || !settings) {
         return {
-            msg: 'V korne nevernie nastroyki',
+            msg: 'В корне неверные настройки'
         }
     }
 
@@ -93,7 +93,8 @@ function validateSettings(settings, validationModel) {
 
     var badFields = [];
     errors.forEach(function (item) {
-        badFields.push(item.field);
+        if (item.field)
+            badFields.push(item.field);
     });
 
     return errors.length ? {
@@ -409,7 +410,7 @@ function processPart(part) {
         return i;
     }
 
-    var output='';
+    var output = '';
     var inner = '';
     var t = -1;
     var variants = null;
@@ -456,11 +457,11 @@ function processPart(part) {
     return output;
 }
 
-function validateDbId(id){
+function validateDbId(id) {
     return /^[a-fA-F0-9]{24}$/.test(id);
 }
 
-function processAnyError(err){
+function processAnyError(err) {
 
     console.error(err);
 

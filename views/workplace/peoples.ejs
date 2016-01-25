@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<% var processId = 'searchPeoples' %>
+<% var pageId = 'searchPeoples' %>
 <%- include ../parts/cabinetMenu.ejs %>
 
 <div class="canvas">
@@ -285,48 +285,8 @@
             }
         })
     });
-
 </script>
 
-<script>
-    $(function () {
-
-        $('.selectpicker').on('change', function (e) {
-            var selectedIndex = this.selectedIndex;
-            var $this = $(this);
-            var id = $this.attr('id');
-            switch (id) {
-                case 'replaceSelector':
-
-                    break;
-            }
-
-            var selector = $('.' + id + selectedIndex);
-            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
-            selector.toggleClass('hidden');
-        });
-
-        $('.selectpicker').trigger('change');
-
-        $('[type=checkbox]').on('change', function () {
-            var $this = $(this);
-            var id = $this.attr('id');
-            var selector = $('.' + id + ($this.prop('checked') ? 1 : 0));
-            $('[class^=' + id + ']').not(selector).toggleClass('hidden', true);
-            selector.toggleClass('hidden');
-        });
-
-        $('[type=checkbox]').trigger('change');
-    });
-
-</script>
-
-<script>
-    $(function () {
-
-    })
-
-</script>
 
 </body>
 </html>

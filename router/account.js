@@ -49,7 +49,7 @@ module.exports.post = function (req, res) {
         var url = location.pathname.substring(1);
 
         var result = {
-            processId: 'defaultProcess',
+            pageId: 'pageId',
             accountInfo: {
                 accountId: 'defaultAccount',
                 photo_50: '/images/camera_50.png',
@@ -63,48 +63,51 @@ module.exports.post = function (req, res) {
 
         switch (url) {
             case 'admin':
-                result.processId = 'adminPanel';
+                result.pageId = 'adminPanel';
                 break;
             case 'proxies':
-                result.processId = 'validateProxies';
+                result.pageId = 'validateProxies';
                 break;
             case 'accounts':
-                result.processId = 'validateAccounts';
+                result.pageId = 'validateAccounts';
                 break;
             case 'peoples':
-                result.processId = 'searchPeoples';
+                result.pageId = 'searchPeoples';
                 break;
             case 'groups':
-                result.processId = 'searchGroups';
+                result.pageId = 'searchGroups';
                 break;
             case 'lists':
-                result.processId = 'listCreatingFromPerson';
+                result.pageId = 'listCreatingFromPerson';
+
+                switch (objURL.type) {
+                    case 'group':
+                        result.pageId = 'listCreatingFromGroup';
+                        break;
+                    case 'audio':
+                        result.pageId = 'listCreatingFromAudio';
+                        break;
+                    case 'video':
+                        result.pageId = 'listCreatingFromVideo';
+                        break;
+                    case 'post':
+                        result.pageId = 'listCreatingFromPost';
+                        break;
+                }
                 break;
             case 'tasks':
-                result.processId = 'taskExecution';
+                result.pageId = 'taskExecution';
                 break;
             case 'config':
 
-                result.processId = 'configurationClean';
+                result.pageId = 'configurationClean';
 
                 switch (objURL.type) {
                     case 'copy':
-                        result.processId = 'configurationCopy';
+                        result.pageId = 'configurationCopy';
                         break;
                     case 'group':
-                        result.processId = 'configurationGroup';
-                        break;
-                    case 'group':
-                        result.processId = 'listCreatingFromGroup';
-                        break;
-                    case 'audio':
-                        result.processId = 'listCreatingFromAudio';
-                        break;
-                    case 'video':
-                        result.processId = 'listCreatingFromVideo';
-                        break;
-                    case 'post':
-                        result.processId = 'listCreatingFromPost';
+                        result.pageId = 'configurationGroup';
                         break;
                 }
 

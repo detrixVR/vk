@@ -22,6 +22,6 @@ module.exports.get = function (req, res) {
         user: req.user,
         page: 'lists',
         subPage: subPage,
-        processId: 'listCreatingFrom' + query.type
+        pageId : 'listCreatingFrom' + query.type
     });
 };

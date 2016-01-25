@@ -1,6 +1,8 @@
-var utils = require('../../../modules/utils');
+"use strict";
 
-var searchGroups = {
+let utils = require('../../../modules/utils');
+
+let searchGroups = {
     city: {
         name: 'Город',
         validate: function (value) {
@@ -107,7 +109,7 @@ var searchGroups = {
     }
 };
 
-var searchPeoples = {
+let searchPeoples = {
     age_from: {
         name: 'Минимальный возраст',
         validate: function (value) {
@@ -236,7 +238,7 @@ var searchPeoples = {
     }
 };
 
-var listCreatingFromPerson = {
+let listCreatingFromPerson = {
     fromLatest: {
         name: 'Таймаут',
         validate: function (value) {
@@ -262,7 +264,7 @@ var listCreatingFromPerson = {
         }
     },
     postGrid: {
-        required: function(settings){
+        required: function (settings) {
             return settings['whatSelector'].value === 0;
         },
         name: 'Настройки таблицы людей',
@@ -271,7 +273,7 @@ var listCreatingFromPerson = {
         }
     },
     photoGrid: {
-        required: function(settings){
+        required: function (settings) {
             return settings['whatSelector'].value === 1;
         },
         name: 'Настройки таблицы людей',
@@ -280,7 +282,7 @@ var listCreatingFromPerson = {
         }
     },
     videoGrid: {
-        required: function(settings){
+        required: function (settings) {
             return settings['whatSelector'].value === 2;
         },
         name: 'Настройки таблицы людей',
@@ -303,7 +305,14 @@ var listCreatingFromPerson = {
     whatSelector: {
         name: 'Взять',
         validate: function (value) {
-            return false;
+            switch (value){
+                case 0:
+                case 1:
+                case 2:
+                    break;
+                default :
+                    return 'Значение от 0 до 2'
+            }
         }
     },
     listName: {
@@ -322,8 +331,29 @@ var listCreatingFromPerson = {
     }
 };
 
+
+let gridRefreshItem = {
+    listType: {
+        name: 'Тип списка',
+        validate: function (value, settings) {
+            if (!value && settings['replaceSelector'].value === 2) {
+                return 'Обязательное поле'
+            }
+        }
+    },
+    items: {
+        name: 'Элементы',
+        validate: function (value, settings) {
+            if (!value || !value.length) {
+                return 'Обязательное поле'
+            }
+        }
+    }
+};
+
 module.exports = {
     searchGroups: searchGroups,
     searchPeoples: searchPeoples,
-    listCreatingFromPerson: listCreatingFromPerson
+    listCreatingFromPerson: listCreatingFromPerson,
+    gridRefreshItem: gridRefreshItem
 };
