@@ -275,9 +275,7 @@ var searchGroups = function (Task, callback) {
 
                                     Task.pushMesssage(utils.createMsg({msg: 'Выполнение прервано'}));
 
-                                    return callback(err ? err : null, {
-                                        cbType: 0
-                                    })
+                                    return next({error: 'error'});
                                 }
                             }
                         };
