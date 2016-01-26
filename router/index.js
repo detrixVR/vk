@@ -56,6 +56,10 @@ module.exports = function (app) {
     app.get('/tasks', require('./workplace/tasks').get);
     app.get('/config', require('./workplace/config').get);
 
+    app.get('/messaging', require('./workplace/messaging').get);
+    app.post('/messaging', require('./workplace/messaging').post);
+    app.put('/messaging', require('./workplace/messaging').put);
+
     app.get('/logout', require('./default/logout').get);
 
     app.get('/upload', require('./upload').get);

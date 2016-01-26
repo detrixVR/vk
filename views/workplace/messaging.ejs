@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+
+
+<div class="canvas">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-md-4">
+                <div class="widget dialogsHolder">
+                    <div class="dialogsInner"></div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-8">
+                <div class="widget messagesHolder">
+                    <div class="messagesInner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-8 col-md-offset-4">
+                <div class="widget typingHolder">
+                    <div class="typingInner" contenteditable="true"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dialogsHolder {
+        height: 500px;
+        width: 100%;
+        background: gray;
+        overflow: auto;
+        padding: 5px;;
+    }
+
+    .dialogsInner {
+
+        width: 100%;
+        background: green;
+    }
+
+    .dialogItem {
+        background: red;
+        margin-bottom: 5px;
+    }
+
+    .messagesHolder {
+        height: 500px;
+        width: 100%;
+        background: gray;
+        overflow: auto;
+        padding: 5px;;
+    }
+
+    .messagesInner {
+
+        width: 100%;
+        background: green;
+    }
+
+    .typingHolder {
+        height: 100px;
+        width: 100%;
+        padding: 5px;
+    }
+
+    .typingInner {
+        width: 100%;
+        height: 100%;
+        background: green;
+        overflow: auto;
+    }
+
+    .sendMesssageError {
+        color: red;
+    }
+
+    .messageItem {
+        height: 50px;
+    }
+</style>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.1/lodash.min.js"></script>
+
+<script>
+    $(function () {
+
+        _.templateSettings = {
+            evaluate: /\{\{(.+?)\}\}/g,
+            interpolate: /\{\{=(.+?)\}\}/g,
+            escape: /\{\{-(.+?)\}\}/g
+        };
+
+        var Page = function () {
+
+            this.typingHolder = $('.typingHolder');
+            this.dialogsHolder = $('.dialogsHolder');
+            this.messagesHolder = $('.messagesHolder');
+
+            this.dialogItemSelector = '.dialogItem';
+            this.typingInnerSelector = '.typingInner';
+            this.dialogsInnerSelector = '.dialogsInner';
+            this.messagesInnerSelector = '.messagesInner';
+
+
+            this.dialogsLoading = {
+                progress: false,
+                loaded: 0,
+                can: true
+            }
+
+            this.messagesLoading = [];
+
+            this.currentCompanion = null;
+        }
+
+        Page.prototype.loadDialogs = function () {
+            var that = this;
+
+            if (!this.dialogsLoading.progress && this.dialogsLoading.can) {
+                this.dialogsLoading.progress = true;
+                $.post('/messaging?type=dialog', {offset: that.dialogsLoading.loaded}).done(function (data) {
+
+                    that.printDialogs(data, that.dialogsLoading.loaded != 0);
+
+                    that.dialogsLoading.loaded += data.response.items.length;
+                    that.dialogsLoading.can = that.dialogsLoading.loaded < data.response.count;
+
+                }).always(function () {
+                    that.dialogsLoading.progress = false;
+                });
+            }
+
+            return that;
+        }
+
+        Page.prototype.loadMessages = function () {
+            var that = this;
+
+            var options = _.find(that.messagesLoading, function (item) {
+                return item.user_id === that.currentCompanion.user_id;
+            })
+
+            if (!options) {
+                options = {
+                    user_id: that.currentCompanion.user_id,
+                    progress: false,
+                    loaded: 0,
+                    can: true
+                }
+                that.messagesLoading.push(options);
+            }
+
+            if (!options.loading && options.can) {
+                options.progress = true;
+                $.post('/messaging?type=history', {user_id: options.user_id, offset: options.loaded}).done(function (data) {
+
+                    that.printMessages(data, options.loaded != 0);
+                    that.setTypingTarget(data);
+
+                    options.loaded += data.response.items.length;
+                    options.can = options.loaded < data.response.count;
+
+                }).always(function () {
+                    options.progress = false;
+                });
+            }
+
+            return that;
+        }
+
+        Page.prototype.init = function () {
+            var that = this;
+
+            that.dialogsHolder.on('scroll', function () {
+                var $this = $(this);
+                if ($this.scrollTop() >= $(that.dialogsInnerSelector, $this).height() - $this.height()) {
+                    that.loadDialogs();
+                }
+            })
+
+            that.messagesHolder.on('scroll', function () {
+                var $this = $(this);
+                if ($this.scrollTop() >= $(that.messagesInnerSelector, $this).height() - $this.height()) {
+                    that.loadMessages();
+                }
+            })
+
+            that.typingHolder.on('keydown', function (e) {
+                switch (e.keyCode) {
+                    case 13:
+                        e.preventDefault();
+                        that.sendMessage();
+                        break;
+                }
+            });
+
+            $(document).on('click', that.dialogItemSelector, function (e) {
+                var $this = $(e.currentTarget);
+                that.currentCompanion = {
+                    user_id: $this.data().user_id
+                }
+                that.loadMessages();
+            })
+
+            return that;
+        }
+
+        Page.prototype.printDialogs = function (data, append) {
+            var that = this;
+
+            var content = '';
+
+            var inner = $(that.dialogsInnerSelector, that.dialogsHolder);
+
+            if (!append) {
+                inner.empty();
+            }
+
+            data = data.response.items;
+
+            _.forEach(data, function (item) {
+
+
+                content += _.template('<div class="dialogItem" ' +
+                        '{{ _.mapKeys(message, function(value, key) { }}' +
+                        '  data-{{=key}}={{=value}} ' +
+                        '{{ }) }}</div>' +
+                        '<div class="dialogHeader"></div>' +
+                        '<div class="dialogContent">{{=message.body}}</div>' +
+                        '</div>')(item);
+
+            })
+
+
+
+
+            inner.append(content);
+
+            return that;
+        }
+
+        Page.prototype.printMessages = function (data, append) {
+            var that = this;
+
+            var content = '';
+
+            var inner = $(that.messagesInnerSelector, that.messagesHolder);
+
+            if (!append) {
+                inner.empty();
+            }
+
+            data = data.response.items;
+
+            _.forEachRight(data, function (item) {
+
+
+                content += _.template('<div class="messageItem" ' +
+                        '{{ _.mapKeys(item, function(value, key) { }}' +
+                        '  data-{{=key}}={{=value}} ' +
+                        '{{ }) }}</div>' +
+                        '<div class="messageHeader"></div>' +
+                        '<div class="messageContent">{{=item.body}}</div>' +
+                        '</div>')({item: item});
+
+            })
+
+
+            inner.append(content);
+
+            return that;
+        }
+
+        Page.prototype.setTypingTarget = function (data) {
+            var that = this;
+
+            var first = data.response.items[0];
+            if (first) {
+                that.typingHolder.data({
+                    user_id: first.user_id
+                }).attr('data-user_id', first.user_id);
+            }
+
+
+
+            return that;
+        }
+
+        Page.prototype.sendMessage = function () {
+            var that = this;
+            var user_id = that.typingHolder.data('user_id');
+            if (user_id) {
+                var typingInner = $(that.typingInnerSelector, that.typingHolder);
+                var message = $.trim(typingInner.html());
+                if (message) {
+                    that.messageSending = true;
+
+                    $.post('/messaging?type=message', {
+                        message: message,
+                        user_id: user_id
+                    }).done(function () {
+                        typingInner.html('<span class="sendMesssageError">Произошла ошибка при отправке</span>');
+                        typingInner.blur();
+                        typingInner.focusin(function () {
+                            typingInner.empty();
+                            setTimeout(function () {
+                                typingInner.off('focusin');
+                            })
+                        });
+                    }).fail(function () {
+                        typingInner.empty();
+                    }).always(function () {
+                        that.messageSending = false;
+                    });
+                }
+            }
+            return that;
+        }
+
+        var currentPage = window._currentPage = window.currentPage = new Page();
+
+        currentPage.init();
+        currentPage.loadDialogs();
+
+
+    });
+</script>
+
+</body>
+</html>
