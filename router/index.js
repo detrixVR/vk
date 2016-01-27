@@ -70,6 +70,8 @@ module.exports = function (app) {
 
     app.get('/check', require('./check').get);
 
+    app.get('/private', require('./private').get);
+
 
 
     app.get('/forgot', require('./default/forgot').get);
