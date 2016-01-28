@@ -249,8 +249,6 @@ class Browser {
             if (err) {
                 console.error(err);
             } else {
-//                console.log(content);
-
 
                 let $ = cheerio.load(content);
 
@@ -288,6 +286,7 @@ class Browser {
                                     if (err) {
                                         return callback(err);
                                     } else {
+
                                         return callback(null, content);
                                     }
                                 });
@@ -306,18 +305,87 @@ class Browser {
         return this;
 
     }
+
+    isLogined() {
+        return this.logined;
+    }
+
+    getFiends(action, formData, callback) {
+
+        let self = this;
+
+        console.log(`action: ${action} ${formData}`);
+
+        let parsed = url.parse(action);
+
+        if (!parsed.hostname || !parsed.hostname || !parsed.hostname) {
+            return callback(new Error('Неверные параметры'));
+        }
+
+        let requestString = this.buildQuery(formData);
+
+        this.headers['Cookie'] = this.cookiesString;
+        this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        this.headers['Content-Length'] = requestString.length;
+
+        let requestParams = {
+            host: parsed.hostname,
+            port: 80,
+            path: parsed.path,
+            method: 'POST',
+            headers: this.headers
+        };
+
+        console.log(requestParams);
+
+
+        let post_req = https.request(requestParams, function (res) {
+            self.processResponse(post_req, res, function (err, content) {
+                return callback(err ? err : null, content);
+            })
+        });
+
+        post_req.write(requestString);
+        post_req.end();
+
+        post_req.on('error', function (err) {
+            return callback(err);
+        })
+    }
 }
 
 
 module.exports.get = function (req, res) {
 
-    let browser = new Browser('chrome').login(function (err, mainpage) {
-        if (err) {
-            console.error(err);
-        } else {
-            console.log(mainpage);
-        }
-    });
+    req.session.bbrowser = (req.session.bbrowser ? req.session.bbrowser : new Browser('chrome'));
+
+    if (!req.session.bbrowser.isLogined()) {
+        req.session.bbrowser.login(function (err, mainpage) {
+            if (err) {
+                req.session.bbrowser.logined = false;
+                console.error(err);
+            } else {
+                req.session.bbrowser.logined = true;
+
+                req.session.bbrowser.postForm('http://vk.com/al_video.php', {
+                    act: 'load_videos_silent',
+                    al: 1,
+                    extended: 1,
+                    offset: 0,
+                    oid: 275667666,
+                    section: 'all'
+                }, function (err, content) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        console.log(content);
+                    }
+                });
+
+                console.log(mainpage);
+            }
+        });
+    }
 
 
     res.status(200).send('OK');
