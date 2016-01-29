@@ -11,6 +11,9 @@ var cheerio = require('cheerio'),
     iconv = require('iconv-lite'),
     windows1251 = require('windows-1251'),
     zlib = require('zlib'),
+    uuid = require('node-uuid'),
+    dbBrowser = require('models/browser'),
+    utils = require('modules/utils'),
     _ = require('underscore');
 
 
@@ -21,26 +24,44 @@ var translator = new Iconv(fromEnc, toEnc);
 
 class Browser {
 
-    constructor(browser) {
+    constructor(options) {
 
-        this.headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, sdch',
-            'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4',
-            'Cache-Control': 'max-age=0',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36'
+        let defaults = {
+            username: 'huyax',
+            uid: uuid.v1(),
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, sdch',
+                'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4',
+                'Cache-Control': 'max-age=0',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36'
+            },
+            cookiesString: '',
+            cookies: [],
+            logined: false
         };
 
-        this.cookiesString = '';
+        defaults = extend(defaults, options);
 
-        this.cookies = [];
 
-        switch (browser) {
-            case 'chrome':
-                break;
-        }
+        this.username = defaults.username;
+
+        this.uid = defaults.uid;
+
+        this.headers = defaults.headers;
+
+        this.cookiesString = defaults.cookiesString;
+
+        this.cookies = defaults.cookies;
+
+        this.logined = defaults.logined;
+
+        /*switch (options.browser) {
+         case 'chrome':
+         break;
+         }*/
 
     }
 
@@ -203,9 +224,11 @@ class Browser {
 
         let parsed = url.parse(action);
 
-        if (!parsed.hostname || !parsed.hostname || !parsed.hostname) {
+        if (!parsed.hostname || !parsed.hostname || !parsed.hostname || !parsed.protocol) {
             return callback(new Error('Неверные параметры'));
         }
+
+        let isSecured = parsed.protocol === 'https:';
 
         let requestString = this.buildQuery(formData);
 
@@ -215,7 +238,7 @@ class Browser {
 
         let requestParams = {
             host: parsed.hostname,
-            port: 443,
+            port: isSecured ? 443 : 80,
             path: parsed.path,
             method: 'POST',
             headers: this.headers
@@ -223,12 +246,21 @@ class Browser {
 
         console.log(requestParams);
 
+        let post_req = null;
 
-        let post_req = https.request(requestParams, function (res) {
-            self.processResponse(post_req, res, function (err, content) {
-                return callback(err ? err : null, content);
-            })
-        });
+        if (isSecured) {
+            post_req = https.request(requestParams, function (res) {
+                self.processResponse(post_req, res, function (err, content) {
+                    return callback(err ? err : null, content);
+                })
+            });
+        } else {
+            post_req = http.request(requestParams, function (res) {
+                self.processResponse(post_req, res, function (err, content) {
+                    return callback(err ? err : null, content);
+                })
+            });
+        }
 
         post_req.write(requestString);
         post_req.end();
@@ -286,7 +318,7 @@ class Browser {
                                     if (err) {
                                         return callback(err);
                                     } else {
-
+                                        self.logined = true;
                                         return callback(null, content);
                                     }
                                 });
@@ -352,40 +384,126 @@ class Browser {
             return callback(err);
         })
     }
+
+    saveToDb(callback) {
+
+        dbBrowser.update({
+            uid: this.uid
+        }, {
+            username: this.username,
+
+            logined: this.logined,
+            headers: this.headers,
+            cookiesString: this.cookiesString,
+            cookies: this.cookies,
+
+            uid: this.uid
+        }, {
+            upsert: true,
+            setDefaultsOnInsert: true
+        }, function (err) {
+            return callback(err ? err : null)
+        });
+
+    }
 }
 
 
 module.exports.get = function (req, res) {
 
-    req.session.bbrowser = (req.session.bbrowser ? req.session.bbrowser : new Browser('chrome'));
 
-    if (!req.session.bbrowser.isLogined()) {
-        req.session.bbrowser.login(function (err, mainpage) {
-            if (err) {
-                req.session.bbrowser.logined = false;
-                console.error(err);
-            } else {
-                req.session.bbrowser.logined = true;
+    dbBrowser.findOne({
+        username: 'huyax'
+    }, function (err, doc) {
+        if (err) {
+            console.error(err);
+        } else {
 
-                req.session.bbrowser.postForm('http://vk.com/al_video.php', {
-                    act: 'load_videos_silent',
-                    al: 1,
-                    extended: 1,
-                    offset: 0,
-                    oid: 275667666,
-                    section: 'all'
-                }, function (err, content) {
-                    if (err) {
-                        console.error(err);
-                    } else {
-                        console.log(content);
-                    }
+            let bbrowser = new Browser(doc);
+
+            async.waterfall([function (callback) {
+
+                if (!bbrowser.isLogined()) {
+                    bbrowser.login(function (err, mainpage) {
+
+
+                        if (!err) {
+                            bbrowser.saveToDb(function (err) {
+                                if (err) {
+                                    return callback(err);
+                                } else {
+                                    return callback();
+                                }
+                            })
+                        } else {
+                            return callback(err);
+                        }
+
+                    })
+                } else {
+                    return callback();
+                }
+            }, function (callback) {
+
+                /*bbrowser.postForm('http://vk.com/al_im.php', {
+                 'act': 'a_get_fast_chat',
+                 //   'ads_section': 'photos',
+                 //  'ads_showed': '6_0231d9f5,5_6dc61907,5_db865d18',
+                 'al': '1',
+                 //   'al_ad': '1',
+                 //    'list': 'photos275667666',
+                 //    'module': 'photos',
+                 //    'photo': '275667666_396273017'
+                 }, function (err, content) {
+                 return callback(err ? err : null, content);
+                 });*/
+
+
+                bbrowser.getUrl('http://vk.com/katemicha', function (err, content) {
+
+
+                    return callback(err ? err : null, content);
                 });
 
-                console.log(mainpage);
-            }
-        });
-    }
+            }], function (err, content) {
+                if (err) {
+                    console.error(err);
+                } else {
+                    console.log(content);
+
+                    let notifier = /Notifier.init\((.*?)\)/.exec(content);
+                    // /parent.onLoginDone\('\/'\)/
+                    console.log(notifier[1]);
+
+                    if (notifier[1]) {
+
+                        notifier = JSON.parse(notifier[1]);
+
+                        let params = {
+                            'act': 'a_check',
+                            'ts': notifier.timestamp,
+                            'key': notifier.key,
+                            'id': notifier.uid,
+                            'wait': 25
+                        };
+
+                        bbrowser.postForm(notifier.server_url, params, function (err, content) {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                console.log(content);
+                            }
+                        });
+
+                    }
+
+
+                    // console.log(utils.processVkResponse(content))
+
+                }
+            });
+        }
+    });
 
 
     res.status(200).send('OK');

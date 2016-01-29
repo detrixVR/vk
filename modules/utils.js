@@ -1,3 +1,5 @@
+"use strict";
+
 var Account = require('../models/grid/account').AccountGrid;
 
 function ruslat(str) {
@@ -578,6 +580,77 @@ function processAnyError(err) {
 
 }
 
+var _parseJSON = (JSON && JSON.parse) ? function (obj) {
+    try {
+        return JSON.parse(obj);
+    } catch (e) {
+        return eval('(' + obj + ')');
+    }
+} : function (obj) {
+    return eval('(' + obj + ')');
+};
+
+var _trim = function (text) {
+    return (text || '').replace(/^\s+|\s+$/g, '');
+};
+
+function _intval(value) {
+    if (value === true) return 1;
+    return parseInt(value) || 0;
+}
+function _floatval(value) {
+    if (value === true) return 1;
+    return parseFloat(value) || 0;
+}
+function positive(value) {
+    value = _intval(value);
+    return value < 0 ? 0 : value;
+}
+
+var _parseRes = function (answer) {
+    for (var i = answer.length - 1; i >= 0; --i) {
+        var ans = answer[i].toString();
+        if (ans.substr(0, 2) == '<!') {
+            var from = ans.indexOf('>');
+            var type = ans.substr(2, from - 2);
+            ans = ans.substr(from + 1);
+            switch (type) {
+                case 'json' :
+                    answer[i] = _parseJSON(ans);
+                    break;
+                case 'int'  :
+                    answer[i] = _intval(ans);
+                    break;
+                case 'float':
+                    answer[i] = _floatval(ans);
+                    break;
+                case 'bool' :
+                    answer[i] = _intval(ans) ? true : false;
+                    break;
+                case 'null' :
+                    answer[i] = null;
+                    break;
+            }
+        }
+    }
+};
+
+function processVkResponse(text) {
+
+    text = text.replace(/^<!--/, '').replace(/-<>-(!?)>/g, '--$1>');
+
+    if (!_trim(text).length) {
+        console.error('Response length error');
+        return [];
+    }
+
+    var answer = text.split('<!>');
+
+    _parseRes(answer);
+
+    return answer;
+}
+
 module.exports = {
     ruslat: ruslat,
     processError: processError,
@@ -597,5 +670,6 @@ module.exports = {
     isArray: isArray,
     shuffleArray: shuffleArray,
     validateDbId: validateDbId,
-    processPart: processPart
+    processPart: processPart,
+    processVkResponse: processVkResponse
 };
