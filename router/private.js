@@ -19,8 +19,14 @@ class Browser {
 
     constructor(options) {
 
+        if (!options.email || !options.pass || !options.username) {
+            throw new Error('an Browser `email`, `pass`, `username` must be specified!');
+        }
+
         let defaults = {
-            username: 'huyax',
+            //username: options.username,
+            // email: options.email,
+            //pass: options.pass ,
             uid: uuid.v1(),
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -33,11 +39,14 @@ class Browser {
             },
             cookiesString: '',
             cookies: [],
+            hostName: 'vk.com',
+            protocol: 'http',
+            path: '/',
+            currentUrl: `${this.protocol}//${this.hostName}${this.path}`,
             logined: false
         };
 
         defaults = extend(defaults, options);
-
 
         this.username = defaults.username;
 
@@ -50,6 +59,10 @@ class Browser {
         this.cookies = defaults.cookies;
 
         this.logined = defaults.logined;
+
+        this.hostName = defaults.hostName;
+
+        this.protocol = defaults.protocol;
 
         /*switch (options.browser) {
          case 'chrome':
@@ -84,8 +97,6 @@ class Browser {
         let self = this;
 
         if (headers['set-cookie']) {
-
-
             _.forEach(headers['set-cookie'], function (item) {
                 let parsed = cookie.parse(item);
                 for (var key in parsed) {
@@ -103,18 +114,14 @@ class Browser {
                 }
             });
 
+            self.cookiesString = _.reduce(this.cookies, function (sum, value) {
+                for (var key in value) {
+                    return sum += `${cookie.serialize(key, value[key])}; `;
+                }
+            }, '');
+
+            console.log(this.cookiesString);
         }
-
-        //   console.log(self.cookies);
-
-        self.cookiesString = _.reduce(this.cookies, function (sum, value) {
-            for (var key in value) {
-                return sum += `${cookie.serialize(key, value[key])}; `;
-            }
-        }, '');
-
-
-        console.log(this.cookiesString);
     }
 
     processResponse(req, res, callback) {
@@ -128,6 +135,7 @@ class Browser {
 
         switch (res.statusCode) {
             case 200:
+                self.currentUrl = `${this.protocol}//${this.hostName}${this.path}`;
                 break;
             case 302:
                 return self.getUrl(res.headers['location'], callback);
@@ -191,6 +199,7 @@ class Browser {
 
         this.hostName = parsed.hostname || this.hostName;
         this.protocol = parsed.protocol || this.protocol;
+        this.path = parsed.path || '/';
 
         if (!this.hostName || !this.protocol) {
             return callback(new Error('Неверные параметры'));
@@ -199,24 +208,36 @@ class Browser {
         delete this.headers['Content-Type'];
         delete this.headers['Content-Length'];
 
-
         this.headers['Cookie'] = this.cookiesString;
 
+        let isSecured = this.protocol === 'https:';
 
         let requestParams = {
             hostname: this.hostName,
-            port: 80,
-            path: parsed.path,
+            port: isSecured ? 443 : 80,
+            path: this.path,
             headers: this.headers
         };
 
         console.log(requestParams);
 
-        let req = http.get(requestParams, function (res) {
-            self.processResponse(req, res, function (err, content) {
-                return callback(err ? err : null, content);
+        let req = null;
+
+        if (isSecured) {
+            req = https.get(requestParams, function (res) {
+                self.processResponse(req, res, function (err, content) {
+                    return callback(err ? err : null, content);
+                })
             })
-        }).on('error', function (err) {
+        } else {
+            req = http.get(requestParams, function (res) {
+                self.processResponse(req, res, function (err, content) {
+                    return callback(err ? err : null, content);
+                })
+            })
+        }
+
+        req.on('error', function (err) {
             return callback(err);
         })
     }
@@ -231,6 +252,7 @@ class Browser {
 
         this.hostName = parsed.hostname || this.hostName;
         this.protocol = parsed.protocol || this.protocol;
+        this.path = parsed.path || '/';
 
         if (!this.hostName || !this.protocol) {
             return callback(new Error('Неверные параметры'));
@@ -244,14 +266,12 @@ class Browser {
         this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         this.headers['Content-Length'] = requestString.length;
 
-
         this.headers = extend(this.headers, headers);
-
 
         let requestParams = {
             host: this.hostName,
             port: isSecured ? 443 : 80,
-            path: parsed.path,
+            path: path,
             method: 'POST',
             headers: this.headers
         };
@@ -283,7 +303,6 @@ class Browser {
     }
 
     login(callback) {
-        console.log('login: ' + arguments);
 
         let self = this;
 
@@ -294,7 +313,6 @@ class Browser {
                 console.error(err);
             } else {
 
-                console.log('HEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
                 let $ = cheerio.load(content);
 
                 let formData = {};
@@ -311,8 +329,8 @@ class Browser {
                         }
                     });
 
-                    formData['email'] = '89297064207';
-                    formData['pass'] = 'jukebox5653';
+                    formData['email'] = self.email;
+                    formData['pass'] = self.pass;
 
                     console.log(formData);
                     console.log(action);
@@ -324,10 +342,10 @@ class Browser {
                             console.log('done');
                             console.log(content);
 
-                            let result = /parent.onLoginDone\('\/(.*?)'\)/.exec(content);
+                            let successResult = /parent.onLoginDone\('\/(.*?)'\);/.exec(content);
 
-                            if (result) {
-                                self.getUrl('http://vk.com/' + result[1], function (err, content) {
+                            if (successResult) {
+                                self.getUrl('http://vk.com/' + successResult[1], function (err, content) {
                                     if (err) {
                                         return callback(err);
                                     } else {
@@ -336,6 +354,41 @@ class Browser {
                                     }
                                 });
                             } else {
+
+                                let failResult = /parent.onLoginFailed\((.*?)\);/.exec(content);
+
+                                if (failResult) {
+
+                                    let inner = failResult[1];
+
+                                    if (inner) {
+
+                                        let parts = inner.split(',');
+
+                                        switch (parts[0]) {
+                                            case -1:
+                                                return self.getUrl(`https://$(self.hostName}${self.path}`, callback);
+                                            case 4:
+                                                let email = eval(`(${parts[1]})`);
+                                                if (typeof  email == 'object') {
+                                                    return self.getUrl(`https://$(self.hostName}/login.php?m=1&email=${email.email}`);
+                                                } else {
+                                                    return callback(new Error(''))
+                                                }
+                                                break;
+                                            default:
+                                                return self.getUrl(`https://$(self.hostName}/login.php`, callback);
+                                        }
+                                    } else {
+                                        ew
+                                        Err
+                                    }
+
+                                } else {
+                                    ew
+                                    Err
+                                }
+
                                 return callback(new Error('Не найден таргет после логина'));
                             }
                         }
@@ -378,6 +431,16 @@ class Browser {
         });
 
     }
+
+    parseJSON(string) {
+        let result = null;
+        try {
+            result = JSON.parse(string);
+        } catch (e) {
+            return null;
+        }
+        return result;
+    }
 }
 
 
@@ -391,17 +454,20 @@ module.exports.get = function (req, res) {
             console.error(err);
         } else {
 
-            let bbrowser = new Browser(doc);
+            let bbrowser = new Browser(doc || {
+                    username: 'huyax',
+                    email: '89084153026',
+                    pass: 'jukebox5653'
+                });
 
             console.log(bbrowser.isLogined());
 
             async.waterfall([function (callback) {
-
                 if (!bbrowser.isLogined()) {
                     bbrowser.login(function (err, mainpage) {
-
-
-                        if (!err) {
+                        if (err) {
+                            return callback(err);
+                        } else {
                             bbrowser.saveToDb(function (err) {
                                 if (err) {
                                     return callback(err);
@@ -409,43 +475,21 @@ module.exports.get = function (req, res) {
                                     return callback();
                                 }
                             })
-                        } else {
-                            return callback(err);
                         }
-
                     })
                 } else {
                     return callback();
                 }
             }, function (callback) {
-
-                /*bbrowser.postForm('http://vk.com/al_im.php', {
-                 'act': 'a_get_fast_chat',
-                 //   'ads_section': 'photos',
-                 //  'ads_showed': '6_0231d9f5,5_6dc61907,5_db865d18',
-                 'al': '1',
-                 //   'al_ad': '1',
-                 //    'list': 'photos275667666',
-                 //    'module': 'photos',
-                 //    'photo': '275667666_396273017'
-                 }, function (err, content) {
-                 return callback(err ? err : null, content);
-                 });*/
-
-
                 bbrowser.getUrl('http://vk.com/im', function (err, content) {
-
-
                     return callback(err ? err : null, content);
                 });
-
             }], function (err, content) {
                 if (err) {
                     console.error(err);
                 } else {
-                    console.log(content);
 
-                    let notifier = /Notifier.init\((.*?)\)/.exec(content);
+                    console.log(content);
 
                     let $ = cheerio.load(content);
 
@@ -453,13 +497,8 @@ module.exports.get = function (req, res) {
 
                     let im = null;
 
-
                     scripts.each(function (i, item) {
-                        /*im =  /IM.init\({(.*?)}\);/i.exec($(item).html());
-                         console.log($(item).html())
-                         if (im && im.length) {
-                         return false;
-                         }*/
+
                         let itemContent = $(item).html();
                         let index = itemContent.indexOf('IM.init(');
 
@@ -489,66 +528,65 @@ module.exports.get = function (req, res) {
 
                         console.log(im);
 
-                        //     im = '{' + im[1] + '}';
+                        im = bbrowser.parseJSON(im);
 
-                        im = JSON.parse(im);
+                        if (im) {
 
-                        let params = {
-                            'act': 'a_check',
-                            'ts': im.timestamp,
-                            'version': 1,
-                            'key': im.key,
-                            'wait': 25,
-                            'mode': 66
-                        };
+                            let params = {
+                                'act': 'a_check',
+                                'ts': im.timestamp,
+                                'version': 1,
+                                'key': im.key,
+                                'wait': 25,
+                                'mode': 66
+                            };
 
-                        let transport_host = im.transport_frame.match(/http(.*?).com/);
+                            let transport_host = im.transport_frame.match(/http(.*?).com/);
 
-                        let headers = {
-                            'Accept': '*/*',
-                            'Referer': im.transport_frame.substring(0, im.transport_frame.indexOf('#')),
-                            'Origin': transport_host[0],
-                            'X-Compress': null,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        };
+                            let headers = {
+                                'Accept': '*/*',
+                                'Referer': im.transport_frame.substring(0, im.transport_frame.indexOf('#')),
+                                'Origin': transport_host[0],
+                                'X-Compress': null,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            };
 
-                        console.log(params);
+                            console.log(params);
 
-                        async.forever(function (next) {
-                            bbrowser.postForm(transport_host[0] + '/' + im.url, params, headers, function (err, content) {
-                                if (err) {
-                                    console.error(err);
-                                } else {
-                                    console.log(content);
-                                    let o = null;
-                                    try {
-                                        o = JSON.parse(content);
-                                    } catch(e){
-                                        return next(e);
-                                    }
+                            async.forever(function (next) {
+                                bbrowser.postForm(transport_host[0] + '/' + im.url, params, headers, function (err, content) {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        console.log(content);
+                                        let o = null;
+                                        try {
+                                            o = JSON.parse(content);
+                                        } catch (e) {
+                                            return next(e);
+                                        }
 
-                                    if (o) {
-                                        if (o.hasOwnProperty('failed')) {
-                                            params.ts = o.ts;
-                                            return next();
+                                        if (o) {
+                                            if (o.hasOwnProperty('failed')) {
+                                                params.ts = o.ts;
+                                                return next();
+                                            } else {
+                                                return next(new Error('error'));
+                                            }
                                         } else {
                                             return next(new Error('error'));
                                         }
-                                    } else {
-                                        return next(new Error('error'));
                                     }
-                                }
+                                });
+                            }, function (err) {
+
                             });
-                        }, function (err) {
-
-                        });
-
-
+                        } else {
+                            return new Error('')
+                        }
+                    } else {
+                        return new Error('')
                     }
-
-
-                    // console.log(utils.processVkResponse(content))
-
                 }
             });
         }

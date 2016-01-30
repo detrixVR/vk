@@ -6,6 +6,14 @@ var schema = new Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: true
+    },
+    pass: {
+        type: String,
+        required: true
+    },
     logined: {
         type: Boolean,
         required: true
@@ -27,6 +35,14 @@ var schema = new Schema({
         required: true
     },
     protocol: {
+        type: String,
+        required: true
+    },
+    path: {
+        type: String,
+        required: true
+    },
+    currentUrl: {
         type: String,
         required: true
     },
