@@ -48,7 +48,13 @@ class Browser {
 
         defaults = extend(defaults, options);
 
+        //  console.log(defaults);
+
         this.username = defaults.username;
+
+        this.email = defaults.email;
+
+        this.pass = defaults.pass;
 
         this.uid = defaults.uid;
 
@@ -141,7 +147,7 @@ class Browser {
                 return self.getUrl(res.headers['location'], callback);
             default :
                 req.emit('error', new Error(`Неверный код ответа: ${res.statusCode}`));
-                req.abort();
+                return req.abort();
         }
 
         if (res.headers['content-encoding'] === 'gzip') {
@@ -225,15 +231,11 @@ class Browser {
 
         if (isSecured) {
             req = https.get(requestParams, function (res) {
-                self.processResponse(req, res, function (err, content) {
-                    return callback(err ? err : null, content);
-                })
+                return self.processResponse(req, res, callback);
             })
         } else {
             req = http.get(requestParams, function (res) {
-                self.processResponse(req, res, function (err, content) {
-                    return callback(err ? err : null, content);
-                })
+                return self.processResponse(req, res, callback);
             })
         }
 
@@ -271,7 +273,7 @@ class Browser {
         let requestParams = {
             host: this.hostName,
             port: isSecured ? 443 : 80,
-            path: path,
+            path: this.path,
             method: 'POST',
             headers: this.headers
         };
@@ -282,15 +284,11 @@ class Browser {
 
         if (isSecured) {
             post_req = https.request(requestParams, function (res) {
-                self.processResponse(post_req, res, function (err, content) {
-                    return callback(err ? err : null, content);
-                })
+                return self.processResponse(post_req, res, callback);
             });
         } else {
             post_req = http.request(requestParams, function (res) {
-                self.processResponse(post_req, res, function (err, content) {
-                    return callback(err ? err : null, content);
-                })
+                return self.processResponse(post_req, res, callback);
             });
         }
 
@@ -302,6 +300,138 @@ class Browser {
         })
     }
 
+    processContent(content, callback) {
+        let self = this;
+
+        console.log('done');
+        console.log(content);
+
+        let $ = cheerio.load(content);
+
+        let formData = {};
+
+        let $loginForm = $('form[name=login]');
+
+        if ($loginForm && !this.tryLogin) {
+
+            let action = $loginForm[0].attribs.action;
+
+            $('input', $loginForm).each(function (i, item) {
+                if (item.attribs.name) {
+                    formData[item.attribs.name] = item.attribs.value || ''
+                }
+            });
+
+            formData['email'] = self.email;
+            formData['pass'] = self.pass;
+
+            console.log(formData);
+            console.log(action);
+
+            this.tryLogin = 1;
+
+            return self.postForm(action, formData, {}, function (err, content) {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return self.processContent(content, callback);
+                }
+            });
+
+        }
+
+        let successResult = /parent.onLoginDone\('\/(.*?)'\);/.exec(content);
+
+        if (successResult) {
+
+            let query = `${self.protocol}//vk.com/${successResult[1]}`;
+            return self.getUrl(query, function (err, content) {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return self.processContent(content, callback);
+                }
+            });
+
+        }
+
+        let failResult = /parent.onLoginFailed\((.*?)\);/.exec(content);
+
+        if (failResult) {
+
+            let inner = failResult[1];
+
+            if (inner) {
+
+                let parts = inner.split(',');
+
+                switch (parts[0]) {
+                    case -1:
+                        return self.getUrl(`https://${self.hostName}${self.path}`, function (err, content) {
+                            if (err) {
+                                return callback(err);
+                            } else {
+                                return self.processContent(content, callback);
+                            }
+                        });
+                    case 4:
+                        let email = eval(`(${parts[1]})`);
+                        if (typeof  email == 'object') {
+                            return self.getUrl(`${self.protocol}//${self.hostName}/login.php?m=1&email=${email.email}`, function (err, content) {
+                                if (err) {
+                                    return callback(err);
+                                } else {
+                                    return self.processContent(content, callback);
+                                }
+                            });
+                        } else {
+                            return callback(new Error(''))
+                        }
+                        break;
+                    default:
+                        return self.getUrl(`${self.protocol}//${self.hostName}/login.php`, function (err, content) {
+                            if (err) {
+                                return callback(err);
+                            } else {
+                                return self.processContent(content, callback);
+                            }
+                        });
+                }
+            }
+        }
+
+        /*let scripts = $('script');
+
+        scripts.each(function (i, item) {
+
+            let itemContent = $(item).html();
+            let index = itemContent.indexOf('var vk = ');
+
+            if (index > -1) {
+                itemContent = itemContent.substring(index + 8);
+                let obj = self._parseJSON(self._getObj(itemContent));
+                if (obj) {
+
+                    this.logined = true;
+                    console.log(obj.id);
+                }
+                return false;
+            }
+        });*/
+
+        if ($('#logout_link')) {
+            return callback(null, 'logined')
+        }
+
+
+        if (this.tryLogin) {
+            return callback(new Error(`Neverniy login ili parol'`))
+        }
+
+        return callback(new Error(`Unprocesseble`))
+    }
+
+
     login(callback) {
 
         let self = this;
@@ -310,98 +440,11 @@ class Browser {
 
         this.getUrl('http://vk.com', function (err, content) {
             if (err) {
-                console.error(err);
+                return callback(err);
             } else {
-
-                let $ = cheerio.load(content);
-
-                let formData = {};
-
-                let $loginForm = $('form[name=login]');
-
-                if ($loginForm) {
-
-                    let action = $loginForm[0].attribs.action;
-
-                    $('input', $loginForm).each(function (i, item) {
-                        if (item.attribs.name) {
-                            formData[item.attribs.name] = item.attribs.value || ''
-                        }
-                    });
-
-                    formData['email'] = self.email;
-                    formData['pass'] = self.pass;
-
-                    console.log(formData);
-                    console.log(action);
-
-                    self.postForm(action, formData, {}, function (err, content) {
-                        if (err) {
-                            return callback(err);
-                        } else {
-                            console.log('done');
-                            console.log(content);
-
-                            let successResult = /parent.onLoginDone\('\/(.*?)'\);/.exec(content);
-
-                            if (successResult) {
-                                self.getUrl('http://vk.com/' + successResult[1], function (err, content) {
-                                    if (err) {
-                                        return callback(err);
-                                    } else {
-                                        self.logined = true;
-                                        return callback(null, content);
-                                    }
-                                });
-                            } else {
-
-                                let failResult = /parent.onLoginFailed\((.*?)\);/.exec(content);
-
-                                if (failResult) {
-
-                                    let inner = failResult[1];
-
-                                    if (inner) {
-
-                                        let parts = inner.split(',');
-
-                                        switch (parts[0]) {
-                                            case -1:
-                                                return self.getUrl(`https://$(self.hostName}${self.path}`, callback);
-                                            case 4:
-                                                let email = eval(`(${parts[1]})`);
-                                                if (typeof  email == 'object') {
-                                                    return self.getUrl(`https://$(self.hostName}/login.php?m=1&email=${email.email}`);
-                                                } else {
-                                                    return callback(new Error(''))
-                                                }
-                                                break;
-                                            default:
-                                                return self.getUrl(`https://$(self.hostName}/login.php`, callback);
-                                        }
-                                    } else {
-                                        ew
-                                        Err
-                                    }
-
-                                } else {
-                                    ew
-                                    Err
-                                }
-
-                                return callback(new Error('Не найден таргет после логина'));
-                            }
-                        }
-                    })
-
-                } else {
-                    return callback(new Error('Не найдена логинка'));
-                }
+                return self.processContent(content, callback);
             }
         });
-
-        return this;
-
     }
 
     isLogined() {
@@ -414,6 +457,8 @@ class Browser {
             uid: this.uid
         }, {
             username: this.username,
+            email: this.email,
+            pass: this.pass,
 
             logined: this.logined,
             headers: this.headers,
@@ -432,12 +477,29 @@ class Browser {
 
     }
 
-    parseJSON(string) {
+    _parseJSON(string) {
         let result = null;
         try {
             result = JSON.parse(string);
         } catch (e) {
             return null;
+        }
+        return result;
+    }
+
+    _getObj(string) {
+        let count = 0;
+        let result = null;
+        for (var k = 0; k < string.length; k++) {
+            if (string[k] === '{') {
+                count++;
+            } else if (string[k] === '}') {
+                count--;
+            }
+            if (count === 0 && k != 0) {
+                result = string.substring(0, ++k);
+                break;
+            }
         }
         return result;
     }
@@ -468,6 +530,10 @@ module.exports.get = function (req, res) {
                         if (err) {
                             return callback(err);
                         } else {
+                            console.log(mainpage);
+
+                            bbrowser.logined = true;
+
                             bbrowser.saveToDb(function (err) {
                                 if (err) {
                                     return callback(err);
@@ -504,20 +570,7 @@ module.exports.get = function (req, res) {
 
                         if (index > -1) {
                             itemContent = itemContent.substring(index + 8);
-                            let count = 0;
-                            for (var k = 0; k < itemContent.length; k++) {
-                                if (itemContent[k] === '{') {
-                                    count++;
-                                } else if (itemContent[k] === '}') {
-                                    count--;
-                                }
-                                if (count === 0) {
-
-                                    itemContent = itemContent.substring(0, ++k);
-                                    im = itemContent;
-                                    break;
-                                }
-                            }
+                            im = self._getObj(itemContent);
                             return false;
                         }
 
@@ -528,7 +581,7 @@ module.exports.get = function (req, res) {
 
                         console.log(im);
 
-                        im = bbrowser.parseJSON(im);
+                        im = bbrowser._parseJSON(im);
 
                         if (im) {
 
@@ -579,13 +632,13 @@ module.exports.get = function (req, res) {
                                     }
                                 });
                             }, function (err) {
-
+                                return callback(err);
                             });
                         } else {
-                            return new Error('')
+                            return callback(new Error('error'));
                         }
                     } else {
-                        return new Error('')
+                        return callback(new Error('v'));
                     }
                 }
             });

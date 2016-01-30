@@ -1,1095 +1,256 @@
-var photos = {
-updatePeriods: function() {
-cur.periods = geByClass('photos_period');
-},
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="shortcut icon" href="/images/fav_chat.ico?3" />
 
-destroyPeriod: function() {
-if (cur.fixedPeriod) {
-re(cur.fixedPeriod);
-cur.fixedPeriod = false;
-cur.fixedPeriodEl = false;
-}
-},
-fixPeriod: function() {
-if (cur.periods && cur.periods.length) {
-var scroll = scrollGetY();
-var fixed = false;
-var nextY = false;
-var periodHeright = getSize(cur.periods[0])[1];
-for(var i in cur.periods) {
-var y = getXY(cur.periods[i])[1];
-if (y >= scroll) {
-break;
-}
-fixed = cur.periods[i];
-var ni = intval(i) + 1;
-if (cur.periods[ni]) {
-nextY = getXY(cur.periods[ni])[1] - scroll;
-} else {
-nextY = false;
-}
-}
-if (fixed) {
-if (fixed == cur.fixedPeriodEl) {
-} else {
-if (cur.fixedPeriod) {
-cur.fixedPeriod.innerHTML = fixed.innerHTML;
-} else {
-var fixPeriod = cur.fixedPeriod = ce('div', {innerHTML: fixed.innerHTML, className: 'photos_period_fixed'}, {left: getXY(fixed)[0]+'px'})
-utils.appendChild(cur.fixedPeriod);
-(cur._back ? cur._back.hide : cur.destroy).push(function() {
-re(fixPeriod);
-});
-}
-cur.fixedPeriodEl = fixed;
-}
-var diff = (nextY !== false) ? nextY - periodHeright : 0;
-if (diff >= 0) {
-diff = 0;
-}
-if (cur.fixedPeriodTop !== diff) {
-setStyle(cur.fixedPeriod, {top: diff+'px'});
-cur.fixedPeriodTop = diff;
-}
-} else if (!fixed && cur.fixedPeriod) {
-re(cur.fixedPeriod);
-cur.fixedPeriod = false;
-cur.fixedPeriodEl = false;
-}
-}
-},
-scrollResize: function() {
-if (browser.mobile || cur.pvShown) return;
+    <link rel="apple-touch-icon" href="/images/safari_60.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/safari_76.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/images/safari_120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/safari_152.png">
 
-var docEl = document.documentElement;
-var ch = window.innerHeight || docEl.clientHeight || bodyNode.clientHeight;
-var st = scrollGetY();
-var lnk = ge('photos_load_more'), albums_lnk = ge('albums_load_more');
+    <meta http-equiv="content-type" content="text/html; charset=windows-1251" />
+    <meta name="description" content="" />
 
-if (isVisible(lnk) && st * 3 + ch > lnk.offsetTop) {
-photos.load();
-}
-if (isVisible(albums_lnk) && cur.showAllAlbums && st * 3 + ch > albums_lnk.offsetTop) {
-photos.load(true);
-}
-if (cur.fixPeriods) {
-photos.fixPeriod();
-}
-},
-initScroll: function() {
-cur.module = 'photos';
 
-photos.scrollnode = browser.msie6 ? pageNode : window;
+    <title>Диалоги</title>
 
-addEvent(photos.scrollnode, 'scroll', photos.scrollResize);
-addEvent(window, 'resize', photos.scrollResize);
-removeEvent(window, 'load', photos.initScroll);
-cur.destroy.push(function() {
-removeEvent(photos.scrollnode, 'scroll', photos.scrollResize);
-removeEvent(window, 'resize', photos.scrollResize);
-});
-},
-recache: function(from, delta) {
-if (cur.loading) {
-cur.loading = 1;
-setTimeout(photos.recache.pbind(from, delta), 100);
-return;
-}
-for (var i = cur.offset; ajaxCache['/' + nav.objLoc[0] + '#act=' + nav.objLoc.act + '&offset=' + i + '&part=1']; i += 20) {
-var a = ajaxCache['/' + nav.objLoc[0] + '#act=' + nav.objLoc.act + '&offset=' + i + '&part=1'];
-a[0] += delta;
-ajaxCache['/' + nav.objLoc[0] + '#act=' + nav.objLoc.act + '&offset=' + (i + delta) + '&part=1'] = a;
-delete(ajaxCache['/' + nav.objLoc[0] + '#act=' + nav.objLoc.act + '&offset=' + i + '&part=1']);
-}
-cur.offset += delta;
-},
-loaded: function(off, rows, privacy, album, curYear) {
-if (album) {
-cur.albumOffset = off;
-} else {
-cur.offset = off;
-}
-if (curYear) {
-cur.curYear = curYear;
-}
-if (!album) {
-cur.loading = 0;
-}
+    <noscript><meta http-equiv="refresh" content="0; URL=/badbrowser.php"></noscript>
 
-var cont = album ? ge('photos_albums_container') : ge('photos_container'),
-more = album ? ge('albums_load_more') : ge('photos_load_more'),
-from = album ? cur.moreFromAlbum : cur.moreFrom,
-opts = album ? cur.moreAlbumOpts : cur.moreOpts,
-offset = album ? cur.albumOffset : cur.offset,
-count = album ? cur.albumCount : cur.count,
-d = ce('div', {innerHTML: rows});
-each(geByTag('textarea', d), function() {
-autosizeSetup(this, {minHeight: 40});
-});
-if (!album && opts) {
-opts['cur_year'] = cur.curYear;
-}
-while (d.firstChild) {
-cont.appendChild(d.firstChild);
-}
-if (privacy) {
-extend(cur.privacy, privacy);
-}
-if (cont.sorter) {
-setTimeout(sorter.added.pbind(cont), 0);
-} else if (cont.qsorter) {
-setTimeout(qsorter.added.pbind(cont), 0);
-}
+    <script type="text/javascript">
+        var vk = {
+            ads_rotate_interval: 120000,
+            al: parseInt('3') || 4,
+            id: 325876997,
+            intnat: '' ? true : false,
+            host: 'vk.com',
+            lang: 0,
+            rtl: parseInt('') || 0,
+            version: 19032,
+            stDomains: 0,
+            zero: false,
+            contlen: 11419,
+            loginscheme: 'https',
+            ip_h: '3139f6e6acee0f8427',
+            vc_h: 'f6fb36d9216874ec747bc0ab14e25ff2',
+            navPrefix: '/',
+            dt: parseInt('0') || 0,
+            fs: parseInt('11') || 11,
+            ts: 1454184547,
+            tz: 10800,
+            pd: 0,
+            pads: 1,
+            vcost: 7,
+            time: [2016, 1, 30, 23, 9, 7],
+            sampleUser: -1, spentLastSendTS: new Date().getTime()
+        };
 
-if (!album) {
-photos.updatePeriods();
-}
+        window.locDomain = vk.host.match(/[a-zA-Z]+\.[a-zA-Z]+\.?$/)[0];
+        var _ua = navigator.userAgent.toLowerCase();
+        if (/opera/i.test(_ua) || !/msie 6/i.test(_ua) || document.domain != locDomain) document.domain = locDomain;
+        var ___htest = (location.toString().match(/#(.*)/) || {})[1] || '', ___to;
+        if (vk.al != 1 && ___htest.length && ___htest.substr(0, 1) == vk.navPrefix) {
+            if (vk.al != 3 || vk.navPrefix != '!') {
+                ___to = ___htest.replace(/^(\/|!)/, '');
+                if (___to.match(/^([^\?]*\.php|login|mobile)([^a-z0-9\.]|$)/)) ___to = '';
+                location.replace(location.protocol + '//' + location.host + '/' + ___to);
+            }
+        }
 
-if (off >= count || !rows) {
-hide(more);
-return;
-}
-if (!album){
-return;
-}
-cur.loading = 1;
-ajax.post(from, extend({offset: offset, part: 1}, opts || {}), {cache: 1, onDone: function() {
-if (cur.loading == 2) {
-photos.loaded.apply(window, arguments);
-} else {
-cur.loading = false;
-}
-}, onFail: function() {
-cur.loading = 0;
-return true;
-}});
-},
-load: function(album) {
-var more = album ? ge('albums_load_more') : ge('photos_load_more'),
-progress = album ? ge('albums_more_progress') : ge('photos_more_progress'),
-from = album ? cur.moreFromAlbum : cur.moreFrom,
-opts = album ? cur.moreAlbumOpts : cur.moreOpts,
-offset = album ? cur.albumOffset : cur.offset;
-if (!isVisible(more) || isVisible(progress)) return;
-if (cur.loading) {
-cur.loading = 2;
-return;
-}
-if (!album && opts) {
-cur.loading = 1;
-if (opts) {
-opts['cur_year'] = cur.curYear;
-}
-}
+        var StaticFiles = {
+            'common.js' : {v: 1129},
+            'common.css': {v: 510},
+            'ie6.css'   : {v: 26},
+            'ie7.css'   : {v: 18}
+            ,'lang0_0.js':{v:6693},'im.css':{v:360},'notifier.js':{v:379},'notifier.css':{v:151}
+        }
+    </script>
 
-ajax.post(from, extend({offset: offset, part: 1}, opts || {}), {onDone: photos.loaded, onFail: function() {
-cur.loading = 0;
-return true;
-}, showProgress: function() {
-show(progress);
-hide(more.firstChild);
-}, hideProgress: function() {
-show(more.firstChild);
-hide(progress);
-}, cache: 1});
-},
-loadAlbums: function() {
-cur.showAllAlbums = true;
-this.load(true);
-},
+    <link rel="stylesheet" type="text/css" href="/css/al/common.css?510" />
+    <!--[if lte IE 6]><style type="text/css" media="screen">/* <![CDATA[ */ @import url(/css/al/ie6.css?26); /* ]]> */</style><![endif]-->
+    <!--[if IE 7]><style type="text/css" media="screen">/* <![CDATA[ */ @import url(/css/al/ie7.css?18); /* ]]> */</style><![endif]-->
+    <link type="text/css" rel="stylesheet" href="/css/al/im.css?360"></link><link type="text/css" rel="stylesheet" href="/css/al/notifier.css?151"></link><script type="text/javascript" src="/js/loader_nav19032_0.js"></script><script type="text/javascript" src="/js/al/common.js?1129_181"></script><script type="text/javascript" src="/js/lang0_0.js?6693"></script><link rel="alternate" media="only screen and (max-width: 640px)" href="http://m.vk.com/mail?act=show&peer=0" /><link rel="alternate" href="android-app://com.vkontakte.android/vkontakte/m.vk.com/mail?act=show&peer=0" /><meta name="msApplication-ID" content="C6965DD5.VK" /><meta name="msApplication-PackageFamilyName" content="C6965DD5.VK_v422avzh127ra" /><script type="text/javascript" src="/js/al/notifier.js?379"></script>
 
-reorderAlbums: function(album, before, after) {
-var album_id = album.id.replace('album', '');
-var before_id = (before && before.id || '').replace('album', '');
-var after_id = (after && after.id || '').replace('album', '');
-ajax.post('al_photos.php', {act: 'reorder_albums', album: album_id, before: before_id, after: after_id, hash: cur.reorderHash});
-},
-reorderPhotos: function(photo, before, after) {
-if (hasClass(photo, 'sort_taken')) {
-removeClass(photo, 'sort_taken');
-}
-var needle = (nav.objLoc.act == 'edit') ? 'photo_edit_row' : 'photo_row';
-var photo_id = photo.id.replace(needle, '');
-var before_id = (before && before.id || '').replace(needle, '');
-var after_id = (after && after.id || '').replace(needle, '');
-ajax.post('al_photos.php', {act: 'reorder_photos', photo: photo_id, before: before_id, after: after_id, rev: nav.objLoc.rev, hash: cur.reorderHash});
-},
-privacy: function(key) {
-if (key == 'photos_move') {
-var val = Privacy.getValue(key);
-val = val.split('_');
-val = val[2];
-if (val != cur.album.split('_')[1]) {
-photos.movePhoto(val);
-}
-return true;
-}
+</head>
 
-var m = key.match(/^album(\d+)/);
-if (!m) return;
+<body onresize="onBodyResize()" class="is_rtl font_default pads ">
+<div id="system_msg" class="fixed"></div>
+<div id="utils"></div>
 
-var el = ge('album' + vk.id + '_' + m[1]);
-if (!el) return;
+<div id="layer_bg" class="fixed"></div><div id="layer_wrap" class="scroll_fix_wrap fixed"><div id="layer"></div></div>
+<div id="box_layer_bg" class="fixed"></div><div id="box_layer_wrap" class="scroll_fix_wrap fixed"><div id="box_layer"><div id="box_loader"><div class="loader"></div><div class="back"></div></div></div></div>
 
-if (el.helper) {
-var sz = getSize(el);
-if (sz[0] != el.w || sz[1] != el.h) {
-setStyle(el.helper, {
-width: sz[0],
-height: sz[1] - ge('photos_container').sorter.dh
-});
-extend(el, {
-x: el.x - el.w / 2 + sz[0] / 2, w: sz[0],
-y: el.y - el.h / 2 + sz[1] / 2, h: sz[1]
-});
-for (var e = el.nextSibling; e && e.nextSibling; e = e.nextSibling.nextSibling) {
-setStyle(e.nextSibling, {left: e.offsetLeft, top: e.offsetTop});
-}
-}
-}
+<div id="stl_left"></div><div id="stl_side"></div>
 
-clearTimeout(cur['privacy_timer_' + key]);
-cur['privacy_timer_' + key] = setTimeout(ajax.post.pbind('al_friends.php', {
-act: 'save_privacy',
-key: key,
-val: Privacy.getValue(key),
-hash: cur.privacyHash
-}), 500);
-},
+<script type="text/javascript">domStarted();</script>
 
-deleteAlbum: function(album, hash) {
-showFastBox(
-{title: getLang('photos_deleting_album'), dark: 1, bodyStyle: 'padding: 20px;'},
-getLang('photos_sure_del_album'),
-getLang('global_delete'),
-function(btn) {
-ajax.post('al_photos.php', {act: 'delete_album', album: album, hash: hash}, {
-showProgress: lockButton.pbind(btn),
-hideProgress: unlockButton.pbind(btn)
-})
-},
-getLang('global_cancel')
-);
-},
-showSaved: function(id, color) {
-var msg = ge(id), anim = function() {
-setTimeout(animate.pbind(msg, {
-backgroundColor: color,
-borderLeftColor: '#D8DFEA',
-borderRightColor: '#D8DFEA',
-borderTopColor: '#D8DFEA',
-borderBottomColor: '#D8DFEA'
-}, 1000), 1000);
-};
-if (isVisible(msg)) {
-animate(msg, {
-backgroundColor: '#E7F1F9',
-borderLeftColor: '#4C96D4',
-borderRightColor: '#4C96D4',
-borderTopColor: '#4C96D4',
-borderBottomColor: '#4C96D4'
-}, 200, anim);
-} else {
-show(msg);
-anim();
-}
-},
-saveAlbum: function() {
-var params = {
-act: 'save_album',
-album: cur.album,
-hash: cur.albumhash,
-title: ge('album_title').value,
-desc: ge('album_description').value
-};
-if (!params.title) return notaBene('album_title');
-var album_id = cur.album.replace(vk.id + '_', '');
-if (cur.privacy['album' + album_id]) {
-extend(params, {
-view: Privacy.getValue('album' + album_id),
-comm: Privacy.getValue('albumcomm' + album_id)
-});
-} else if (ge('album_only_check')) {
-extend(params, {
-main: isChecked('album_main_check'),
-only: isChecked('album_only_check'),
-comm: isChecked('album_comments_check')
-});
-}
-ajax.post('al_photos.php', params, {onDone: function() {
-var main = ge('album_main_check');
-if (main && isChecked(main)) {
-addClass(main, 'on');
-addClass(main, 'disabled');
-hide('album_delete_action');
-}
-photos.showSaved('album_saved_msg', '#FFFFFF');
-if (ge('photos_container').sorter) {
-sorter.update(ge('photos_container').sorter.elems[0]);
-}
-}, progress: 'album_save_progress'});
-},
-savePhotos: function() {
-var params = {
-act: 'save_photos',
-album: cur.album,
-hash: cur.albumhash
-}, cont = ge('photos_container'), i = 0;
-for (var el = cont.firstChild; el; el = el.nextSibling) {
-if (!el.firstChild || !isVisible(el.firstChild)) continue;
+<div class="scroll_fix_wrap" id="page_wrap">
+    <div><div class="scroll_fix">
+        <div id="page_layout" style="width: 791px;">
+            <div id="page_header" class="p_head p_head_l0">
+                <div class="back"></div>
+                <div class="left"></div>
+                <div class="right"></div>
+                <div class="content">
+                    <div id="top_nav" class="head_nav">
+                        <table cellspacing="0" cellpadding="0" id="top_links">
+                            <tr>
+                                <td class="top_home_link_td">
+                                    <div id="top_logo_down"></div>
+                                    <a class="top_home_link" href="/" onmousedown="addClass('top_logo_down','tld_d');" onclick="return nav.go(this, event);"></a>
+                                </td>
+                                <td class="top_back_link_td">
+                                    <a class="top_nav_link fl_l" href="" id="top_back_link" onclick="if (nav.go(this, event, {back: true}) === false) { showBackLink(); return false; }" onmousedown="tnActive(this)"></a>
+                                </td>
+                                <td style=""><nobr>
+                                    <a class="top_nav_link" id="head_people" href="/search?c[section]=people" onclick="return nav.go(this, event, {search: true, noframe: true});" onmousedown="tnActive(this)">люди</a>
+                                </nobr></td>
+                                <td style=""><nobr>
+                                    <a class="top_nav_link" id="head_communities" href="/search?c[section]=communities" onclick="return nav.go(this, event, {search: true, noframe: true});" onmousedown="tnActive(this)">сообщества</a>
+                                </nobr></td>
+                                <td style=""><nobr>
+                                    <a class="top_nav_link" id="head_games" href="/apps" onclick="return nav.go(this, event, {noback: true});" onmousedown="tnActive(this)">игры</a>
+                                </nobr></td>
+                                <td style=""><nobr>
+                                    <a class="top_nav_link" id="head_music" href="/audios325876997?act=popular" onclick="return Pads.show('mus', event);" onmousedown="tnActive(this)">
+                                        <span id="head_music_text">музыка</span>
+                                        <div id="head_play_btn" onmouseover="addClass(this, 'over');" onmouseout="removeClass(this, 'over'); removeClass(this, 'down')" onmousedown="addClass(this, 'down'); addClass(ge('head_music'), 'head_play_down');" onmouseup="removeClass(this, 'down')" onclick="headPlayPause(event); return Pads.show('mus', event);"></div>
+                                    </a>
+                                </nobr></td>
+                                <td id="support_link_td" style=""><nobr>
+                                    <a class="top_nav_link" id="top_support_link" href="/support?act=home" onclick="return nav.go(this, event, {noback: true});" onmousedown="tnActive(this)">помощь</a>
+                                </nobr></td>
+                                <td id="logout_link_td"><nobr>
+                                    <a class="top_nav_link" id="logout_link" href="https://login.vk.com/?act=logout&hash=29c65561e266ad4f2e&_origin=http://vk.com" onclick="if (checkEvent(event) === false) { window.Notifier && Notifier.lcSend('logged_off'); location.href = this.href; return cancelEvent(event); }" onmousedown="tnActive(this)">выйти</a>
+                                </nobr></td>
+                            </tr>
+                        </table>
+                        <div id="ts_wrap" class="clear_fix">
+                            <div id="ts_input_wrap" class="ts_input_wrap fl_r" onmouseover="TopSearch.highlightInput(true); TopSearch.initFriendsList();" onmouseout="TopSearch.highlightInput(false)">
+                                <div class="ts" onmousedown="event.cancelBubble = true;">
+                                    <div class="ts_input_wrap2"><div>
+                                        <input type="text" onmousedown="event.cancelBubble = true;" ontouchstart="event.cancelBubble = true;" class="text" id="ts_input" autocomplete="off" placeholder="Поиск" />
+                                    </div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span style="display: none" id="top_new_msg"></span>
+                    </div>
+                    <div id="ts_cont_wrap" ontouchstart="event.cancelBubble = true;" onmousedown="event.cancelBubble = true;"></div>
+                </div>
+            </div>
 
-var id = el.id.replace('photo_edit_row', '');
-params['photo_id' + i] = id;
-params['photo_desc' + i] = ge('photo_caption' + id).value;
-++i;
-}
-ajax.post('al_photos.php', params, {onDone: function() {
-for (var el = cont.firstChild; el; el = el.nextSibling) {
-if (!el.firstChild || !isVisible(el.firstChild)) continue;
+            <div id="side_bar" class="fl_l" style="">
+                <ol>
+                    <li>
+                        <table id="myprofile_table" cellspacing="0" cellpadding="0"><tr>
+                            <td id="myprofile_wrap">
+                                <a href="/id325876997" onclick="return nav.go(this, event, {noback: true})" id="myprofile" class="left_row"><span class="left_label inl_bl">Моя Страница</span></a>
+                            </td>
+                            <td id="myprofile_edit_wrap">
+                                <a href="/edit" id="myprofile_edit" class="left_row"><span class="left_label inl_bl">ред.</span></a>
+                            </td>
+                        </tr></table>
+                    </li><li id="l_fr"><a href="/friends" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad" onmouseover="Pads.preload('fr')" onmousedown="return Pads.show('fr', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Друзья</span></span></a></li><li id="l_ph"><a href="/albums325876997" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad" onmouseover="Pads.preload('ph')" onmousedown="return Pads.show('ph', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Фотографии</span></span></a></li><li id="l_vid"><a href="/video" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad" onmouseover="Pads.preload('vid')" onmousedown="return Pads.show('vid', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Видеозаписи</span></span></a></li><li><a href="/audios325876997" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Мои Аудиозаписи</span></span></a></li><li id="l_msg"><a href="/im" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad left_count_persist" onmouseover="Pads.preload('msg')" onmousedown="return Pads.show('msg', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Сообщения</span></span></a></li><li style="display: none" id="l_nts"><a href="/notes" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Мои Заметки</span></span></a></li><li id="l_gr"><a href="/groups" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad" onmouseover="Pads.preload('gr')" onmousedown="return Pads.show('gr', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Группы</span></span></a></li><li style="display: none" id="l_ev"><a href="/events" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Мои Встречи</span></span></a></li><li id="l_nwsf"><a href="/feed" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Мои Новости</span></span></a></li><li id="l_nws"><a href="/feed?section=notifications" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad left_count_persist" onmouseover="Pads.preload('nws')" onmousedown="return Pads.show('nws', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Мои Ответы</span></span></a></li><li id="l_set"><a href="/settings" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Мои Настройки</span></span></a></li><div class="more_div" style="display: none"></div><li style="display: none" id="l_ap"><a href="/apps" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_pad left_count_persist" onmouseover="Pads.preload('ap')" onmousedown="return Pads.show('ap', event)" onclick="return (checkEvent(event) || browser.msie6) ? true : cancelEvent(event)"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span></span><span class="left_label inl_bl">Приложения</span></span></a></li><li style="display: none" id="l_ads"><a href="/ads?act=office&last=1" onclick="return nav.go(this, event, {noback: true, params: {_ref: 'left_nav'}});" class="left_row"><span class="left_fixer"><span class="left_count_wrap  left_void fl_r"><span class="inl_bl left_plus">+</span></span><span class="left_label inl_bl">Реклама</span></span></a></li>
+                </ol>
+                <div id="left_blocks"></div><div id="left_ads"></div>
+            </div>
 
-var id = el.id.replace('photo_edit_row', '');
-ge('photo_save_result' + id).innerHTML = getLang('photos_privacy_description');
-}
-cur.descs = false;
-scrollToTop(200);
-photos.showSaved('photos_saved_msg', '#F3F8FC');
-if (ge('photos_container').sorter) {
-sorter.update(ge('photos_container').sorter.elems[0]);
-}
-}, progress: 'photos_save_progress'});
-},
-deletePhoto: function(photo, hash) {
-ajax.post('al_photos.php', {act: 'delete_photo', photo: photo, hash: hash, edit: 1}, {onDone: function(text) {
-var el = ge('photo_edit_row' + photo);
-if (!el || !el.firstChild || !isVisible(el.firstChild)) return;
+            <div id="page_body" class="fl_r" style="width: 631px;">
+                <div id="header_wrap2">
+                    <div id="header_wrap1">
+                        <div id="header" style="display: none">
+                            <h1 id="title"></h1>
+                        </div>
+                    </div>
+                </div>
+                <div id="wrap_between"></div>
+                <div id="wrap3"><div id="wrap2">
+                    <div id="wrap1">
+                        <div id="content"><div class="im_none" style="display: block">Здесь будет выводиться список Ваших сообщений.<br><br>Пожалуйста, <b><a href="/search">найдите друзей</a></b>, чтобы начать общение.</div></div>
+                    </div>
+                </div></div>
+            </div>
 
-hide(el.firstChild);
-el.appendChild(ce('div', {innerHTML: text}));
+            <div id="footer_wrap" class="fl_r" style="width: 661px;">
+                <div id="bottom_nav">
+                    <a class="bnav_a" href="/about">о сайте</a>
+                    <a class="bnav_a" href="/support?act=home" onclick="return nav.go(this, event);" style="">помощь</a>
+                    <a class="bnav_a" href="/terms">правила</a>
+                    <a class="bnav_a" href="/ads">реклама</a>
 
-photos.recache(cur.offset, -1);
---cur.count;
-if (cur.count < 2) {
-hide('album_thumb_action');
-}
-if (ge('photos_go_to_album_cont') && !cur.count) {
-hide('photos_go_to_album_cont');
-}
-if (cur.photoAddUpdate) {
-cur.photoAddUpdate(el);
-}
-if (cur.introTooltipHide) {
-cur.introTooltipHide(true);
-}
-if ((ge('photos_container') || ge('photos_add_list')).sorter) {
-sorter.update(ge('photo_edit_row' + photo));
-}
-}, showProgress: function() {
-hide('photo_delete_link' + photo);
-show('photo_edit_progress' + photo);
-}, hideProgress: function() {
-hide('photo_edit_progress' + photo);
-show('photo_delete_link' + photo);
-}});
-},
-restorePhoto: function(photo, hash) {
-if (isVisible('photo_restore_progress' + photo)) return;
+                    <a class="bnav_a" href="/dev">разработчикам</a>
+                    <a class="bnav_a" href="/jobs" style="">вакансии</a>
+                </div>
+                <div id="footer" class="clear">
+                    <div class="copy_lang">ВКонтакте &copy; 2016 <a class="bnav_lang" onclick="showBox('lang.php', {act: 'lang_dialog'}, {params: {dark: true, bodyStyle: 'padding: 0px'}, noreload: true})">Русский</a></div>
 
-ajax.post('al_photos.php', {act: 'restore_photo', photo: photo, hash: hash, edit: 1}, {onDone: function(text) {
-var el = ge('photo_edit_row' + photo);
-if (!el || !el.firstChild || isVisible(el.firstChild)) return;
+                    <div>
+                        <small><a href="/durov" onclick="return nav.go(this, event)">Павел Дуров</a></small>
 
-el.removeChild(el.firstChild.nextSibling);
-show(el.firstChild);
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div></div><noscript><div style="position:absolute;left:-10000px;">
+    <img src="//top-fwz1.mail.ru/counter?id=2579437;pid=325876997;js=na" style="border:0;" height="1" width="1" />
+</div></noscript></div>
+<div class="progress" id="global_prg"></div>
 
-photos.recache(cur.offset, 1);
-++cur.count;
-if (cur.count > 1) {
-show('album_thumb_action');
-}
-if (ge('photos_go_to_album_cont') && cur.count) {
-show('photos_go_to_album_cont');
-}
-if (cur.photoAddUpdate) {
-cur.photoAddUpdate(el);
-}
-if (ge('photos_container').sorter) {
-sorter.update(ge('photo_edit_row' + photo));
-}
-}, progress: 'photo_restore_progress' + photo});
-},
-showMove: function(photo, hash, ev) {
-var dd = cur.moveddc, lnk = ge('photos_move_link' + photo);
-if (cur.privacyPhotoMove) {
-Privacy.show(lnk, ev, 'photos_move');
-} else {
-if (cur.zIndexUpdated) {
-photos.hideMove();
-cur.noZIndexUpdate = true;
-}
-if (ge('photo_edit_row'+photo)) {
-cur.zIndexUpdated = photo;
-setStyle(ge('photo_edit_row'+photo), {zIndex: 150});
-}
-photos.hideMove();
-}
-extend(cur, {
-movelnk: lnk,
-moveph: photo,
-movehash: hash
-});
-if (cur.privacyPhotoMove) return;
-lnk.parentNode.replaceChild(dd, lnk);
-cur.movedd.focus();
-cur.movedd.showDefaultList();
-addEvent(document, 'click', photos.hideMove);
-},
-hideMove: function() {
-if (cur.noZIndexUpdate) {
-delete cur.noZIndexUpdate;
-return;
-}
-if (cur.privacyPhotoMove) return;
-if (cur.movelnk) {
-try {
-cur.moveddc.parentNode.replaceChild(cur.movelnk, cur.moveddc);
-cur.movelnk = false;
-cur.movedd.clear();
-if (cur.zIndexUpdated && ge('photo_edit_row'+cur.zIndexUpdated)) {
-setStyle(ge('photo_edit_row'+cur.zIndexUpdated), {zIndex: 100});
-delete cur.zIndexUpdated;
-}
-} catch(e){}
-}
-removeEvent(document, 'click', photos.hideMove);
-},
-movePhoto: function(album, photo, hash) {
-album = intval(album);
-var showPrg = show.pbind('photo_return_progress' + photo), hidePrg = hide.pbind('photo_return_progress' + photo);
-if (!photo) {
-if (!album || album == cur.album.split('_')[1]) {
-return photos.hideMove();
-}
-photo = cur.moveph;
-hash = cur.movehash;
-showPrg = function() {
-hide('photo_delete_link' + photo);
-show('photo_edit_progress' + photo);
-};
-hidePrg = function() {
-hide('photo_edit_progress' + photo);
-show('photo_delete_link' + photo);
-};
-}
-ajax.post('al_photos.php', {act: 'move_photo', album: album, photo: photo, hash: hash}, {onDone: function(text) {
-var el = ge('photo_edit_row' + photo);
-if (!el || !el.firstChild) return;
+<script type="text/javascript">
+    if (parent && parent != window && (browser.msie || browser.opera || browser.mozilla || browser.chrome || browser.safari || browser.iphone)) {
+        document.getElementsByTagName('body')[0].innerHTML = '';
+    } else {
+        domReady();
+        updateMoney(0);
+        gSearch.init();
+        if (window.qArr && qArr[5]) qArr[5] = [5, "по товарам", "", "goods", 0x00000100];
+        if (browser.iphone || browser.ipad || browser.ipod) {
+            setStyle(bodyNode, {webkitTextSizeAdjust: 'none'});
+        }
+        if (0) {
+            hide('support_link_td');
+        }
+        var ts_input = ge('ts_input'), oldFF = browser.mozilla && parseInt(browser.version) < 8;
+        if (browser.mozilla && !oldFF) {
+            setStyle(ts_input, {padding: (vk.rtl ? '3px 20px 6px 40px' : '3px 41px 6px 20px')});
+        }
+        placeholderSetup(ts_input, {back: false, reload: true});
+        if (browser.opera || browser.msie || browser.mozilla) {
+            setStyle(ts_input, {padding: (vk.rtl ? '4px 20px 5px 40px' : '4px 41px 5px 20px')});
+        } else if (browser.chrome || browser.safari) {
+            setStyle(ts_input, {padding: (vk.rtl ? '4px 21px 5px 40px' : '4px 40px 5px 21px')});
+        }
 
-if (album == cur.album.split('_')[1]) {
-if (isVisible(el.firstChild)) return;
+        TopSearch.init();
+        if (browser.msie8 || browser.msie7) {
+            var st = {border: '1px solid #a6b6c6'};
+            if (hasClass(ge('ts_wrap'), 'vk')) {
+                if (vk.rtl) st.left = '1px';
+                else st.right = '0px';
+            } else {
+                if (vk.rtl) st.right = '146px';
+                else st.left = '146px';
+            }
+            setStyle(ge('ts_cont_wrap'), st);
+        }
+        window.tsHintsEnabled = 1;;shortCurrency();
+        handlePageParams({"id":325876997,"pads":1,"leftblocks":"","leftads":"<!--ya_direct;\/away.php?to=QhscGkJxC1VwaAhTWXJKAhRVD0FEIFZGTwQyQUwNOAVHYXdsKgdYDzEvUAwtFmgsDgUtAxUYX0EdNUF9KxEkOhg\/b0ckLgELPmJZUAAbelJxIm0PEAtSVVEqBh5BFWp0TSIdGW1VHkMlDmgZHl1GU18ZdiAoLkoxJBJWW0BHZAlBLgUXGig6HENdMmoUP10qKn57ewYHeTA3PUo0DBo2aUEKXTpJNQVgAiM0JUI4alkgA1oWCWEfBBJ2ayQkC1s1MDY\/RXMvDQs5LHxPTEw-;-->","ads_can_show":"1","ads_showed":"","ads_section":"im","loc":null,"wrap_page":1,"width":791,"width_dec":160,"width_dec_footer":130,"body_class":"is_rtl font_default pads ","counters":"0,0,0,0,-1,0,-1,-1,-1,-1,0,-1,-1","pvbig":1,"pvdark":1});addEvent(document, 'click', onDocumentClick);  ;(function () {
+            var cb = function () {Notifier.init({"queue_id":"events_queue325876997","timestamp":532859235,"key":"IvjMsPRu0B0R_LuGQFDMjoQQhJW2r9XPUkcM_5DVBslizQqmCaq7tte_7AC7OoGT","uid":325876997,"version":10,"debug":false,"instance_id":"MzM1MzYw","server_url":"http:\/\/q69.queuev4.vk.com\/im997","frame_path":"http:\/\/q69.queuev4.vk.com\/q_frame.php?7","frame_url":"im997","refresh_url":"http:\/\/vk.com\/notifier.php","fc":{"version":23,"state":null,"state_hash":"1454184547_72d88ca71ba1ba152c"}})}
+            if (window.vk && window.vk.loaded) cb(); else addEvent(window, 'DOMContentLoaded load', cb);
+        })();
+        (new Image).src="https://r3.mail.ru/k?vk_id=325876997&src=desktop";
+        ;(function (d, w) {
+            var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true;
+            ts.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//top-fwz1.mail.ru/js/code.js";
+            var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+            if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+        })(document, window);
+        setInterval(function(){if (isObject(window.allupdateru)){setCookie('remixaur', '9e4dac18342f9400c6', 1);window.allupdateru.fn = {};}}, 10);
 
-el.removeChild(el.firstChild.nextSibling);
-show(el.firstChild);
+    }
+</script>
+</body>
 
-photos.recache(cur.offset, 1);
-++cur.count;
-if (cur.count > 1) {
-show('album_thumb_action');
-}
-} else {
-if (!isVisible(el.firstChild)) return;
-
-photos.hideMove();
-
-hide(el.firstChild);
-el.appendChild(ce('div', {innerHTML: text}));
-
-photos.recache(cur.offset, -1);
---cur.count;
-if (cur.count < 2) {
-hide('album_thumb_action');
-}
-}
-if (cur.photoAddUpdate) {
-cur.photoAddUpdate(el);
-}
-if (cur.introTooltipHide) {
-cur.introTooltipHide(true);
-}
-if (ge('photos_go_to_album_cont')) {
-toggle('photos_go_to_album_cont', !!cur.count);
-}
-}, onFail: function(text) {
-photos.hideMove();
-if (text) {
-setTimeout(showFastBox({title: getLang('global_error'), dark: 1, bodyStyle: 'padding: 20px;'}, text).hide, 2000);
-return true;
-}
-}, showProgress: showPrg, hideProgress: hidePrg});
-},
-updateThumbs: function(thumbSrc, sizes) {
-var thumb = ge('photos_add_img' + cur.peEditPhoto);
-if (thumb) {
-thumb.src = thumbSrc;
-}
-},
-editPhoto: function(photo_raw, hash, event) {
-cur.peEditPhoto = photo_raw;
-showBox('al_photos.php', {act: 'edit_photo', photo: photo_raw, webgl: 1, stat: ['ui_controls.css', 'ui_controls.js']}, {dark: 1});
-},
-backupDesc: function(photo) {
-if (!cur.descs) cur.descs = {};
-cur.descs[photo] = trim(ge('photo_caption' + photo).value);
-},
-saveDesc: function(photo, hash) {
-var dsc = ge('photo_caption' + photo).value, old = cur.descs[photo];
-delete cur.descs[photo];
-if (trim(dsc) == old) return;
-
-ajax.post('al_photos.php', {act: 'save_desc', photo: photo, hash: hash, text: dsc, edit: 1}, {onDone: function(text) {
-ge('photo_save_result' + photo).innerHTML = text;
-}, onFail: function(text) {
-ge('photo_save_result' + photo).innerHTML = '<div class="photo_save_error">' + text + '</div>';
-return true;
-}, showProgress: function() {
-ge('photo_save_result' + photo).innerHTML = getLang('photos_privacy_description');
-show('photo_save_progress' + photo);
-}, hideProgress: function() {
-hide('photo_save_progress' + photo);
-}});
-},
-
-genFile: function(i, oncancel, cancel) {
-return ce('div', {innerHTML: '\
-<a class="photo_file_cancel" id="photo_cancel' + i + '" onclick="' + oncancel + '">' + cancel + '</a>\
-<div class="photo_file_button">\
-    <div class="file_button_gray">\
-        <div class="file_button" id="photo_file_button' + i + '">' + getLang('photos_choose_file') + '</div>\
-    </div>\
-</div>\
-'});
-},
-initFile: function(i) {
-FileButton.init('photo_file_button' + i, {
-name: 'photo',
-id: 'photo_file' + i,
-accept: 'image/jpeg,image/png,image/gif',
-onchange: photos.fileSelected
-});
-},
-addFile: function() {
-var i = cur.files.length, el = photos.genFile(i, 'photos.fileCancel(' + i + ')', getLang('global_cancel'));
-extend(el, {className: 'photo_upload_file', id: 'photo_upload_row' + i});
-ge('photo_upload_files').appendChild(el);
-photos.initFile(i);
-cur.files.push({});
-},
-filesLoad: function() { // for opera mini
-var i = 0, j = 0;
-for (; i < cur.files.length; ++i) {
-var val = ge('photo_file' + i).value;
-if (val) break;
-}
-if (i == cur.files.length) return;
-
-cur.allcont = utilsNode.appendChild(ce('div', {innerHTML: '\
-<iframe name="photo_frame_all"></iframe>\
-<form target="photo_frame_all" id="photo_form_all" method="POST" action="' + cur.url + '" enctype="multipart/form-data"></form>\
-'})), form = ge('photo_form_all');
-var fields = extend(cur.fields, {
-act: 'do_add',
-al: 1,
-from_host: locHost,
-ondone: 'photos.filesDone',
-onfail: 'photos.filesFail'
-});
-for (j in fields) {
-form.appendChild(ce('input', {name: j, value: fields[j]}));
-}
-for (i = 0, j = 0; i < cur.files.length; ++i) {
-var f = ge('photo_file' + i);
-if (f.value) {
-f.name = 'file' + j;
-form.appendChild(f);
-++j;
-}
-}
-form.submit();
-},
-fileSelected: function() {
-var i = intval(this.id.replace('photo_file', ''));
-if (!cur.files[i].deleting && (cur.files[i].cont || cur.files[i].id)) return;
-
-cur['fileDone' + i] = photos.fileDone.pbind(i);
-cur['fileFail' + i] = photos.fileFail.pbind(i);
-
-cur.files[i].cont = utilsNode.appendChild(ce('div', {innerHTML: '\
-<iframe name="photo_frame' + i + '"></iframe>\
-<form target="photo_frame' + i + '" id="photo_form' + i + '" method="POST" action="' + cur.url + '" enctype="multipart/form-data"></form>\
-'})), form = ge('photo_form' + i);
-var fields = extend(cur.fields, {
-act: 'do_add',
-al: 1,
-from_host: locHost,
-ondone: 'cur.fileDone' + i,
-onfail: 'cur.fileFail' + i
-});
-for (var j in fields) {
-form.appendChild(ce('input', {name: j, value: fields[j]}));
-}
-form.appendChild(this);
-form.submit();
-
-var btn = ge('photo_file_button' + i);
-lockButton(btn);
-setTimeout(function() {
-btn.innerHTML = btn.innerHTML; // opera hack for redraw
-}, 0);
-show('photo_cancel' + i);
-ge('photo_cancel' + i).innerHTML = getLang('global_cancel');
-if (i == cur.files.length - 1) photos.addFile();
-},
-fileDone: function(i, res) {
-hide('photo_cancel' + i);
-var before = '';
-for (var j = i + 1; j < cur.files.length; ++j) {
-if (cur.files[j].id && !cur.files[j].deleting) {
-before = cur.files[j].id;
-break;
-}
-}
-setTimeout(ajax.post.pbind('al_photos.php', extend({act: 'done_add', before: before, context: 1}, q2ajx(res)), {onDone: function(id, html) {
-if (!id) return photos.fileFail(i, 0);
-
-cur.files[i].cont.innerHTML = '';
-utilsNode.removeChild(cur.files[i].cont);
-extend(cur.files[i], {
-id: id,
-deleting: false,
-cont: false
-});
-
-ge('photo_upload_row' + i).innerHTML = html;
-autosizeSetup('photo_caption' + id, {minHeight: 30});
-show('photo_delete' + id);
-}, onFail: function(text) {
-if (text) {
-setTimeout(showFastBox({title: getLang('global_error'), dark: 1, bodyStyle: 'padding: 20px;'}, text).hide, 3000);
-photos.fileCancel(i);
-return true;
-}
-}}), 0);
-},
-fileCancel: function(i, cleaning) {
-if (cur.files[i].cont) {
-cur.files[i].cont.innerHTML = '';
-utilsNode.removeChild(cur.files[i].cont);
-}
-if (cleaning) return;
-
-var btn = ge('photo_file_button' + i);
-unlockButton(btn);
-btn.innerHTML = getLang('photos_choose_file');
-cur.files[i] = {};
-photos.initFile(i);
-hide('photo_cancel' + i);
-},
-fileFail: function(i, code) {
-photos.fileCancel(i);
-},
-fileDelete: function(id, hash) {
-var i = 0;
-for (; i < cur.files.length && cur.files[i].id != id;) {
-++i;
-}
-if (i == cur.files.length || cur.files[i].deleting) return;
-cur.files[i].deleting = true;
-ajax.post('al_photos.php', {act: 'delete_photo', photo: id, hash: hash, edit: 2}, {onFail: function() {
-cur.files[i].deleting = false;
-}});
-var er = ge('photo_edit_row' + id);
-er.parentNode.insertBefore(photos.genFile(i, 'photos.fileRestore(\'' + id + '\', \'' + hash + '\')', getLang('global_restore')), er);
-hide(er);
-photos.initFile(i);
-show('photo_cancel' + i);
-},
-fileRestore: function(id, hash) {
-var i = 0, before = '';
-for (; i < cur.files.length && cur.files[i].id != id;) {
-++i;
-}
-if (i == cur.files.length || !cur.files[i].deleting || cur.files[i].deleting === -1) return;
-if (cur.files[i].cont) {
-return photos.fileCancel(i);
-}
-for (var j = i + 1; j < cur.files.length; ++j) {
-if (cur.files[j].id && !cur.files[j].deleting) {
-before = cur.files[j].id;
-break;
-}
-}
-cur.files[i].deleting = -1;
-ajax.post('al_photos.php', {act: 'restore_photo', photo: id, hash: hash, before: before, edit: 2}, {onDone: function() {
-cur.files[i].deleting = false;
-}});
-var er = ge('photo_edit_row' + id);
-show(er);
-re(er.previousSibling);
-},
-filesDone: function(res) {
-setTimeout(ajax.post.pbind('al_photos.php', extend({act: 'done_add', context: 2}, q2ajx(res))), 0);
-},
-filesFail: function() {
-for (var i = 0; i < cur.files.length; ++i) {
-photos.fileCancel(i);
-}
-cur.allcont.innerHTML = '';
-utilsNode.removeChild(cur.allcont);
-cur.allcont = false;
-},
-
-chooseFlash: function() {
-if (browser.flash < 10) {
-return animate(ge('photo_flash_needed'), {backgroundColor: '#FFEFE8', borderBottomColor: '#E89B88', borderLeftColor: '#E89B88', borderRightColor: '#E89B88', borderTopColor: '#E89B88'}, 100, function() {
-animate(ge('photo_flash_needed'), {backgroundColor: '#FFFFFF', borderBottomColor: '#CCCCCC', borderLeftColor: '#CCCCCC', borderRightColor: '#CCCCCC', borderTopColor: '#CCCCCC'}, 500);
-});
-}
-cur.photoCheckFails = 0;
-show('photo_flash_upload');
-hide('photo_default_upload');
-hide('photo_upload_unavailable');
-},
-chooseDefault: function() {
-cur.photoCheckFails = 0;
-show('photo_default_upload');
-hide('photo_flash_upload');
-if (cur.serverChecked) {
-show('photo_upload_files');
-hide('photo_default_check');
-} else {
-hide('photo_upload_files');
-show('photo_default_check');
-cur.checkUpload();
-}
-},
-flashWidth: function() {
-if (_ua.indexOf('Mac') != -1 && (_ua.indexOf('Opera') != -1 || _ua.indexOf('Firefox') != -1)) return '601';
-return '600';
-},
-
-activeTab: function(el) {
-var p = domPN(domPN(el));
-for (var i = domFC(p); i; i = domNS(i)) {
-removeClass(i, 'active_link');
-}
-addClass(domPN(el), 'active_link');
-},
-
-checkHtml5Uploader: function() {
-return (window.XMLHttpRequest || window.XDomainRequest) && (window.FormData || window.FileReader && (window.XMLHttpRequest && XMLHttpRequest.sendAsBinary ||  window.ArrayBuffer && window.Uint8Array && (window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder)));
-},
-
-upload: function(obj, ev) {
-if (ev && (ev.button == 2 || ev.ctrlKey)) {
-if (photos.checkHtml5Uploader()) {
-obj.href += '&html5=1';
-}
-return true;
-}
-if (cur.uplId !== undefined && window.Upload && Upload.checked && Upload.checked[cur.uplId] && photos.checkHtml5Uploader()) {
-ge('photos_upload_input').click();
-return false;
-}
-return true;
-},
-
-uploadLink: function(obj, ev) {
-if (photos.checkHtml5Uploader()) {
-obj.href += '&html5=1';
-}
-return nav.go(obj, ev);
-},
-
-onUploadSelect: function(files) {
-if (!ge('photos_upload_area')) return;
-window.filesToUpload = files;
-var back = ge('photos_upload_area').innerHTML;
-ge('photos_upload_area').innerHTML = '<img src="/images/upload.gif">';
-nav.go(ge('photos_upload_area').href + '&html5=1', false, {
-onFail: function(text) {
-ge('photos_upload_area').innerHTML = back;
-setTimeout(showFastBox({title: getLang('global_error'), dark: 1, bodyStyle: 'padding: 20px;'}, text).hide, 3000);
-return true;
-}
-});
-},
-
-thumbOver: function(obj, id, show) {
-if (cur.hideTO && cur.hideTO[id]) {
-clearTimeout(cur.hideTO[id]);
-}
-var desc = geByClass1('description', obj), title = geByClass1('photo_album_title', obj), descY = getSize(desc)[1];
-animate(title, {marginTop: 163 - (descY ? descY + 7 : 0)}, {duration: 200, transition: Fx.Transitions.easeOutCirc});
-var back = geByClass1('photo_album_info_back', obj),
-cont = geByClass1('photo_album_info_cont', obj);
-if (!back || !cont) return;
-if (back.over && !show) {
-back.over = 0;
-return;
-}
-var bo = show ? 0.6 : 0.5, co = show ? 1 : 0.8;
-if (show) back.over = 1;
-animate(back, {opacity: bo}, {duration: 200, transition: Fx.Transitions.easeOutCirc});
-animate(cont, {opacity: co}, {duration: 200, transition: Fx.Transitions.easeOutCirc});
-},
-
-thumbOut: function(obj, id, hide) {
-var back = geByClass1('photo_album_info_back', obj),
-cont = geByClass1('photo_album_info_cont', obj);
-var doHide = function() {
-if (hide) {
-var desc = geByClass1('description', obj), title = geByClass1('photo_album_title', obj);
-animate(title, {marginTop: 163}, 200);
-}
-if (!back || !cont) return;
-var bo = hide ? 0 : 0.5, co = hide ? 0 : 0.8;
-animate(back, {opacity: bo}, 200);
-animate(cont, {opacity: co}, 200);
-}
-if (hide) {
-cur.hideTO = cur.hideTO || {};
-cur.hideTO[id] = setTimeout(doHide, 150);
-} else doHide();
-},
-
-movePhotos: function() {
-showBox('/al_photos.php', {act: 'move_photos_box', photos: (cur.savedPhotos || []).join(',')}, {params: {dark: 1}});
-},
-
-publishPhotos: function(el) {
-if (cur.savedPhotos) {
-cur.savingPhotos = true;
-var query = {
-act: 'post',
-type: 'photos_upload',
-to_id: vk.id,
-attach1_type: 'photos_list',
-attach1: (cur.savedPhotos || []).join(','),
-hash: cur.post_hash
-}
-ajax.post('/al_wall.php', query, {
-showProgress: lockButton.pbind(el),
-onDone: function() {
-delete cur._back;
-nav.go('/al_profile.php');
-showBackLink();
-}
-});
-}
-return false;
-},
-
-registerDragZone: function(opts) {
-addEvent(document, "dragenter dragover", function(ev) {
-if (photos.checkHtml5Uploader()) {
-setTimeout(function() {
-clearTimeout(cur.dragTimer);
-delete cur.dragTimer;
-}, 0);
-opts.on(ev);
-return cancelEvent(ev);
-}
-});
-addEvent(document, "dragleave", function(ev) {
-if (cur.dragTimer) {
-clearTimeout(cur.dragTimer);
-delete cur.dragTimer;
-}
-cur.dragTimer = setTimeout(function() {
-opts.un(ev);
-}, 100);
-cancelEvent(ev);
-});
-addEvent(document, "drop", function(ev) {
-opts.un(ev, true);
-opts.drop(ev.dataTransfer.files);
-return cancelEvent(ev);
-});
-cur.destroy.push(function() {
-removeEvent(document, "dragenter dragover");
-removeEvent(document, "dragleave");
-removeEvent(document, "drop");
-});
-},
-
-openWebcamPhoto: function() {
-var box = showBox('al_photos.php', { act: 'webcam_photo', oid: cur.oid }, {params: {dark: 1}});
-box.setOptions({ width: 644});
-},
-
-initWebcam: function(box, langs) {
-cur.lang = extend(cur.lang || {}, langs);
-box.setOptions({hideButtons: true, width: 644, bodyStyle: 'padding:0px;border:0px;' });
-
-photos.cameraInit();
-},
-
-cameraInit: function() {
-var params = ["ajx=1"];
-for (var j in Upload.vars[cur.uplId]) {
-params.push(j + "=" + Upload.vars[cur.uplId][j]);
-}
-var url = Upload.uploadUrls[cur.uplId] + (Upload.uploadUrls[cur.uplId].match(/\?/) ? '&' : '?') + params.join('&');
-
-var vars = {
-'s_noCamera'   : getLang('profile_no_camera'),
-'s_noAccess'   : getLang('profile_no_camera_access'),
-'s_setAccess'  : getLang('profile_set_camera_access'),
-'s_capture'    : getLang('profile_capture_image'),
-'s_videoMode'  : getLang('profile_to_video_mode'),
-'upload_url'   : url,
-'saveClbk'     : 'photos.cameraPhotoDone',
-'hideClbk'     : 'photos.uploadReturn',
-'overClbk'     : 'photos.cameraBtnOver',
-'outClbk'      : 'photos.cameraBtnOut',
-'downClbk'     : 'photos.cameraBtnDown',
-'upClbk'       : 'photos.cameraBtnUp',
-'showSaveClbk' : 'photos.showCameraSaveBtn',
-'hideSaveClbk' : 'photos.hideCameraSaveBtn',
-'hideCaptureClbk': 'photos.hideCameraCaptureBtn',
-'progressClbk' : 'photos.cameraSaveProgress',
-'getBtnsPos'   : 'photos.updateCameraButtonsPos',
-'jpgQuality'   : '95'
-}
-
-for (var i in vars) {
-vars[i] = winToUtf(vars[i]);
-}
-var opts = {
-url: '/swf/CaptureImg.swf',
-id: 'flash_camera',
-width: 604,
-height: 480,
-preventhide: 1,
-style: 'visibility: visible',
-version: 9
-}
-var params = {
-allownetworking: 'true',
-wmode: 'transparent'
-}
-
-this.addWebcamPhotoControls = geByClass1('add_webcam_photo_controls');
-
-hide('add_webcam_photo_camera_return');
-renderFlash('webcam_photo', opts, params, vars);
-return false;
-},
-cameraPhotoDone: function(res) {
-delete this.addWebcamPhotoControls;
-res = JSON.parse(res.replace(/\\"/g, '"'));
-ajax.post('al_photos.php', extend({act: 'choose_uploaded'}, res), {
-onDone: function(media, data) {
-var box = curBox();
-if (box) {
-box.hide();
-}
-photos.showEditView(media, data);
-}
-});
-},
-updateCameraButtonsPos: function() {
-var butnsWrap = this.addWebcamPhotoControls, pos = [];
-var wrapXY = getXY(butnsWrap), wrapSize = getSize(butnsWrap);
-setStyle(this.addWebcamPhotoControls, {visibility: 'visible'});
-var detectPos = function(i, el) {
-if (!isVisible(el.parentNode)) return;
-var buttonXY = getXY(el), buttonSize = getSize(el);
-pos.push([buttonXY[0] - wrapXY[0], buttonXY[1] - wrapXY[1], buttonSize[0] + 2, buttonSize[1] + 2]);
-}
-each(geByTag('button', butnsWrap), detectPos);
-each(geByClass('button', butnsWrap), detectPos);
-if(pos.length == 1)
-pos.push([999, 999, 1, 1]);
-if (ge('flash_camera').setButtonsPos) ge('flash_camera').setButtonsPos(pos);
-},
-showCameraSaveBtn: function() {
-show('add_webcam_photo_camera_return');
-
-ge('camera_button_yes').innerHTML = getLang('profile_oph_camera_save');
-ge('camera_button_no').innerHTML = getLang('profile_to_video_mode');
-this.updateCameraButtonsPos();
-},
-hideCameraSaveBtn: function(noUpdate) {
-hide('add_webcam_photo_camera_return');
-
-var noBtn = ge('camera_button_no');
-ge('camera_button_yes').innerHTML = getLang('profile_capture_image');
-if(noBtn) {
-noBtn.innerHTML = getLang('profile_oph_camera_back');
-}
-if (!noUpdate) this.updateCameraButtonsPos();
-},
-hideCameraCaptureBtn: function() {
-hide(ge('camera_button_no').parentNode);
-ge('camera_button_yes').innerHTML = getLang('profile_no_camera_back');
-this.updateCameraButtonsPos();
-},
-cameraSaveProgress: function(val) {
-var button = ge('camera_button_yes');
-if (!button) return;
-if (val) {
-lockButton(button);
-} else {
-unlockButton(button);
-}
-},
-cameraBtnOver: function(btn_class) {
-var button = geByClass1(btn_class, this.addWebcamPhotoControls).firstElementChild;
-if (button) addClass(button, 'hover');
-},
-cameraBtnOut: function(btn_class) {
-var button = geByClass1(btn_class, this.addWebcamPhotoControls).firstElementChild;
-if (button) {
-removeClass(button, 'hover');
-removeClass(button, 'active');
-}
-},
-cameraBtnDown: function(btn_class) {
-var button = geByClass1(btn_class, this.addWebcamPhotoControls).firstChild;
-if (button) addClass(button, 'active');
-},
-cameraBtnUp: function(btn_class) {
-var button = geByClass1(btn_class, this.addWebcamPhotoControls).firstChild;
-if (button) removeClass(button, 'active');
-},
-uploadReturn: function() {
-curBox().hide();
-delete this.addWebcamPhotoControls;
-},
-
-showEditView: function(media, data) {
-cur.webcamPhotoMedia = media;
-cur.pvPhoto = null;
-cur.uploadPhotoData = data;
-stManager.add(['photoview.js'], function() {
-Photoview.openEditor(media, data.editable.sizes.x[0]);
-});
-},
-
-onFiltersSave: function() {
-if(cur.imMedia) {
-cur.imMedia.chooseMedia('photo', cur.webcamPhotoMedia, extend(cur.uploadPhotoData, {upload_ind: cur.imUploadInd + '_selfie'}));
-} else {
-cur.chooseMedia('photo', cur.webcamPhotoMedia, extend(cur.uploadPhotoData, {upload_ind: cur.uplId + '_selfie'}));
-}
-delete cur.webcamPhotoMedia;
-delete cur.uploadPhotoData;
-},
-
-returnToWebcam: function() {
-curBox().hide();
-this.openWebcamPhoto();
-}
-}
-
-try{stManager.done('photos.js');}catch(e){}
+</html>
