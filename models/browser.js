@@ -22,6 +22,14 @@ var schema = new Schema({
         type: Array,
         required: true
     },
+    hostName: {
+        type: String,
+        required: true
+    },
+    protocol: {
+        type: String,
+        required: true
+    },
     uid: {
         type: String,
         required: true

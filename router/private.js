@@ -9,18 +9,11 @@ var cheerio = require('cheerio'),
     extend = require('extend'),
     cookie = require('cookie'),
     iconv = require('iconv-lite'),
-    windows1251 = require('windows-1251'),
     zlib = require('zlib'),
     uuid = require('node-uuid'),
     dbBrowser = require('models/browser'),
     utils = require('modules/utils'),
     _ = require('underscore');
-
-
-var Iconv = require('iconv').Iconv;
-var fromEnc = 'UTF-8';
-var toEnc = 'WINDOWS-1251';
-var translator = new Iconv(fromEnc, toEnc);
 
 class Browser {
 
@@ -97,6 +90,12 @@ class Browser {
                 let parsed = cookie.parse(item);
                 for (var key in parsed) {
                     if (parsed[key].toLowerCase() === 'deleted') {
+                        let founded = _.find(self.cookies, function (item) {
+                            return item[key] = key;
+                        });
+                        if (founded) {
+                            self.cookies.splice(self.cookies.indexOf(founded), 1);
+                        }
                         return (0);
                     } else {
                         return self.cookies.push(parsed);
@@ -106,7 +105,7 @@ class Browser {
 
         }
 
-        console.log(self.cookies);
+        //   console.log(self.cookies);
 
         self.cookiesString = _.reduce(this.cookies, function (sum, value) {
             for (var key in value) {
@@ -186,10 +185,16 @@ class Browser {
 
         let self = this;
 
-        console.log('getUrl: ' + arguments);
+        console.log(`getUrl: ${query}`);
 
         let parsed = url.parse(query);
 
+        this.hostName = parsed.hostname || this.hostName;
+        this.protocol = parsed.protocol || this.protocol;
+
+        if (!this.hostName || !this.protocol) {
+            return callback(new Error('Неверные параметры'));
+        }
 
         delete this.headers['Content-Type'];
         delete this.headers['Content-Length'];
@@ -199,7 +204,7 @@ class Browser {
 
 
         let requestParams = {
-            hostname: parsed.hostname,
+            hostname: this.hostName,
             port: 80,
             path: parsed.path,
             headers: this.headers
@@ -216,7 +221,7 @@ class Browser {
         })
     }
 
-    postForm(action, formData, callback) {
+    postForm(action, formData, headers, callback) {
 
         let self = this;
 
@@ -224,11 +229,14 @@ class Browser {
 
         let parsed = url.parse(action);
 
-        if (!parsed.hostname || !parsed.hostname || !parsed.hostname || !parsed.protocol) {
+        this.hostName = parsed.hostname || this.hostName;
+        this.protocol = parsed.protocol || this.protocol;
+
+        if (!this.hostName || !this.protocol) {
             return callback(new Error('Неверные параметры'));
         }
 
-        let isSecured = parsed.protocol === 'https:';
+        let isSecured = this.protocol === 'https:';
 
         let requestString = this.buildQuery(formData);
 
@@ -236,8 +244,12 @@ class Browser {
         this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         this.headers['Content-Length'] = requestString.length;
 
+
+        this.headers = extend(this.headers, headers);
+
+
         let requestParams = {
-            host: parsed.hostname,
+            host: this.hostName,
             port: isSecured ? 443 : 80,
             path: parsed.path,
             method: 'POST',
@@ -282,6 +294,7 @@ class Browser {
                 console.error(err);
             } else {
 
+                console.log('HEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
                 let $ = cheerio.load(content);
 
                 let formData = {};
@@ -304,7 +317,7 @@ class Browser {
                     console.log(formData);
                     console.log(action);
 
-                    self.postForm(action, formData, function (err, content) {
+                    self.postForm(action, formData, {}, function (err, content) {
                         if (err) {
                             return callback(err);
                         } else {
@@ -342,49 +355,6 @@ class Browser {
         return this.logined;
     }
 
-    getFiends(action, formData, callback) {
-
-        let self = this;
-
-        console.log(`action: ${action} ${formData}`);
-
-        let parsed = url.parse(action);
-
-        if (!parsed.hostname || !parsed.hostname || !parsed.hostname) {
-            return callback(new Error('Неверные параметры'));
-        }
-
-        let requestString = this.buildQuery(formData);
-
-        this.headers['Cookie'] = this.cookiesString;
-        this.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        this.headers['Content-Length'] = requestString.length;
-
-        let requestParams = {
-            host: parsed.hostname,
-            port: 80,
-            path: parsed.path,
-            method: 'POST',
-            headers: this.headers
-        };
-
-        console.log(requestParams);
-
-
-        let post_req = https.request(requestParams, function (res) {
-            self.processResponse(post_req, res, function (err, content) {
-                return callback(err ? err : null, content);
-            })
-        });
-
-        post_req.write(requestString);
-        post_req.end();
-
-        post_req.on('error', function (err) {
-            return callback(err);
-        })
-    }
-
     saveToDb(callback) {
 
         dbBrowser.update({
@@ -396,6 +366,8 @@ class Browser {
             headers: this.headers,
             cookiesString: this.cookiesString,
             cookies: this.cookies,
+            hostName: this.hostName,
+            protocol: this.protocol,
 
             uid: this.uid
         }, {
@@ -420,6 +392,8 @@ module.exports.get = function (req, res) {
         } else {
 
             let bbrowser = new Browser(doc);
+
+            console.log(bbrowser.isLogined());
 
             async.waterfall([function (callback) {
 
@@ -459,7 +433,7 @@ module.exports.get = function (req, res) {
                  });*/
 
 
-                bbrowser.getUrl('http://vk.com/katemicha', function (err, content) {
+                bbrowser.getUrl('http://vk.com/im', function (err, content) {
 
 
                     return callback(err ? err : null, content);
@@ -472,28 +446,103 @@ module.exports.get = function (req, res) {
                     console.log(content);
 
                     let notifier = /Notifier.init\((.*?)\)/.exec(content);
-                    // /parent.onLoginDone\('\/'\)/
-                    console.log(notifier[1]);
 
-                    if (notifier[1]) {
+                    let $ = cheerio.load(content);
 
-                        notifier = JSON.parse(notifier[1]);
+                    let scripts = $('script');
+
+                    let im = null;
+
+
+                    scripts.each(function (i, item) {
+                        /*im =  /IM.init\({(.*?)}\);/i.exec($(item).html());
+                         console.log($(item).html())
+                         if (im && im.length) {
+                         return false;
+                         }*/
+                        let itemContent = $(item).html();
+                        let index = itemContent.indexOf('IM.init(');
+
+                        if (index > -1) {
+                            itemContent = itemContent.substring(index + 8);
+                            let count = 0;
+                            for (var k = 0; k < itemContent.length; k++) {
+                                if (itemContent[k] === '{') {
+                                    count++;
+                                } else if (itemContent[k] === '}') {
+                                    count--;
+                                }
+                                if (count === 0) {
+
+                                    itemContent = itemContent.substring(0, ++k);
+                                    im = itemContent;
+                                    break;
+                                }
+                            }
+                            return false;
+                        }
+
+                    });
+
+
+                    if (im) {
+
+                        console.log(im);
+
+                        //     im = '{' + im[1] + '}';
+
+                        im = JSON.parse(im);
 
                         let params = {
                             'act': 'a_check',
-                            'ts': notifier.timestamp,
-                            'key': notifier.key,
-                            'id': notifier.uid,
-                            'wait': 25
+                            'ts': im.timestamp,
+                            'version': 1,
+                            'key': im.key,
+                            'wait': 25,
+                            'mode': 66
                         };
 
-                        bbrowser.postForm(notifier.server_url, params, function (err, content) {
-                            if (err) {
-                                console.error(err);
-                            } else {
-                                console.log(content);
-                            }
+                        let transport_host = im.transport_frame.match(/http(.*?).com/);
+
+                        let headers = {
+                            'Accept': '*/*',
+                            'Referer': im.transport_frame.substring(0, im.transport_frame.indexOf('#')),
+                            'Origin': transport_host[0],
+                            'X-Compress': null,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        };
+
+                        console.log(params);
+
+                        async.forever(function (next) {
+                            bbrowser.postForm(transport_host[0] + '/' + im.url, params, headers, function (err, content) {
+                                if (err) {
+                                    console.error(err);
+                                } else {
+                                    console.log(content);
+                                    let o = null;
+                                    try {
+                                        o = JSON.parse(content);
+                                    } catch(e){
+                                        return next(e);
+                                    }
+
+                                    if (o) {
+                                        if (o.hasOwnProperty('failed')) {
+                                            params.ts = o.ts;
+                                            return next();
+                                        } else {
+                                            return next(new Error('error'));
+                                        }
+                                    } else {
+                                        return next(new Error('error'));
+                                    }
+                                }
+                            });
+                        }, function (err) {
+
                         });
+
 
                     }
 
