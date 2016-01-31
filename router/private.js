@@ -24,9 +24,7 @@ class Browser {
         }
 
         let defaults = {
-            //username: options.username,
-            // email: options.email,
-            //pass: options.pass ,
+            vkObj: {},
             uid: uuid.v1(),
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -48,8 +46,6 @@ class Browser {
 
         defaults = extend(defaults, options);
 
-        //  console.log(defaults);
-
         this.username = defaults.username;
 
         this.email = defaults.email;
@@ -70,10 +66,7 @@ class Browser {
 
         this.protocol = defaults.protocol;
 
-        /*switch (options.browser) {
-         case 'chrome':
-         break;
-         }*/
+        this.vkObj = defaults.vkObj;
 
     }
 
@@ -194,7 +187,6 @@ class Browser {
         }
     }
 
-
     getUrl(query, callback) {
 
         let self = this;
@@ -300,7 +292,8 @@ class Browser {
         })
     }
 
-    processContent(content, callback) {
+    processContentLogin(content, callback) {
+
         let self = this;
 
         console.log('done');
@@ -334,7 +327,7 @@ class Browser {
                 if (err) {
                     return callback(err);
                 } else {
-                    return self.processContent(content, callback);
+                    return self.processContent(content, 'login', callback);
                 }
             });
 
@@ -349,7 +342,7 @@ class Browser {
                 if (err) {
                     return callback(err);
                 } else {
-                    return self.processContent(content, callback);
+                    return self.processContent(content, 'login', callback);
                 }
             });
 
@@ -371,7 +364,7 @@ class Browser {
                             if (err) {
                                 return callback(err);
                             } else {
-                                return self.processContent(content, callback);
+                                return self.processContent(content, 'login', callback);
                             }
                         });
                     case 4:
@@ -381,7 +374,7 @@ class Browser {
                                 if (err) {
                                     return callback(err);
                                 } else {
-                                    return self.processContent(content, callback);
+                                    return self.processContent(content, 'login', callback);
                                 }
                             });
                         } else {
@@ -393,14 +386,16 @@ class Browser {
                             if (err) {
                                 return callback(err);
                             } else {
-                                return self.processContent(content, callback);
+                                return self.processContent(content, 'login', callback);
                             }
                         });
                 }
             }
         }
 
-        /*let scripts = $('script');
+        let scripts = $('script');
+
+        let vkObj = null;
 
         scripts.each(function (i, item) {
 
@@ -408,31 +403,345 @@ class Browser {
             let index = itemContent.indexOf('var vk = ');
 
             if (index > -1) {
-                itemContent = itemContent.substring(index + 8);
-                let obj = self._parseJSON(self._getObj(itemContent));
-                if (obj) {
-
-                    this.logined = true;
-                    console.log(obj.id);
+                itemContent = itemContent.substring(index + 9);
+                let textObj = self._getObj(itemContent);
+                vkObj = eval(`(${textObj})`);
+                if (vkObj) {
+                    console.log(vkObj.id);
                 }
                 return false;
             }
-        });*/
+        });
 
         if ($('#logout_link')) {
-            return callback(null, 'logined')
+
+            this.logined = true;
+            this.vkObj = vkObj;
+
+            return callback(null, content);
         }
 
 
         if (this.tryLogin) {
-            return callback(new Error(`Neverniy login ili parol'`))
+            return callback(new Error(`Neverniy login ili parol'`));
         }
 
-        return callback(new Error(`Unprocesseble`))
+        return callback(new Error(`Unprocesseble`));
+    }
+
+    processContentIm(content, callback) {
+
+        let self = this;
+
+        console.log(content);
+
+        let $ = cheerio.load(content);
+
+        let scripts = $('script');
+
+        let im = null;
+
+        scripts.each(function (i, item) {
+
+            let itemContent = $(item).html();
+            let index = itemContent.indexOf('IM.init(');
+
+            if (index > -1) {
+                itemContent = itemContent.substring(index + 8);
+                im = self._getObj(itemContent);
+                return false;
+            }
+
+        });
+
+
+        if (im) {
+
+            console.log(im);
+
+            im = self._parseJSON(im);
+
+            if (im) {
+
+                let params = {
+                    'act': 'a_check',
+                    'ts': im.timestamp,
+                    'version': 1,
+                    'key': im.key,
+                    'wait': 25,
+                    'mode': 66
+                };
+
+                let transport_host = im.transport_frame.match(/http(.*?).com/);
+
+                let headers = {
+                    'Accept': '*/*',
+                    'Referer': im.transport_frame.substring(0, im.transport_frame.indexOf('#')),
+                    'Origin': transport_host[0],
+                    'X-Compress': null,
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+
+                console.log(params);
+
+                return callback(null, {
+                    headers: headers,
+                    params: params,
+                    query: transport_host[0] + '/' + im.url
+                });
+
+
+            } else {
+                return callback(new Error('error'));
+            }
+        } else {
+            return callback(new Error('v'));
+        }
+    }
+
+    _getFastChat(callback) {
+
+        let self = this;
+
+        let params = {
+            'act': 'a_get_fast_chat',
+            'al': '1'
+        };
+
+        let headers = {
+            'Accept': '*/*',
+            'Referer': `${self.currentUrl}`,
+            'Origin': `${self.protocol}//vk.com`,
+            'X-Compress': null,
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        self.postForm(`${self.protocol}//vk.com/al_im.php`, params, headers, function (err, answer) {
+            if (err) {
+                return callback(err);
+            } else {
+                console.log(answer);
+
+                return callback(null, utils.processVkResponse(answer));
+            }
+        });
+    }
+
+    _getReleaseLp(options, callback) {
+
+        let self = this;
+
+        self.postForm(options.query, options.params, options.headers, function (err, content) {
+            if (err) {
+                return callback(err);
+            } else {
+                return callback(null, content);
+            }
+        });
+    }
+
+    processContentLiving(content, callback) {
+        let self = this;
+
+        console.log(content);
+
+        let $ = cheerio.load(content);
+
+        let scripts = $('script');
+
+        let notifier = null;
+
+        scripts.each(function (i, item) {
+            let itemContent = $(item).html();
+            let index = itemContent.indexOf('Notifier.init(');
+            if (index > -1) {
+                itemContent = itemContent.substring(index + 14);
+                notifier = self._getObj(itemContent);
+                return false;
+            }
+        });
+
+        if (notifier) {
+
+            console.log(notifier);
+
+            notifier = self._parseJSON(notifier);
+
+            if (notifier) {
+
+                return callback(null, {
+                    notifier: notifier
+                })
+
+            } else {
+                return callback(new Error('error'));
+            }
+        } else {
+            return callback(new Error('v'));
+        }
+    }
+
+    processContent(content, type, callback) {
+
+        let self = this;
+
+        switch (type) {
+            case 'login':
+                return self.processContentLogin(content, callback);
+            case 'im':
+                return self.processContentIm(content, callback);
+            case 'mainpage':
+                return self.processContentLiving(content, callback);
+            default:
+                return callback(new Error('unknow type for process'));
+        }
+    }
+
+    checkLogin(callback) {
+
+        let self = this;
+
+        if (!self.isLogined()) {
+            self._login(function (err, mainpage) {
+                if (err) {
+                    return callback(err);
+                } else {
+                    self.saveToDb(function (err) {
+                        if (err) {
+                            return callback(err);
+                        } else {
+                            return callback(null, mainpage);
+                        }
+                    });
+                }
+            })
+        } else {
+            return callback(null, null);
+        }
     }
 
 
-    login(callback) {
+    living(callback) {
+
+        let self = this;
+
+        async.waterfall([function (callback) {
+            return self.checkLogin(callback);
+        }, function (mainpage, callback) {
+
+            if (mainpage) {
+                self.processContent(mainpage, 'mainpage', callback);
+            } else {
+                self.getUrl(`http://vk.com/id${self.vkObj.id}`, function (err, content) {
+                    if (err) {
+                        return callback(err);
+                    } else {
+                        console.log('dssssss');
+                        return self.processContent(content, 'mainpage', callback);
+                    }
+                });
+            }
+        }], function (err, options) {
+            if (err) {
+                return callback(err);
+            } else {
+
+
+                console.log(options);
+
+
+                if (options && options.notifier) {
+
+                    let notifier = options.notifier;
+
+                    async.waterfall([
+                        function (callback) {
+                            return self._getFastChat(callback);
+                        }, function (fastchat, callback) {
+
+                            if (fastchat && fastchat[5]) {
+
+                                let fastChat = fastchat[5];
+
+                                let tss = `${options.notifier.timestamp}_${fastChat.im_queue.ts}_${fastChat.cl_queue ? fastChat.cl_queue.ts : ''}`;
+                                let keys = `${options.notifier.key}${fastChat.im_queue.key}${fastChat.cl_queue ? fastChat.cl_queue.key : ''}`;
+
+
+                                let params = {
+                                    'act': 'a_check',
+                                    'id': options.notifier.uid,
+                                    'key': keys,
+                                    'ts': tss,
+                                    'wait': 25
+                                };
+
+                                let headers = {
+                                    'Accept': '*/*',
+                                    'Referer': options.notifier.frame_path,
+                                    'Origin': options.notifier.frame_path.substring(0, options.notifier.frame_path.indexOf('.com') + 4),
+                                    'X-Compress': null,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                };
+
+                                console.log(params);
+
+                                return self._getReleaseLp({
+                                    query: notifier.server_url,
+                                    params: params,
+                                    headers: headers
+                                }, callback);
+
+                            } else {
+                                return callback(new Error('error'));
+                            }
+                        }
+                    ], function (err, content) {
+                        if (err) {
+                            return callback(err);
+                        } else {
+                            console.log(content);
+                        }
+                    });
+
+
+                    /*async.forever(function (next) {
+
+                        self.postForm(options.notifier.server_url, params, headers, function (err, content) {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                console.log(content);
+                                let o = null;
+                                try {
+                                    o = JSON.parse(content);
+                                } catch (e) {
+                                    return next(e);
+                                }
+
+                                if (o) {
+                                    if (o.hasOwnProperty('failed')) {
+                                        options.params.ts = o.ts;
+                                        return next();
+                                    } else {
+                                        return next(new Error('error'));
+                                    }
+                                } else {
+                                    return next(new Error('error'));
+                                }
+                            }
+                        });
+                    }, function (err) {
+                        return callback(err);
+                    });*/
+
+                } else {
+                    return callback(new Error('error'));
+                }
+            }
+        });
+    }
+
+    _login(callback) {
 
         let self = this;
 
@@ -442,7 +751,7 @@ class Browser {
             if (err) {
                 return callback(err);
             } else {
-                return self.processContent(content, callback);
+                return self.processContent(content, 'login', callback);
             }
         });
     }
@@ -466,6 +775,8 @@ class Browser {
             cookies: this.cookies,
             hostName: this.hostName,
             protocol: this.protocol,
+
+            vkObj: this.vkObj,
 
             uid: this.uid
         }, {
@@ -522,129 +833,84 @@ module.exports.get = function (req, res) {
                     pass: 'jukebox5653'
                 });
 
-            console.log(bbrowser.isLogined());
-
-            async.waterfall([function (callback) {
-                if (!bbrowser.isLogined()) {
-                    bbrowser.login(function (err, mainpage) {
-                        if (err) {
-                            return callback(err);
-                        } else {
-                            console.log(mainpage);
-
-                            bbrowser.logined = true;
-
-                            bbrowser.saveToDb(function (err) {
-                                if (err) {
-                                    return callback(err);
-                                } else {
-                                    return callback();
-                                }
-                            })
-                        }
-                    })
-                } else {
-                    return callback();
-                }
-            }, function (callback) {
-                bbrowser.getUrl('http://vk.com/im', function (err, content) {
-                    return callback(err ? err : null, content);
-                });
-            }], function (err, content) {
-                if (err) {
-                    console.error(err);
-                } else {
-
-                    console.log(content);
-
-                    let $ = cheerio.load(content);
-
-                    let scripts = $('script');
-
-                    let im = null;
-
-                    scripts.each(function (i, item) {
-
-                        let itemContent = $(item).html();
-                        let index = itemContent.indexOf('IM.init(');
-
-                        if (index > -1) {
-                            itemContent = itemContent.substring(index + 8);
-                            im = self._getObj(itemContent);
-                            return false;
-                        }
-
-                    });
-
-
-                    if (im) {
-
-                        console.log(im);
-
-                        im = bbrowser._parseJSON(im);
-
-                        if (im) {
-
-                            let params = {
-                                'act': 'a_check',
-                                'ts': im.timestamp,
-                                'version': 1,
-                                'key': im.key,
-                                'wait': 25,
-                                'mode': 66
-                            };
-
-                            let transport_host = im.transport_frame.match(/http(.*?).com/);
-
-                            let headers = {
-                                'Accept': '*/*',
-                                'Referer': im.transport_frame.substring(0, im.transport_frame.indexOf('#')),
-                                'Origin': transport_host[0],
-                                'X-Compress': null,
-                                'X-Requested-With': 'XMLHttpRequest'
-                            };
-
-                            console.log(params);
-
-                            async.forever(function (next) {
-                                bbrowser.postForm(transport_host[0] + '/' + im.url, params, headers, function (err, content) {
-                                    if (err) {
-                                        console.error(err);
-                                    } else {
-                                        console.log(content);
-                                        let o = null;
-                                        try {
-                                            o = JSON.parse(content);
-                                        } catch (e) {
-                                            return next(e);
-                                        }
-
-                                        if (o) {
-                                            if (o.hasOwnProperty('failed')) {
-                                                params.ts = o.ts;
-                                                return next();
-                                            } else {
-                                                return next(new Error('error'));
-                                            }
-                                        } else {
-                                            return next(new Error('error'));
-                                        }
-                                    }
-                                });
-                            }, function (err) {
-                                return callback(err);
-                            });
-                        } else {
-                            return callback(new Error('error'));
-                        }
-                    } else {
-                        return callback(new Error('v'));
-                    }
-                }
+            bbrowser.living(function (err) {
+                console.error(err);
             });
+
         }
     });
 
 
     res.status(200).send('OK');
 };
+/*
+
+ console.log(bbrowser.isLogined());
+
+ async.waterfall([function (callback) {
+ if (!bbrowser.isLogined()) {
+ bbrowser.login(function (err, mainpage) {
+ if (err) {
+ return callback(err);
+ } else {
+ console.log(mainpage);
+
+ bbrowser.logined = true;
+
+ bbrowser.saveToDb(function (err) {
+ if (err) {
+ return callback(err);
+ } else {
+ return callback();
+ }
+ })
+ }
+ })
+ } else {
+ return callback();
+ }
+ }, function (callback) {
+ bbrowser.getUrl('http://vk.com/im', function (err, content) {
+ if (err) {
+ return callback(err);
+ } else {
+ return bbrowser.processContentIm(content, callback);
+ }
+ });
+ }], function (err, options) {
+ if (err) {
+ console.error(err);
+ } else {
+
+ async.forever(function (next) {
+
+ bbrowser.postForm(options.query, options.params, options.headers, function (err, content) {
+ if (err) {
+ console.error(err);
+ } else {
+ console.log(content);
+ let o = null;
+ try {
+ o = JSON.parse(content);
+ } catch (e) {
+ return next(e);
+ }
+
+ if (o) {
+ if (o.hasOwnProperty('failed')) {
+ options.params.ts = o.ts;
+ return next();
+ } else {
+ return next(new Error('error'));
+ }
+ } else {
+ return next(new Error('error'));
+ }
+ }
+ });
+ }, function (err) {
+ console.error(err);
+ });
+
+ }
+ });*/

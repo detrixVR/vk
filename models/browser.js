@@ -46,6 +46,10 @@ var schema = new Schema({
         type: String,
         required: true
     },
+    vkObj: {
+        type: {},
+        required: true
+    },
     uid: {
         type: String,
         required: true
