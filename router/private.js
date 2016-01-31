@@ -527,7 +527,7 @@ class Browser {
         });
     }
 
-    _getReleaseLp(options, callback) {
+    _checkEvents(options, callback) {
 
         let self = this;
 
@@ -620,6 +620,95 @@ class Browser {
         }
     }
 
+    _sendMsg(options, callback) {
+
+        let self = this;
+
+        /*let params = {
+         'act': 'a_send',
+         'al': 1,
+         'gid': 0,
+         'guid': 12.5614364427,
+         'hash': 'c68aa0486c920b5327',
+         'media': '',
+         'msg': 'eto horosho',
+         'title': '',
+         'to': options.id,
+         'ts': 1772978066
+         };*/
+
+        let params = {
+            'act': 'a_send',
+            'al': 1,
+            'chas': '4ce2103ab80bd77ae3',
+            'from': 'box',
+            'media': '',
+            'message': 'sdsd',
+            'title': '',
+            'to_ids': 325876997
+        };
+
+        let headers = {
+            'Accept': '*.*',
+            'Referer': `${self.protocol}//vk.com/im?sel=${options.id}`,
+            'Origin': `${self.protocol}//vk.com`,
+            'X-Compress': null,
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        self.postForm(`${self.protocol}//vk.com/al_im.php`, params, headers, function (err, content) {
+            if (err) {
+                return callback(err);
+            } else {
+                return callback(null, content);
+            }
+        });
+    }
+
+    _getDialogs(options, callback) {
+
+        let self = this;
+
+        let params = {
+            'act': 'a_get_dialogs',
+            'ads_section': 'im',
+            'ads_showed': '',
+            'al': 1,
+            'al_ad': 1,
+            'gid': 0,
+            'offset': 0,
+            'unread': ''
+        };
+
+        let headers = {
+            'Accept': '*/*',
+            'Origin': 'http://vk.com',
+            // 'Referer': 'http://vk.com/im?sel=275667666',
+            'X-Compress': null,
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        let query = 'http://vk.com/al_im.php';
+
+
+        self.postForm(query, params, headers, function (err, content) {
+
+
+            let processed = utils.processVkResponse(content);
+
+            if (processed && processed[5] && processed[5].dialogs_members) {
+
+                console.log(processed);
+
+                let dialogMembers = self._parseJSON(processed[5].dialogs_members);
+
+                return callback(null, dialogMembers);
+            } else {
+                return callback(new Error('error'));
+            }
+        });
+    }
+
 
     living(callback) {
 
@@ -636,7 +725,6 @@ class Browser {
                     if (err) {
                         return callback(err);
                     } else {
-                        console.log('dssssss');
                         return self.processContent(content, 'mainpage', callback);
                     }
                 });
@@ -657,19 +745,23 @@ class Browser {
                     async.waterfall([
                         function (callback) {
                             return self._getFastChat(callback);
-                        }, function (fastchat, callback) {
+                        }
+                    ], function (err, fastchat) {
+                        if (err) {
+                            return callback(err);
+                        } else {
 
                             if (fastchat && fastchat[5]) {
 
                                 let fastChat = fastchat[5];
 
-                                let tss = `${options.notifier.timestamp}_${fastChat.im_queue.ts}_${fastChat.cl_queue ? fastChat.cl_queue.ts : ''}`;
-                                let keys = `${options.notifier.key}${fastChat.im_queue.key}${fastChat.cl_queue ? fastChat.cl_queue.key : ''}`;
+                                let tss = `${notifier.timestamp}_${fastChat.im_queue.ts}_${fastChat.cl_queue ? fastChat.cl_queue.ts : ''}`;
+                                let keys = `${notifier.key}${fastChat.im_queue.key}${fastChat.cl_queue ? fastChat.cl_queue.key : ''}`;
 
 
                                 let params = {
                                     'act': 'a_check',
-                                    'id': options.notifier.uid,
+                                    'id': notifier.uid,
                                     'key': keys,
                                     'ts': tss,
                                     'wait': 25
@@ -677,63 +769,116 @@ class Browser {
 
                                 let headers = {
                                     'Accept': '*/*',
-                                    'Referer': options.notifier.frame_path,
-                                    'Origin': options.notifier.frame_path.substring(0, options.notifier.frame_path.indexOf('.com') + 4),
+                                    'Referer': notifier.frame_path,
+                                    'Origin': notifier.frame_path.substring(0, notifier.frame_path.indexOf('.com') + 4),
                                     'X-Compress': null,
                                     'X-Requested-With': 'XMLHttpRequest'
                                 };
 
-                                console.log(params);
 
-                                return self._getReleaseLp({
-                                    query: notifier.server_url,
-                                    params: params,
-                                    headers: headers
-                                }, callback);
+                                async.forever(function (next) {
+
+                                    console.log(params);
+
+                                    self._checkEvents({
+                                        query: notifier.server_url,
+                                        params: params,
+                                        headers: headers
+                                    }, function (err, content) {
+                                        if (err) {
+                                            return next(err);
+                                        } else {
+                                            console.log(content);
+
+                                            let o = self._parseJSON(content);
+
+                                            if (o && !utils.isArray(o)) {
+                                                o = [o];
+                                            }
+
+                                            if (o) {
+
+                                                if (!utils.isArray(o)) {
+                                                    o = [0];
+                                                }
+
+                                                let error = null;
+
+                                                _.forEach(o, function (item) {
+                                                    if (item.hasOwnProperty('failed')) {
+
+                                                        if (item.err) {
+                                                            error = new Error('error');
+                                                            return false;
+                                                        }
+
+                                                        switch (item.failed) {
+                                                            case 1:
+                                                                params.ts = item.ts;
+                                                                error = new Error('params.ts = item.ts');
+                                                                return false;
+                                                            default:
+                                                                error = new Error('default');
+                                                                return false;
+                                                        }
+                                                    } else if (item.hasOwnProperty('events')) {
+
+                                                        _.forEach(item.events, function (item) {
+                                                            let parsed = utils.processVkResponse(item);
+
+                                                            if (parsed) {
+                                                                console.log(parsed);
+
+                                                                switch (parsed[1]) {
+                                                                    case 'friend_request':
+                                                                        break;
+                                                                    case 'new':
+                                                                        console.log(`${parsed[1]}: msg from id${parsed[2]}: ${parsed[5]}`);
+                                                                        break;
+                                                                    default:
+                                                                        console.log('unprocesseble event');
+                                                                }
+                                                            }
+                                                        })
+
+                                                    }
+                                                });
+
+                                                if (error) {
+                                                    return next(error);
+                                                }
+
+
+                                                let str = _.reduce(o, function (sum, item) {
+                                                    return sum += `${item.ts}_`;
+                                                }, '');
+
+                                                if (str[str.length - 1] == '_') {
+                                                    str = str.substring(0, str.length - 1);
+                                                }
+
+                                                params.ts = str;
+
+                                                //console.log(params);
+
+                                                return next();
+
+
+                                            } else {
+                                                return next(new Error('error'));
+                                            }
+                                        }
+                                    });
+
+                                }, function (err) {
+                                    return callback(err);
+                                });
 
                             } else {
                                 return callback(new Error('error'));
                             }
                         }
-                    ], function (err, content) {
-                        if (err) {
-                            return callback(err);
-                        } else {
-                            console.log(content);
-                        }
                     });
-
-
-                    /*async.forever(function (next) {
-
-                        self.postForm(options.notifier.server_url, params, headers, function (err, content) {
-                            if (err) {
-                                console.error(err);
-                            } else {
-                                console.log(content);
-                                let o = null;
-                                try {
-                                    o = JSON.parse(content);
-                                } catch (e) {
-                                    return next(e);
-                                }
-
-                                if (o) {
-                                    if (o.hasOwnProperty('failed')) {
-                                        options.params.ts = o.ts;
-                                        return next();
-                                    } else {
-                                        return next(new Error('error'));
-                                    }
-                                } else {
-                                    return next(new Error('error'));
-                                }
-                            }
-                        });
-                    }, function (err) {
-                        return callback(err);
-                    });*/
-
                 } else {
                     return callback(new Error('error'));
                 }
@@ -819,29 +964,90 @@ class Browser {
 
 module.exports.get = function (req, res) {
 
+    let email = '89084153026';
+    let pass = 'jukebox5653';
+    let username = 'huyax';
 
-    dbBrowser.findOne({
-        username: 'huyax'
-    }, function (err, doc) {
-        if (err) {
-            console.error(err);
-        } else {
 
-            let bbrowser = new Browser(doc || {
-                    username: 'huyax',
-                    email: '89084153026',
-                    pass: 'jukebox5653'
-                });
+    /*dbBrowser.findOne({
+     username: username,
+     email: email
+     }, function (err, doc) {
+     if (err) {
+     console.error(err);
+     } else {
 
-            bbrowser.living(function (err) {
-                console.error(err);
-            });
+     let bbrowser = new Browser(doc || {
+     username: username,
+     email: email,
+     pass: pass
+     });
 
-        }
+     /* bbrowser.living(function (err) {
+     console.error(err);
+     });/
+
+     bbrowser._getDialogs({}, function (err, dialogMembers) {
+     if (err) {
+     console.error(err);
+     } else {
+     console.log(dialogMembers);
+     }
+     })
+
+     }
+     });*/
+
+
+    res.render('private', {
+        user: req.user,
+        page: 'private'
     });
+};
 
+let dbUtils = require('modules/dbUtils');
 
-    res.status(200).send('OK');
+module.exports.post = function (req, res) {
+
+    let username = req.user.username;
+    let account = req.body.account;
+
+    if (account) {
+
+        async.waterfall([
+            function (callback) {
+
+                return dbUtils.getAccountByOptions({
+                    username: username,
+                    accountId: accountId
+                }, callback);
+
+            }, function (account, callback) {
+
+                if (account) {
+
+                    switch (req.body.command) {
+                        case 'getDialogs':
+                            break;
+                        case 'getMessages':
+                            break;
+                        default:
+                            return callback(new Error('unknow command'))
+                    }
+
+                } else {
+                    return callback(new Error('account ne nayden'))
+                }
+
+            }], function (err) {
+
+        });
+
+    } else {
+        res.status(400).json({
+            msg: 'wrong parametres'
+        })
+    }
 };
 /*
 

@@ -13,6 +13,10 @@ var VideoListItem = require('../../models/lists/videoListItem');
 
 var utils = require('../../modules/utils');
 
+function getAccountByOptions(options, callback) {
+    return AccountListItem.findOne(options, callback);
+}
+
 
 function getRequester(type) {
 
@@ -107,7 +111,7 @@ var saveToDbListItems = function (type, result, settings, credentials, next) {
 
                 var newRequester = new Requester(itemToSave);
 
-               // console.log(newRequester);
+                // console.log(newRequester);
 
                 newRequester.save(function (err) {
                     console.log(err);
@@ -366,5 +370,6 @@ module.exports = {
     getAccountByCredentials: getAccountByCredentials,
     getItemFromDbById: getItemFromDbById,
     removeItemFromDbById: removeItemFromDbById,
+    getAccountByOptions: getAccountByOptions,
     clearList: clearList
 };
