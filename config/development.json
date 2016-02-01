@@ -1,0 +1,28 @@
+{
+  "mongoose": {
+    "url": "mongodb://127.0.0.1:27017/vkbot",
+    "options": {
+      "server": {
+        "socketOptions": {
+          "keepAlive": 1
+        }
+      }
+    }
+  },
+  "secretCookies": "HKJrgkjf21sAHW8Kjdb90ufjfiowe",
+  "secretSessions": "HKJrgkjf21sAHW8Kjdb90ufjfiowe",
+  "intelConfig": {
+    "formatter": "terminal",
+    "level": 30,
+    "formatters": {
+      "terminal": {
+        "format": "[%(levelname)s] %(message)s",
+        "colorize": true
+      },
+      "file": {
+        "format": "[%(date)s] %(name)s.%(levelname)s: %(message)s",
+        "strip": true
+      }
+    }
+  }
+}

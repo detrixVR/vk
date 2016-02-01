@@ -9,30 +9,25 @@ var cluster = require('cluster'),
     express = require('express'),
     app = require('app'),
     server = require('http').createServer(app),
-    Socket = require('newsocket/Classes/Socket'),
     uuid = require('node-uuid'),
     utils = require('modules/utils'),
     _ = require('underscore'),
+    intel = require('intel'),
+    Instance = require('Instance'),
     util = require('util');
 
 var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
 
-var workersArray = [];
 var accounts = [];
 var memoryUsage = {};
+
+let timeout = null;
 
 if (cluster.isMaster) {
 
     console.log(__dirname);
 
     console.log('Start cluster with %s workers', workers - 1);
-
-    let broadcast = function (data) {
-        for (var i in workersArray) {
-            var worker = workersArray[i];
-            worker.send(data);
-        }
-    };
 
     let getExistingTaskAccount = function (uid) {
         var account = null;
@@ -98,12 +93,15 @@ if (cluster.isMaster) {
 
             switch (msg.command) {
                 case 'getMemoryUsage':
+                {
                     this.send({
                         command: 'sendMemoryUsage',
                         data: memoryUsage
                     });
+                }
                     break;
                 case 'setMemoryUsage':
+                {
                     var oldMemoryUsage = extend({}, memoryUsage);
 
                     memoryUsage[msg.data.processPid] = {
@@ -117,15 +115,18 @@ if (cluster.isMaster) {
                             data: memoryUsage
                         })
                     }
-
+                }
                     break;
                 case 'getAllTasks':
+                {
                     broadcast({
                         command: 'getAllTasks',
                         data: msg.data
                     });
+                }
                     break;
                 case 'switchAccount':
+                {
                     account = getExistingAccount(msg.data);
                     if (!account) {
 
@@ -142,8 +143,10 @@ if (cluster.isMaster) {
                             data: newAccount
                         });
                     }
+                }
                     break;
                 case 'getCurrentTask':
+                {
                     account = getExistingAccount(msg.data);
                     if (account) {
                         cluster.workers[account.wid].send({
@@ -157,11 +160,15 @@ if (cluster.isMaster) {
                         });
                     }
                     console.log(msg.data);
+                }
                     break;
                 case 'createTask':
+                {
                     createTask(msg.data, msg.command);
+                }
                     break;
                 case 'startPauseTask':
+                {
                     if (!msg.data.uid) {
                         createTask(msg.data, msg.command);
                     } else {
@@ -173,8 +180,10 @@ if (cluster.isMaster) {
                             });
                         }
                     }
+                }
                     break;
                 case 'stopTask':
+                {
                     account = getExistingTaskAccount(msg.data.uid);
                     if (account) {
                         cluster.workers[account.wid].send({
@@ -182,24 +191,58 @@ if (cluster.isMaster) {
                             data: msg.data
                         });
                     }
+                }
+                    break;
+                case 'canKill':
+                {
+                    this.kill();
+                }
                     break;
             }
+        }).on('listening', function (address) {
+            console.log(address);
+        }).on('disconnect', function () {
+            console.log('disconnect');
+        }).on('error', function (error) {
+            console.error('PARAPAPAPAM');
+            console.error(error);
         });
-        workersArray.push(worker);
     }
 
-    cluster.on('death', function (worker) {
+    cluster.on('death', (worker) => {
         console.log('worker %s died. restart...', worker.process.pid);
         cluster.fork();
+    }).on('online', (worker) => {
+        intel.debug(`Yay, the worker responded after it was forked ${worker.id}`);
+
+        worker.send({
+            command: 'init',
+            data: worker.id
+        });
+
     });
 
+    let eachWorker = function (callback) {
+        for (var id in cluster.workers) {
+            callback(cluster.workers[id]);
+        }
+    };
+
     setInterval(function () {
-        for (var i = 0; i < workersArray.length; i++) {
-            workersArray[i].send({
+        eachWorker((worker) => {
+            worker.send({
                 command: 'memoryUsage'
             });
-        }
+        });
     }, 2000);
+
+
+    setTimeout(function () {
+       // for (var i = 0; i < workersArray.length; i++) {
+        cluster.workers[1].send({command: 'error'});
+           // workersArray[0].send({command: 'shutdown'});
+       // }
+    }, 10000)
 
 } else {
 
@@ -258,7 +301,13 @@ if (cluster.isMaster) {
     server.on('error', onError);
     server.on('listening', onListening);
 
-    app.set('hovan', (new Socket(server)).init());
+    //app.set('hovan', (new Socket(server)).init());
+
+    console.log(cluster.workers);
+
+    require('processing');
+
+
 }
 
 

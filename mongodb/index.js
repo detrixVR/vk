@@ -1,5 +1,7 @@
-var mongoose        = require('mongoose'),
-    config          = require('../config');
+"use strict";
+
+var mongoose = require('mongoose'),
+    config = require('config');
 
 var db = mongoose.connection;
 
@@ -25,8 +27,11 @@ db.on('disconnected', function () {
     //  mongoose.connect(config.get('mongoose:uri_heroku'), config.get('mongoose:options'));
 });
 
-mongoose.connect(config.get('mongoose:uri_local'), config.get('mongoose:options'));
+let connection = mongoose.connect(config.get('mongoose:url'), config.get('mongoose:options'));
+
+mongoose.connection.on('error', function (error) {
+    console.error(error);
+});
 
 module.exports = mongoose;
-module.exports.connection = db;
 
