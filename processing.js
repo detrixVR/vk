@@ -14,14 +14,49 @@
 
         dbInstance.findOne({sn: sn}, function (err, doc) {
             if (err) {
+                intel.error(err);
 
+                throw new Error('Init error');
             } else if (doc) {
 
-                GLOBAL.Instance = new Instance(doc)
-
+                let newInstance = new Instance(doc);
+                newInstance.init(function (err) {
+                    if (err) {
+                        intel.error(err);
+                    } else {
+                        GLOBAL.Instance = newInstance;
+                        process.send({
+                            command: 'instanceReady', data: {
+                                sn: newInstance.sn,
+                                accounts: _.map(newInstance.accounts, function (account) {
+                                    return {
+                                        uid: account.uid,
+                                        tasks: _.map(account, function (task) {
+                                            return task.uid;
+                                        })
+                                    }
+                                })
+                            }
+                        });
+                    }
+                });
             } else {
-                GLOBAL.Instance = new Instance({
+                let newInstance = new Instance({
                     sn: sn
+                });
+
+                newInstance.init(function (err) {
+                    if (err) {
+                        intel.error(err);
+                    } else {
+                        GLOBAL.Instance = newInstance;
+                        process.send({
+                            command: 'instanceReady', data: {
+                                sn: newInstance.sn,
+                                accounts: []
+                            }
+                        });
+                    }
                 });
             }
         });
@@ -51,7 +86,7 @@
     };
 
     let sendMemoryUsage = function (msg) {
-        GLOBAL.Instance.Socket && GLOBAL.Instance.Socket.sendMemoryUsage(msg.data);
+      //  GLOBAL.Instance.Socket && GLOBAL.Instance.Socket.sendMemoryUsage(msg.data);
     };
 
     let shutdown = function (msg) {
@@ -63,8 +98,8 @@
 
     };
 
-    let error = function(){
-       // throw  new Error('test');
+    let error = function () {
+        // throw  new Error('test');
     };
 
 

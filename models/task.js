@@ -2,20 +2,15 @@ var mongoose = require('../mongodb');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
-    content: {
-        type: String,
-        required: false,
-        default: ''
-    },
-    username: {
+    uid: {
         type: String,
         required: true
     },
-    accountId: {
+    account: {
         type: String,
         required: true
     },
-    accountUid: {
+    taskName: {
         type: String,
         required: true
     },
@@ -31,8 +26,8 @@ var schema = new Schema({
         type: Number,
         required: true
     },
-    uid: {
-        type: String,
+    initLoop: {
+        type: Number,
         required: true
     },
     created: {
@@ -42,4 +37,4 @@ var schema = new Schema({
     }
 });
 
-exports.Task = mongoose.model('Task', schema);
+exports = mongoose.model('Task', schema);

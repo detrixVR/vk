@@ -3,9 +3,12 @@
 var extend = require('extend'),
     utils = require('modules/utils'),
     uuid = require('node-uuid'),
-    Socket = require('newsocket/Classes/Socket'),
-    Account = require('newsocket/Classes/Account'),
+    Socket = require('Instance/Socket'),
+    Account = require('Instance/Account'),
+
     dbInstance = require('models/instance'),
+    dbAccount = require('models/account'),
+
     async = require('async'),
     intel = require('intel'),
     _ = require('underscore');
@@ -15,34 +18,68 @@ class Instance {
     constructor(options) {
 
         let defaults = {
-            sn: null,
-            accounts: []
+            sn: null
         };
 
         extend(defaults, options);
 
         this.sn = defaults.sn;
-        this.accounts = defaults.accounts;
-        this.Socket = null;
 
+        this.accounts = [];
+        this.Socket = null;
         this.initialized = false;
 
         intel.debug(`Создан новый Instance: ${process.pid}:${this.sn}`);
     }
 
-    init() {
+    init(callback) {
+        let self = this;
+
         if (!this.initialized) {
 
-            this.Socket = new Socket();
+            dbAccount.find({instance: this.sn}, function (err, docs) {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return async.each(docs, function (item, callback) {
+                        let newAccount = new Account(self, item);
+                        self.accounts.push(new Account(self, item));
+                        return newAccount.init(callback);
+                    }, function (err) {
+                        if (err) {
+                            return callback(err);
+                        } else {
+                            intel.debug('dssssssssssss')
+                            self.Socket = new Socket(self);
+                            return callback();
+                        }
+                    });
+                }
+            });
 
             this.initialized = true;
         }
     }
 
     addAccount(data) {
+        let self = this;
         let account = this.getAccountByCredentials(data);
         if (account) {
-            this.accounts.push(new Account(data));
+            let newAccount = new Account(data);
+            this.accounts.push(newAccount);
+            newAccount.init(function (err) {
+                if (err) {
+                    intel.error('Невозможно создать аккаунт');
+                } else {
+                    process.send({
+                        command: 'accountReady', data: {
+                            instanceSn: self.Instance.sn,
+                            uid: newAccount.uid,
+                            tasks: []
+                        }
+                    });
+                }
+            })
         } else {
             intel.warning('Попытка добавить существующий аккаунт');
         }
@@ -69,7 +106,7 @@ class Instance {
             if (err) {
                 return callback(err);
             } else {
-                dbInstance.update({
+                return dbInstance.update({
                     sn: self.sn
                 }, {
                     sn: self.sn,

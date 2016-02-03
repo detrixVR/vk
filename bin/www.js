@@ -18,7 +18,7 @@ var cluster = require('cluster'),
 
 var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
 
-var accounts = [];
+var instances = [];
 var memoryUsage = {};
 
 let timeout = null;
@@ -29,55 +29,55 @@ if (cluster.isMaster) {
 
     console.log('Start cluster with %s workers', workers - 1);
 
-    let getExistingTaskAccount = function (uid) {
-        var account = null;
 
-        for (var k = 0; k < accounts.length; k++) {
-            for (var i = 0; i < accounts[k].tasks.length; i++) {
-                if (accounts[k].tasks[i].uid === uid) {
-                    account = accounts[k];
-                    break;
-                }
-            }
-        }
-
-        return account;
+    let getInstance = function (data) {
+        return _.find(instances, function (instance) {
+            return (instance.sn === data.sn);
+        })
     };
 
-    let getExistingAccount = function (data) {
-        console.log('getExistingAccount');
-        var account = null;
-
-        for (var k = 0; k < accounts.length; k++) {
-            if (accounts[k].username === data.username &&
-                accounts[k].accountId === data.accountId) {
-                account = accounts[k];
-                break;
+    let getAccount = function (data) {
+        let instance = null;
+        let account = _.find(instances, function (ins) {
+            if (ins.sn === data.instanceSn) {
+                instance = ins;
+                return _.find(ins.accounts, function (account) {
+                    return (account.uid === data.uid);
+                });
             }
-        }
+            return false;
+        });
 
-        return account;
+        return {
+            instance: instance,
+            account: account
+        }
     };
 
-    let createTask = function (data, command) {
-        let account = getExistingAccount(data);
-        if (account) {
+    let getTask = function (data) {
 
-            let uid = uuid.v1();
+        let instance = null;
+        let account = null;
+        let task = _.find(instances, function (ins) {
+            if (ins.sn === data.instanceSn) {
+                instance = ins;
+                return _.find(ins.accounts, function (ac) {
+                    if (account.uid === data.accountUid) {
+                        account = ac;
+                        return _.find(ac.tasks, function (task) {
+                            return (task.uid === task.uid);
+                        })
+                    }
+                    return false;
+                });
+            }
+            return false;
+        });
 
-            let task = {
-                taskName: data.taskName + '_' + uid,
-                uid: uid
-            };
-
-            account.tasks.push(task);
-
-            console.log(account.uid)
-
-            cluster.workers[account.wid].send({
-                command: command,
-                data: extend({}, data, task, {account: {uid: account.uid}})
-            });
+        return {
+            instance: instance,
+            account: account,
+            task: task
         }
     };
 
@@ -92,6 +92,43 @@ if (cluster.isMaster) {
             let account = null;
 
             switch (msg.command) {
+                case 'instanceReady':
+                {
+                    let instance = getInstance(msg.data);
+                    if (!instance) {
+                        instances.push(msg.data);
+                    } else {
+                        intel.warning('Попытка добавить существующий инстанс');
+                    }
+                }
+                    break;
+                case 'accountReady':
+                { //instanceSn
+                    let result = getAccount(msg.data);
+                    if (result.instance && !result.account) {
+                        result.instance.accounts.push({
+                            uid: msg.uid,
+                            tasks: msg.tasks
+                        });
+                    } else {
+                        intel.error('Невозможно добавить аккаунт');
+                    }
+                }
+                    break;
+                case 'taskReady':
+                { //instanceSn, accountUid
+                    let result = getTask(msg.data);
+                    if (result.instance && result.account && !result.task) {
+                        result.account.tasks.push({
+                            uid: msg.uid
+                        });
+                    } else {
+                        intel.error('Невозможно добавить таск');
+                    }
+                }
+                    break;
+
+
                 case 'getMemoryUsage':
                 {
                     this.send({
@@ -222,7 +259,7 @@ if (cluster.isMaster) {
 
     });
 
-    let eachWorker = function (callback) {
+    /*let eachWorker = function (callback) {
         for (var id in cluster.workers) {
             callback(cluster.workers[id]);
         }
@@ -238,11 +275,11 @@ if (cluster.isMaster) {
 
 
     setTimeout(function () {
-       // for (var i = 0; i < workersArray.length; i++) {
+        // for (var i = 0; i < workersArray.length; i++) {
         cluster.workers[1].send({command: 'error'});
-           // workersArray[0].send({command: 'shutdown'});
-       // }
-    }, 10000)
+        // workersArray[0].send({command: 'shutdown'});
+        // }
+    }, 10000)*/
 
 } else {
 
@@ -296,18 +333,12 @@ if (cluster.isMaster) {
 
     app.set('port', port);
 
-    server.listen(port);
+    GLOBAL.server = server.listen(port);
 
     server.on('error', onError);
     server.on('listening', onListening);
 
-    //app.set('hovan', (new Socket(server)).init());
-
-    console.log(cluster.workers);
-
     require('processing');
-
-
 }
 
 

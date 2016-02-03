@@ -1,6 +1,9 @@
 "use strict";
 var extend = require('extend'),
-    dbAccount = require('models/account').Account,
+
+    dbAccount = require('models/account'),
+    dbTask = require('models/task'),
+
     utils = require('modules/utils'),
     settings = require('newsocket/tasks/settings'),
     uuid = require('node-uuid'),
@@ -12,17 +15,29 @@ var extend = require('extend'),
 
 class Account {
 
-    constructor(Socket, data) {
-        this.Socket = Socket;
-        this.uid = data.uid;
-        this.username = data.username;
-        this.accountId = data.accountId;
-        this.tasks = [];
+    constructor(Instance, options) {
 
-        intel.debug(`Создан новый аккаунт: ${data.username}:${data.accountId}`);
+        this.Instance = Instance;
+
+        let defaults = {
+            uid: null,
+            username: null,
+            accountId: null
+        };
+
+        extend(defaults, options);
+
+        this.uid = defaults.uid;
+        this.username = defaults.username;
+        this.accountId = defaults.accountId;
+
+        this.tasks = [];
+        this.initialized = false;
+
+        intel.debug(`Создан новый аккаунт: ${this.username}:${this.accountId}`);
     }
 
-    getExistingTask(data) {
+   /* getExistingTask(data) {
         var task = null;
 
         for (var k = 0; k < this.tasks.length; k++) {
@@ -75,6 +90,57 @@ class Account {
 
             console.log(this.tasks);
         }
+    }*/
+
+    init(callback) {
+        let self = this;
+
+        if (!this.initialized) {
+
+            dbTask.find({account: this.uid, state: {$gt: 0}}, function (err, docs) {
+                if (err) {
+                    return callback(err);
+                } else {
+                    return async.each(docs, function (item, callback) {
+                        let newTask = new Task(self, item);
+                        self.tasks.push(newTask);
+                        return newTask.init(callback);
+                    }, callback);
+                }
+            });
+
+            this.initialized = true;
+        }
+    }
+
+    addTask(data) {
+        let self = this;
+        let task = this.getTaskByName(data);
+        if (task) {
+            let  newTask = new Task(self, data);
+            this.tasks.push(newTask);
+            newTask.init(function(err){
+                if(err) {
+                    intel.error('Невозможно создать аккаунт');
+                } else {
+                    process.send({
+                        command: 'taskReady', data: {
+                            instanceSn: self.Account.Instance.sn,
+                            accountUid: self.Account.uid,
+                            uid: newTask.uid
+                        }
+                    });
+                }
+            })
+        } else {
+            intel.warning('Попытка добавить существующий таск');
+        }
+    }
+
+    getTaskByName(data){
+        return _.find(this.tasks, function (item) {
+            return item.taskName === data.taskName;
+        })
     }
 
     save(callback) {
@@ -87,15 +153,13 @@ class Account {
             if (err) {
                 return callback(err);
             } else {
-                dbAccount.update({
+                return dbAccount.update({
                     uid: self.uid
                 }, {
                     uid: self.uid,
+                    instance: self.Instance.sn,
                     username: self.username,
-                    accountId: self.accountId,
-                    tasks: _.map(self.tasks, function (item) {
-                        return item.uid;
-                    })
+                    accountId: self.accountId
                 }, {
                     upsert: true,
                     setDefaultsOnInsert: true

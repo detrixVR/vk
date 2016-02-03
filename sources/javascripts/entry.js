@@ -1,8 +1,13 @@
-import Page     from './page/page.js';
+//import Page     from './page/page.js';
+import OtherPage     from './pages/other.js';
 
-var page = new Page();
+//var page = new Page();
 
-page.init();
+//page.init();
+
+let other = new OtherPage().init();
+
+
 
 
 
