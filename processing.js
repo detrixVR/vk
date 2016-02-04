@@ -86,7 +86,7 @@
     };
 
     let sendMemoryUsage = function (msg) {
-      //  GLOBAL.Instance.Socket && GLOBAL.Instance.Socket.sendMemoryUsage(msg.data);
+        //  GLOBAL.Instance.Socket && GLOBAL.Instance.Socket.sendMemoryUsage(msg.data);
     };
 
     let shutdown = function (msg) {
@@ -98,8 +98,55 @@
 
     };
 
-    let error = function () {
-        // throw  new Error('test');
+    let getCurrentTask = function (msg) {
+       // console.log(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId);
+        let room = msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId;
+        if (msg.data && msg.data.account && msg.data.task) { // uids: { instance, account, task }
+            let account = GLOBAL.Instance.getAccountByUid(msg.data.account.uid);
+            if (account) {
+                account.getCurrentTask(msg.data.task, function (err, task) {
+                    if (err) {
+                        intel.error(err);
+                    } else {
+                        GLOBAL.Instance.Socket.s.sockets.in(room).emit('setCurrentTask', task);
+                    }
+                });
+            } else {
+                intel.error('Не найден аккаунт при поиске существующего таска')
+            }
+        } else {
+            GLOBAL.Instance.Socket.s.sockets.in(room).emit('setCurrentTask', null);
+        }
+    };
+
+    let setStatistic = function(statistic) {
+        GLOBAL.Instance.Socket.s.sockets.in('huyax:10000000:adminPanel').emit('setStatistic', statistic);
+    };
+
+    let getStatistic = function() {
+
+        let self = GLOBAL.Instance;
+
+        process.send({
+            command: 'setStatistic',
+            data: {
+                processPid: process.pid,
+                memoryUsage: process.memoryUsage(),
+                accounts: _.map(self.accounts, function (account) {
+                    return {
+                        uid: account.uid,
+                        username: account.username,
+                        accountId: account.accountId,
+                        tasks: _.map(account.tasks, function (task) {
+                            return {
+                                uid: task.uid,
+                                pageId: task.pageId
+                            }
+                        })
+                    }
+                })
+            }
+        });
     };
 
 

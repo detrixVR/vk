@@ -94,10 +94,12 @@ class Page {
         var interval = setInterval(function () {
             console.log('try get');
             if (self.Socket && self.Socket.socket.connected) {
-                self.Socket.socket.emit('getCurrentTask', {
-                    pageId: self.pageId,
-                    accountId: self.accountId
+
+                self.Socket.socket.emit('joinAccountPage', {
+                    accountId: self.accountId,
+                    pageId: self.pageId
                 });
+
                 clearInterval(interval);
             }
         }, 100);

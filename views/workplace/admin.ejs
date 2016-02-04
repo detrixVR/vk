@@ -19,19 +19,19 @@
         </div>
         <div class="row">
             <div class="widget">
-                <button class="btn btn-default" onclick="$(this).closest('.widget').trigger('getMemoryUsage')"><span class="glyphicon glyphicon-refresh"></span></button>
+                <button class="btn btn-default" onclick="$('#kozelTimur').trigger('getStatistic')"><span class="glyphicon glyphicon-refresh"></span></button>
             </div>
         </div>
     </div>
 </div>
+
+<div class="hidden" id="kozelTimur"></div>
 
 <%- include ../templates/modalInput.ejs %>
 
 <script src="javascripts/libs.js"></script>
 <script src="javascripts/app.js"></script>
 
-<%- include ../templates/other/accountHolder.ejs %>
-<%- include ../templates/other/taskRowTemplate.ejs %>
 <%- include ../templates/other/memoryUsage.ejs %>
 
 </body>

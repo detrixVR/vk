@@ -37,60 +37,60 @@ class Account {
         intel.debug(`Создан новый аккаунт: ${this.username}:${this.accountId}`);
     }
 
-   /* getExistingTask(data) {
-        var task = null;
+    /* getExistingTask(data) {
+     var task = null;
 
-        for (var k = 0; k < this.tasks.length; k++) {
-            if (this.tasks[k].uid === data.uid) {
-                task = this.tasks[k];
-                break;
-            }
-        }
+     for (var k = 0; k < this.tasks.length; k++) {
+     if (this.tasks[k].uid === data.uid) {
+     task = this.tasks[k];
+     break;
+     }
+     }
 
-        return task;
-    }
+     return task;
+     }
 
-    createTask(data) {
-        let task = this.getExistingTask(data);
-        if (!task) {
-            var newTask = new Task(this, extend({}, data, {
-                uid: uuid.v1()
-            }));
-            this.tasks.push(newTask);
-        }
-    }
+     createTask(data) {
+     let task = this.getExistingTask(data);
+     if (!task) {
+     var newTask = new Task(this, extend({}, data, {
+     uid: uuid.v1()
+     }));
+     this.tasks.push(newTask);
+     }
+     }
 
-    startPauseTask(data) {
-        let task = this.getExistingTask(data);
-        if (task) {
-            task.start();
-        } else {
-            var newTask = new Task(this, extend({}, data, {
-                uid: uuid.v1()
-            }));
-            this.tasks.push(newTask);
-            newTask.start();
-        }
-    }
+     startPauseTask(data) {
+     let task = this.getExistingTask(data);
+     if (task) {
+     task.start();
+     } else {
+     var newTask = new Task(this, extend({}, data, {
+     uid: uuid.v1()
+     }));
+     this.tasks.push(newTask);
+     newTask.start();
+     }
+     }
 
-    stopTask(data) {
-        console.log('stopTask');
-        let task = this.getExistingTask(data);
-        if (task) {
-            task.justStop();
-        }
-    }
+     stopTask(data) {
+     console.log('stopTask');
+     let task = this.getExistingTask(data);
+     if (task) {
+     task.justStop();
+     }
+     }
 
-    justStopTask(data) {
+     justStopTask(data) {
 
-        console.log('JustStop');
-        var task = this.getExistingTask(data);
-        if (task) {
-            this.tasks.splice(this.tasks.indexOf(task), 1);
+     console.log('JustStop');
+     var task = this.getExistingTask(data);
+     if (task) {
+     this.tasks.splice(this.tasks.indexOf(task), 1);
 
-            console.log(this.tasks);
-        }
-    }*/
+     console.log(this.tasks);
+     }
+     }*/
 
     init(callback) {
         let self = this;
@@ -115,13 +115,13 @@ class Account {
 
     addTask(data) {
         let self = this;
-        let task = this.getTaskByName(data);
+        let task = this.getTaskByPageId(data);
         if (task) {
-            let  newTask = new Task(self, data);
+            let newTask = new Task(self, data);
             this.tasks.push(newTask);
-            newTask.init(function(err){
-                if(err) {
-                    intel.error('Невозможно создать аккаунт');
+            newTask.init(function (err) {
+                if (err) {
+                    intel.error('Невозможно создать таск');
                 } else {
                     process.send({
                         command: 'taskReady', data: {
@@ -137,10 +137,31 @@ class Account {
         }
     }
 
-    getTaskByName(data){
+    getTaskByPageId(data) {
         return _.find(this.tasks, function (item) {
-            return item.taskName === data.taskName;
+            return item.pageId === data.pageId;
         })
+    }
+
+    _getTaskByUid(uid) {
+        return _.find(this.tasks, function (item) {
+            return item.uid === uid;
+        })
+    }
+
+    _getHistoryTaskByUid(uid, callback) {
+        return dbTask.findOne({uid: uid}, callback);
+    }
+
+    getCurrentTask(uid, callback) {
+        let self = this;
+
+        let task = _getTaskByUid(uid);
+        if (!task) {
+            return _getHistoryTaskByUid(uid, callback);
+        } else {
+            return callback(null, task);
+        }
     }
 
     save(callback) {

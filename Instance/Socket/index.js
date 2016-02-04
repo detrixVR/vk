@@ -4,6 +4,7 @@ var extend = require('extend'),
     async = require('async'),
     _ = require('underscore'),
     io = require('socket.io'),
+    intel = require('intel'),
     config = require('config'),
     cookieParser = require('cookie-parser'),
     Account = require('Instance/Account'),
@@ -66,11 +67,11 @@ class Socket {
 
             this.s.sockets.on('connection', function (socket) {
 
-
                 var user = {
                     username: socket.request.username
                 };
 
+                intel.debug(`${process.pid}: [${self.getUserNameString(user)}] connected`);
                 console.log(`${process.pid}: [${self.getUserNameString(user)}] connected`);
 
                 socket.join(user.username);
@@ -86,42 +87,40 @@ class Socket {
 
                     if (self.validatePacketData(command, data)) {
 
-                        console.log(`${process.pid}: socket command [${command}] from [${self.getUserNameString(user)}]`);
+                        intel.debug(`${process.pid}: socket command [${command}] from [${self.getUserNameString(user)}]`);
 
-                        var roomsWhereUserIs = [];
+                        let roomsWhereUserIs = [];
+
                         for (var k in self.s.sockets.adapter.rooms) {
                             if (k.indexOf(user.username) > -1)
                                 roomsWhereUserIs.push(k);
                         }
-                        user.roomsWhereUserIs = roomsWhereUserIs;
 
                         switch (command) {
-                            case 'join':
+                            case 'joinAccountPage':
                                 switch (data.pageId) {
-                                    case 'memoryUsage':
-                                        socket.join(data.pageId);
-                                        break;
                                     default :
+                                        if (user.accountId) {
+                                            for (var k in roomsWhereUserIs) {
+                                                if (k.indexOf(user.accountId) > -1)
+                                                    socket.leave(k);
+                                            }
+                                        }
                                         user.pageId = data.pageId;
-                                        socket.join(self.getUserNameString(user));
+                                        user.accountId = data.accountId;
+
+                                        self.Instance.addAccount({
+                                            username: user.username,
+                                            accountId: user.accountId
+                                        }, function (err) {
+                                            if (err) {
+                                                intel.error('Невозможно создать аккаунт');
+                                            } else {
+                                                socket.join(self.getUserNameString(user));
+                                                socket.emit('setAccountPage');
+                                            }
+                                        });
                                 }
-                                return;
-                            case 'switchAccount':
-
-
-                                for (var k in user.roomsWhereUserIs) {
-                                    if (k.indexOf(user.accountId) > -1)
-                                        socket.leave(k);
-                                }
-                                user.accountId = data.accountId;
-                                socket.join(user.username + ':' + user.accountId);
-                                socket.emit('switchAccount');
-                                console.log(user);
-                                process.send({
-                                    command: command,
-                                    data: extend(user)
-                                });
-
                                 return;
                         }
 
@@ -129,19 +128,17 @@ class Socket {
                             case 'createTask':
                             case 'startPauseTask':
                             case 'getCurrentTask':
+                            case 'getCurrentTasks':
                             case 'stopTask':
                                 process.send({
                                     command: command,
                                     data: extend({}, user, data)
                                 });
                                 return;
-                            case 'getAllTasks':
-                                console.error('21111112');
-                                return;
                         }
 
                         switch (command) {
-                            case 'getMemoryUsage':
+                            case 'getStatistic':
                                 process.send({
                                     command: command,
                                     data: extend({}, user, data)
@@ -170,7 +167,7 @@ class Socket {
                 });
             });
 
-            process.on('message', function (msg) {
+            /*process.on('message', function (msg) {
 
                 if (msg.data && msg.data.username && msg.data.accountId) {
 
@@ -262,7 +259,7 @@ class Socket {
                             console.log('default1 ' + msg.command);
                     }
                 }
-            });
+            });*/
 
             this.initialized = true;
         }

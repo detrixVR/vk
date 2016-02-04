@@ -16,7 +16,7 @@ class Task {
         let defaults = {
             uid: null,
             pageId: null,
-            taskName: null,
+           // taskName: null,
             settings: [],
             messages: [],
             initLoop: 0,
@@ -32,10 +32,7 @@ class Task {
         this.accountId = defaults.accountId;
         this.settings = defaults.settings;
         this.messages = defaults.messages;
-        this.taskName = defaults.taskName;
-        // this.pageId = data.pageId;
-
-        // this.taskName = data.taskName;
+        this.pageId = defaults.pageId;
 
         this.initLoop = defaults.initLoop || 0;
         this.initState = defaults.state;

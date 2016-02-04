@@ -49,8 +49,7 @@ class Instance {
                         if (err) {
                             return callback(err);
                         } else {
-                            intel.debug('dssssssssssss')
-                            self.Socket = new Socket(self);
+                            self.Socket = new Socket(self).init();
                             return callback();
                         }
                     });
@@ -61,39 +60,38 @@ class Instance {
         }
     }
 
-    addAccount(data) {
+    addAccount(data, callback) { //username //accountId
         let self = this;
-        let account = this.getAccountByCredentials(data);
-        if (account) {
-            let newAccount = new Account(data);
+        let account = this._getAccountByCredentials(data);
+        if (!account) {
+            data.uid = uuid.v1();
+            let newAccount = new Account(self, data);
             this.accounts.push(newAccount);
-            newAccount.init(function (err) {
-                if (err) {
-                    intel.error('Невозможно создать аккаунт');
-                } else {
-                    process.send({
-                        command: 'accountReady', data: {
-                            instanceSn: self.Instance.sn,
-                            uid: newAccount.uid,
-                            tasks: []
-                        }
-                    });
+
+            process.send({
+                command: 'accountReady', data: {
+                    instanceSn: self.sn,
+                    uid: newAccount.uid,
+                    tasks: []
                 }
-            })
+            });
+
+            return newAccount.init(callback)
         } else {
-            intel.warning('Попытка добавить существующий аккаунт');
+            intel.debug(`Существующий аккаунт:${data.accountId}`);
+            return callback();
         }
     }
 
-    getAccountByCredentials(data) {
+    _getAccountByCredentials(data) {
         return _.find(this.accounts, function (item) {
             return item.username === data.username && item.accountId === data.accountId;
         })
     }
 
-    getAccountByUid(data) {
+    getAccountByUid(uid) {
         return _.find(this.accounts, function (item) {
-            return item.uid === data.uid;
+            return item.uid === uid;
         })
     }
 

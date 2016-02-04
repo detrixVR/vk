@@ -37,4 +37,4 @@ var schema = new Schema({
     }
 });
 
-exports = mongoose.model('Task', schema);
+module.exports = mongoose.model('Task', schema);

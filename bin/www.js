@@ -62,10 +62,10 @@ if (cluster.isMaster) {
             if (ins.sn === data.instanceSn) {
                 instance = ins;
                 return _.find(ins.accounts, function (ac) {
-                    if (account.uid === data.accountUid) {
+                    if (ac.uid === data.accountUid) {
                         account = ac;
                         return _.find(ac.tasks, function (task) {
-                            return (task.uid === task.uid);
+                            return (task === data.uid);
                         })
                     }
                     return false;
@@ -81,6 +81,23 @@ if (cluster.isMaster) {
         }
     };
 
+    let getTaskByData = function (data) {
+        let result = {};
+        result.task = _.find(instances, function (instance) {
+            return _.find(instance.accounts, function (account) {
+                if (account.accountId === data.accountId) {
+                    result.instance = instance;
+                    result.account = account;
+                    return _.find(account.tasks, function (task) {
+                        return (task === task.pageId);
+                    })
+                }
+                return false;
+            });
+        });
+        return result;
+    };
+
     workers--;
 
     for (var i = 0; i < workers; ++i) {
@@ -88,6 +105,8 @@ if (cluster.isMaster) {
         var worker = cluster.fork();
 
         worker.on('message', function (msg) {
+
+            intel.debug(msg.data);
 
             let account = null;
 
@@ -129,17 +148,17 @@ if (cluster.isMaster) {
                     break;
 
 
-                case 'getMemoryUsage':
+                case 'getStatistic':
                 {
                     this.send({
-                        command: 'sendMemoryUsage',
+                        command: 'setStatistic',
                         data: memoryUsage
                     });
                 }
                     break;
-                case 'setMemoryUsage':
+                case 'setStatistic':
                 {
-                    var oldMemoryUsage = extend({}, memoryUsage);
+                    let oldMemoryUsage = extend({}, memoryUsage);
 
                     memoryUsage[msg.data.processPid] = {
                         memory: msg.data.memoryUsage.heapTotal,
@@ -148,7 +167,7 @@ if (cluster.isMaster) {
 
                     if (!_.isEqual(oldMemoryUsage, memoryUsage)) {
                         this.send({
-                            command: 'sendMemoryUsage',
+                            command: 'setStatistic',
                             data: memoryUsage
                         })
                     }
@@ -183,20 +202,19 @@ if (cluster.isMaster) {
                 }
                     break;
                 case 'getCurrentTask':
-                {
-                    account = getExistingAccount(msg.data);
-                    if (account) {
-                        cluster.workers[account.wid].send({
+                { //accountId //pageId
+                    let result = getTaskByData(msg.data);
+                    if (result.instance && result.account && result.task) {
+                        cluster.workers[result.instance.sn].send({
                             command: msg.command,
-                            data: extend({}, msg.data, {account: {uid: account.uid}})
+                            data: extend({}, result, msg.data)
                         });
                     } else {
                         this.send({
                             command: msg.command,
-                            data: extend({}, msg.data, {account: {uid: account.uid}})
+                            data: msg.data
                         });
                     }
-                    console.log(msg.data);
                 }
                     break;
                 case 'createTask':
@@ -259,7 +277,7 @@ if (cluster.isMaster) {
 
     });
 
-    /*let eachWorker = function (callback) {
+    let eachWorker = function (callback) {
         for (var id in cluster.workers) {
             callback(cluster.workers[id]);
         }
@@ -268,18 +286,18 @@ if (cluster.isMaster) {
     setInterval(function () {
         eachWorker((worker) => {
             worker.send({
-                command: 'memoryUsage'
+                command: 'getStatistic'
             });
         });
     }, 2000);
 
-
-    setTimeout(function () {
-        // for (var i = 0; i < workersArray.length; i++) {
-        cluster.workers[1].send({command: 'error'});
-        // workersArray[0].send({command: 'shutdown'});
-        // }
-    }, 10000)*/
+    /*
+     setTimeout(function () {
+     // for (var i = 0; i < workersArray.length; i++) {
+     cluster.workers[1].send({command: 'error'});
+     // workersArray[0].send({command: 'shutdown'});
+     // }
+     }, 10000)*/
 
 } else {
 
