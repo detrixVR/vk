@@ -13,8 +13,11 @@ var cluster = require('cluster'),
     utils = require('modules/utils'),
     _ = require('underscore'),
     intel = require('intel'),
+    Hub = require('cluster-hub'),
     Instance = require('Instance'),
     util = require('util');
+
+var hub = new Hub();
 
 var workers = /*process.env.WORKERS*/3 || require('os').cpus().length; //WEB_CONCURRENCY
 
@@ -111,7 +114,7 @@ if (cluster.isMaster) {
             let account = null;
 
             switch (msg.command) {
-                case 'instanceReady':
+                /*case 'instanceReady':
                 {
                     let instance = getInstance(msg.data);
                     if (!instance) {
@@ -120,7 +123,7 @@ if (cluster.isMaster) {
                         intel.warning('Попытка добавить существующий инстанс');
                     }
                 }
-                    break;
+                    break;*/
                 case 'accountReady':
                 { //instanceSn
                     let result = getAccount(msg.data);
@@ -270,10 +273,27 @@ if (cluster.isMaster) {
     }).on('online', (worker) => {
         intel.debug(`Yay, the worker responded after it was forked ${worker.id}`);
 
-        worker.send({
+
+        hub.requestWorker(worker, 'init', worker.id, function(err, instance){
+            if (err) {
+                intel.error(err);
+            } else {
+                let curInstance = getInstance(instance);
+                if (!curInstance) {
+                    instances.push(instance);
+                } else {
+                    instances.splice(instances.indexOf(curInstance), 1);
+                    instances.push(instance);
+                    //intel.warning('Попытка добавить существующий инстанс');
+                }
+            }
+
+        });
+
+       /* worker.send({
             command: 'init',
             data: worker.id
-        });
+        });*/
 
     });
 

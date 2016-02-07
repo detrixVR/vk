@@ -5,8 +5,11 @@
     let intel = require('intel'),
         dbInstance = require('models/instance'),
         _ = require('underscore'),
+        Hub = require('cluster-hub'),
+        async = require('async'),
         Instance = require('Instance');
 
+    var hub = new Hub();
 
     let init = function (msg) {
 
@@ -99,7 +102,7 @@
     };
 
     let getCurrentTask = function (msg) {
-       // console.log(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId);
+        // console.log(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId);
         let room = msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId;
         if (msg.data && msg.data.account && msg.data.task) { // uids: { instance, account, task }
             let account = GLOBAL.Instance.getAccountByUid(msg.data.account.uid);
@@ -119,11 +122,11 @@
         }
     };
 
-    let setStatistic = function(statistic) {
+    let setStatistic = function (statistic) {
         GLOBAL.Instance.Socket.s.sockets.in('huyax:10000000:adminPanel').emit('setStatistic', statistic);
     };
 
-    let getStatistic = function() {
+    let getStatistic = function () {
 
         let self = GLOBAL.Instance;
 
@@ -150,12 +153,46 @@
     };
 
 
-    process.on('message', function (data) {
+  /*  process.on('message', function (data) {
 
         intel.debug(`${process.pid}: command: ${data.command}`);
 
         eval(data.command)(data);
 
-    });
+    });*/
+
+
+    hub.on('init', function (data, sender, callback) {
+
+        let sn = data;
+
+        async.waterfall([
+            function (callback) {
+                return dbInstance.findOne({sn: sn}, callback);
+            }, function (doc, callback) {
+                let newInstance = new Instance(doc || {
+                        sn: sn
+                    });
+                newInstance.init(function (err) {
+                    if (err) {
+                        return callback(err);
+                    } else {
+                        GLOBAL.Instance = newInstance;
+                        return callback(null, {
+                            sn: newInstance.sn,
+                            accounts: _.map(newInstance.accounts, function (account) {
+                                return {
+                                    uid: account.uid,
+                                    tasks: _.map(account, function (task) {
+                                        return task.uid;
+                                    })
+                                }
+                            })
+                        });
+                    }
+                });
+            }
+        ], callback);
+    })
 
 })();
