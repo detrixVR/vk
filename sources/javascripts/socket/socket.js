@@ -17,7 +17,7 @@ class Socket {
 
                 this.socket = this.manager.connect({
                     transports: ['polling'],
-                    reconnection: false
+                    reconnection: true
                 });
 
                 this.socket.on('setCurrentTask', function (data) {
@@ -99,6 +99,7 @@ class Socket {
 
                 this.socket.on('connect', function () {
                     console.log('connected');
+                    that.Page.getCurrentTask();
                 });
 
                 this.socket.on('disconnect', function () {

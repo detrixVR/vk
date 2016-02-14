@@ -14,7 +14,9 @@ var cluster = require('cluster'),
     _ = require('underscore'),
     intel = require('intel'),
     Hub = require('cluster-hub'),
+    http = require('http'),
     Instance = require('Instance'),
+    sticky = require('sticky-session'),
     util = require('util');
 
 var hub = new Hub();
@@ -107,157 +109,158 @@ if (cluster.isMaster) {
 
         var worker = cluster.fork();
 
-        worker.on('message', function (msg) {
+        /*worker.on('message', function (msg) {
 
-            intel.debug(msg.data);
+         intel.debug(msg.data);
 
-            let account = null;
+         let account = null;
 
-            switch (msg.command) {
-                /*case 'instanceReady':
-                {
-                    let instance = getInstance(msg.data);
-                    if (!instance) {
-                        instances.push(msg.data);
-                    } else {
-                        intel.warning('Попытка добавить существующий инстанс');
-                    }
-                }
-                    break;*/
-                case 'accountReady':
-                { //instanceSn
-                    let result = getAccount(msg.data);
-                    if (result.instance && !result.account) {
-                        result.instance.accounts.push({
-                            uid: msg.uid,
-                            tasks: msg.tasks
-                        });
-                    } else {
-                        intel.error('Невозможно добавить аккаунт');
-                    }
-                }
-                    break;
-                case 'taskReady':
-                { //instanceSn, accountUid
-                    let result = getTask(msg.data);
-                    if (result.instance && result.account && !result.task) {
-                        result.account.tasks.push({
-                            uid: msg.uid
-                        });
-                    } else {
-                        intel.error('Невозможно добавить таск');
-                    }
-                }
-                    break;
+         switch (msg.command) {
+         /*case 'instanceReady':
+         {
+         let instance = getInstance(msg.data);
+         if (!instance) {
+         instances.push(msg.data);
+         } else {
+         intel.warning('Попытка добавить существующий инстанс');
+         }
+         }
+         break;
+         case 'accountReady':
+         { //instanceSn
+         let result = getAccount(msg.data);
+         if (result.instance && !result.account) {
+         result.instance.accounts.push({
+         uid: msg.uid,
+         tasks: msg.tasks
+         });
+         } else {
+         intel.error('Невозможно добавить аккаунт');
+         }
+         }
+         break;
+         case 'taskReady':
+         { //instanceSn, accountUid
+         let result = getTask(msg.data);
+         if (result.instance && result.account && !result.task) {
+         result.account.tasks.push({
+         uid: msg.uid
+         });
+         } else {
+         intel.error('Невозможно добавить таск');
+         }
+         }
+         break;
 
 
-                case 'getStatistic':
-                {
-                    this.send({
-                        command: 'setStatistic',
-                        data: memoryUsage
-                    });
-                }
-                    break;
-                case 'setStatistic':
-                {
-                    let oldMemoryUsage = extend({}, memoryUsage);
+         case 'getStatistic':
+         {
+         this.send({
+         command: 'setStatistic',
+         data: memoryUsage
+         });
+         }
+         break;
+         case 'setStatistic':
+         {
+         let oldMemoryUsage = extend({}, memoryUsage);
 
-                    memoryUsage[msg.data.processPid] = {
-                        memory: msg.data.memoryUsage.heapTotal,
-                        accounts: msg.data.accounts
-                    };
+         memoryUsage[msg.data.processPid] = {
+         memory: msg.data.memoryUsage.heapTotal,
+         accounts: msg.data.accounts
+         };
 
-                    if (!_.isEqual(oldMemoryUsage, memoryUsage)) {
-                        this.send({
-                            command: 'setStatistic',
-                            data: memoryUsage
-                        })
-                    }
-                }
-                    break;
-                case 'getAllTasks':
-                {
-                    broadcast({
-                        command: 'getAllTasks',
-                        data: msg.data
-                    });
-                }
-                    break;
-                case 'switchAccount':
-                {
-                    account = getExistingAccount(msg.data);
-                    if (!account) {
+         if (!_.isEqual(oldMemoryUsage, memoryUsage)) {
+         this.send({
+         command: 'setStatistic',
+         data: memoryUsage
+         })
+         }
+         }
+         break;
+         case 'getAllTasks':
+         {
+         broadcast({
+         command: 'getAllTasks',
+         data: msg.data
+         });
+         }
+         break;
+         case 'switchAccount':
+         {
+         account = getExistingAccount(msg.data);
+         if (!account) {
 
-                        let newAccount = extend({}, msg.data, {
-                            wid: this.id,
-                            uid: uuid.v1(),
-                            tasks: []
-                        });
+         let newAccount = extend({}, msg.data, {
+         wid: this.id,
+         uid: uuid.v1(),
+         tasks: []
+         });
 
-                        accounts.push(newAccount);
+         accounts.push(newAccount);
 
-                        this.send({
-                            command: 'addAccount',
-                            data: newAccount
-                        });
-                    }
-                }
-                    break;
-                case 'getCurrentTask':
-                { //accountId //pageId
-                    let result = getTaskByData(msg.data);
-                    if (result.instance && result.account && result.task) {
-                        cluster.workers[result.instance.sn].send({
-                            command: msg.command,
-                            data: extend({}, result, msg.data)
-                        });
-                    } else {
-                        this.send({
-                            command: msg.command,
-                            data: msg.data
-                        });
-                    }
-                }
-                    break;
-                case 'createTask':
-                {
-                    createTask(msg.data, msg.command);
-                }
-                    break;
-                case 'startPauseTask':
-                {
-                    if (!msg.data.uid) {
-                        createTask(msg.data, msg.command);
-                    } else {
-                        account = getExistingTaskAccount(msg.data.uid);
-                        if (account) {
-                            cluster.workers[account.wid].send({
-                                command: msg.command,
-                                data: msg.data
-                            });
-                        }
-                    }
-                }
-                    break;
-                case 'stopTask':
-                {
-                    account = getExistingTaskAccount(msg.data.uid);
-                    if (account) {
-                        cluster.workers[account.wid].send({
-                            command: msg.command,
-                            data: msg.data
-                        });
-                    }
-                }
-                    break;
-                case 'canKill':
-                {
-                    this.kill();
-                }
-                    break;
-            }
-        }).on('listening', function (address) {
+         this.send({
+         command: 'addAccount',
+         data: newAccount
+         });
+         }
+         }
+         break;
+         /*case 'getCurrentTask':
+         { //accountId //pageId
+         let result = getTaskByData(msg.data);
+         if (result.instance && result.account && result.task) {
+         cluster.workers[result.instance.sn].send({
+         command: msg.command,
+         data: extend({}, result, msg.data)
+         });
+         } else {
+         this.send({
+         command: msg.command,
+         data: msg.data
+         });
+         }
+         }
+         break;
+         case 'createTask':
+         {
+         createTask(msg.data, msg.command);
+         }
+         break;
+         case 'startPauseTask':
+         {
+         if (!msg.data.uid) {
+         createTask(msg.data, msg.command);
+         } else {
+         account = getExistingTaskAccount(msg.data.uid);
+         if (account) {
+         cluster.workers[account.wid].send({
+         command: msg.command,
+         data: msg.data
+         });
+         }
+         }
+         }
+         break;
+         case 'stopTask':
+         {
+         account = getExistingTaskAccount(msg.data.uid);
+         if (account) {
+         cluster.workers[account.wid].send({
+         command: msg.command,
+         data: msg.data
+         });
+         }
+         }
+         break;
+         case 'canKill':
+         {
+         this.kill();
+         }
+         break;
+         }
+         })*/
+        worker.on('listening', function (address) {
             console.log(address);
         }).on('disconnect', function () {
             console.log('disconnect');
@@ -274,7 +277,7 @@ if (cluster.isMaster) {
         intel.debug(`Yay, the worker responded after it was forked ${worker.id}`);
 
 
-        hub.requestWorker(worker, 'init', worker.id, function(err, instance){
+        hub.requestWorker(worker, 'init', worker.id, function (err, instance) {
             if (err) {
                 intel.error(err);
             } else {
@@ -290,11 +293,22 @@ if (cluster.isMaster) {
 
         });
 
-       /* worker.send({
-            command: 'init',
-            data: worker.id
-        });*/
+        /* worker.send({
+         command: 'init',
+         data: worker.id
+         });*/
 
+    });
+
+
+    hub.on('getCurrentTask', function (data, sender, callback) {
+        let result = getTaskByData(data);
+        if (result.instance && result.account && result.task) {
+            return hub.sendToWorker(cluster.workers[result.instance.sn], 'getCurrentTask', data);
+        } else {
+            console.log('master send')
+            return hub.sendToWorker(sender, 'getCurrentTask', data);
+        }
     });
 
     let eachWorker = function (callback) {
@@ -321,6 +335,37 @@ if (cluster.isMaster) {
 
 } else {
 
+
+
+}
+
+
+// GLOBAL.hub = hub;
+
+let normalizePort = function (val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        return val;
+    }
+
+    if (port >= 0) {
+        return port;
+    }
+
+    return false;
+};
+
+var port = normalizePort(process.env.PORT || '5000');
+
+app.set('port', port);
+
+if (!sticky.listen(server, app.get('port')), {workers: 2}) {
+    // Master code
+    server.once('listening', function () {
+        console.log('server started on 5000 port');
+    });
+} else {
     let onError = function (error) {
         if (error.syscall !== 'listen') {
             throw error;
@@ -353,28 +398,11 @@ if (cluster.isMaster) {
         console.log('Listening on ' + bind);
     };
 
-    let normalizePort = function (val) {
-        var port = parseInt(val, 10);
-
-        if (isNaN(port)) {
-            return val;
-        }
-
-        if (port >= 0) {
-            return port;
-        }
-
-        return false;
-    };
-
-    var port = normalizePort(process.env.PORT || '5000');
-
-    app.set('port', port);
-
-    GLOBAL.server = server.listen(port);
 
     server.on('error', onError);
     server.on('listening', onListening);
+
+    GLOBAL.server = server;
 
     require('processing');
 }

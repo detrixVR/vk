@@ -83,7 +83,7 @@ class Page {
             console.log(this.pageId);
             console.log(this.accountId);
 
-            this.getCurrentTask();
+           // this.getCurrentTask();
 
             this.initialized = true;
         }

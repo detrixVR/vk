@@ -62,7 +62,7 @@ class Instance {
 
     addAccount(data, callback) { //username //accountId
         let self = this;
-        let account = this._getAccountByCredentials(data);
+        let account = this.getAccountByCredentials(data);
         if (!account) {
             data.uid = uuid.v1();
             let newAccount = new Account(self, data);
@@ -83,7 +83,7 @@ class Instance {
         }
     }
 
-    _getAccountByCredentials(data) {
+    getAccountByCredentials(data) {
         return _.find(this.accounts, function (item) {
             return item.username === data.username && item.accountId === data.accountId;
         })

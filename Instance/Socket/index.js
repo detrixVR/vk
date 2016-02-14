@@ -40,7 +40,7 @@ class Socket {
 
         this.Instance = Instance;
         this.s = io.listen(GLOBAL.server);
-
+        this.hub = GLOBAL.hub;
         this.initialized = false;
     }
 
@@ -67,12 +67,14 @@ class Socket {
 
             this.s.sockets.on('connection', function (socket) {
 
-                var user = {
+                let roomsWhereUserIs = [];
+
+                let user = {
                     username: socket.request.username
                 };
 
                 intel.debug(`${process.pid}: [${self.getUserNameString(user)}] connected`);
-                console.log(`${process.pid}: [${self.getUserNameString(user)}] connected`);
+              //  console.log(`${process.pid}: [${self.getUserNameString(user)}] connected`);
 
                 socket.join(user.username);
                 socket.join(user.username + ':uploadFile');
@@ -89,7 +91,7 @@ class Socket {
 
                         intel.debug(`${process.pid}: socket command [${command}] from [${self.getUserNameString(user)}]`);
 
-                        let roomsWhereUserIs = [];
+                        roomsWhereUserIs = [];
 
                         for (var k in self.s.sockets.adapter.rooms) {
                             if (k.indexOf(user.username) > -1)
@@ -130,11 +132,12 @@ class Socket {
                             case 'getCurrentTask':
                             case 'getCurrentTasks':
                             case 'stopTask':
-                                process.send({
-                                    command: command,
-                                    data: extend({}, user, data)
-                                });
-                                return;
+                                /*process.send({
+                                 command: command,
+                                 data: extend({}, user, data)
+                                 });*/
+                                console.log(roomsWhereUserIs)
+                                return self.hub.requestMaster(command, extend({}, user, data));
                         }
 
                         switch (command) {
@@ -161,105 +164,113 @@ class Socket {
                     }
                 };
 
+                //socket.on('connect',function(){
+                  // console.log('single connect');
+               // });
 
                 socket.on('disconnect', function () {
+
+                    for (var k in roomsWhereUserIs) {
+                        if (k.indexOf(user.username) > -1)
+                            this.leave(k);
+                    }
                     console.log(`${process.pid}: [${self.getUserNameString(user)}] disconnected`);
                 });
             });
 
             /*process.on('message', function (msg) {
 
-                if (msg.data && msg.data.username && msg.data.accountId) {
+             if (msg.data && msg.data.username && msg.data.accountId) {
 
-                    let account = null;
-                    let task = null;
+             let account = null;
+             let task = null;
 
 
-                    var credentials = {
-                        username: msg.data.username,
-                        accountId: msg.data.accountId,
-                        pageId: msg.data.pageId
-                    };
+             var credentials = {
+             username: msg.data.username,
+             accountId: msg.data.accountId,
+             pageId: msg.data.pageId
+             };
 
-                    let room = self.getUserNameString(credentials);
+             let room = self.getUserNameString(credentials);
 
-                    switch (msg.command) {
-                        case 'addAccount':
-                            console.log('addAccount');
-                            account = self.getExistingAccount(extend({}, msg.data, credentials));
-                            if (!account) {
-                                var newAccount = new Account(self, extend({}, msg.data, credentials));
-                                self.accounts.push(newAccount);
-                            }
-                            break;
-                        case 'createTask':
-                            account = self.getExistingAccount(extend({}, msg.data, credentials));
-                            if (account) {
-                                account.createTask(extend({}, msg.data, credentials));
-                            }
-                            break;
-                        case 'startPauseTask':
-                            account = self.getExistingAccount(extend({}, msg.data, credentials));
-                            if (account) {
-                                account.startPauseTask(extend({}, msg.data, credentials));
-                            }
-                            break;
-                        case 'stopTask':
-                            account = self.getExistingAccount(extend({}, msg.data, credentials));
-                            if (account) {
-                                account.stopTask(extend({}, msg.data, credentials));
-                            }
-                            break;
-                        case 'getCurrentTask':
-                            account = self.getExistingAccount(extend({}, msg.data, credentials));
-                            if (account) {
-                                task = _.find(account.tasks, function (item) {
-                                        return item.pageId === msg.data.pageId
-                                    }) || null
-                            }
-                            self.s.sockets.in(room).emit('setTask', task ? {
-                                uid: task.uid,
-                                settings: task.settings,
-                                messages: task.messages,
-                                state: task.state
-                            } : task);
-                            break;
-                        default:
-                            console.log('default ' + msg.command);
-                    }
-                } else {
-                    switch (msg.command) {
-                        case 'memoryUsage':
-                            // console.log(self.accounts);
-                            process.send({
-                                command: 'setMemoryUsage',
-                                data: {
-                                    processPid: process.pid,
-                                    memoryUsage: process.memoryUsage(),
-                                    accounts: _.map(self.accounts, function (account) {
-                                        return {
-                                            uid: account.uid,
-                                            username: account.username,
-                                            accountId: account.accountId,
-                                            tasks: _.map(account.tasks, function (task) {
-                                                return {
-                                                    uid: task.uid,
-                                                    taskName: task.taskName
-                                                }
-                                            })
-                                        }
-                                    })
-                                }
-                            });
-                            break;
-                        case 'sendMemoryUsage':
-                            self.s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
-                            break;
-                        default:
-                            console.log('default1 ' + msg.command);
-                    }
-                }
-            });*/
+             switch (msg.command) {
+             case 'addAccount':
+             console.log('addAccount');
+             account = self.getExistingAccount(extend({}, msg.data, credentials));
+             if (!account) {
+             var newAccount = new Account(self, extend({}, msg.data, credentials));
+             self.accounts.push(newAccount);
+             }
+             break;
+             case 'createTask':
+             account = self.getExistingAccount(extend({}, msg.data, credentials));
+             if (account) {
+             account.createTask(extend({}, msg.data, credentials));
+             }
+             break;
+             case 'startPauseTask':
+             account = self.getExistingAccount(extend({}, msg.data, credentials));
+             if (account) {
+             account.startPauseTask(extend({}, msg.data, credentials));
+             }
+             break;
+             case 'stopTask':
+             account = self.getExistingAccount(extend({}, msg.data, credentials));
+             if (account) {
+             account.stopTask(extend({}, msg.data, credentials));
+             }
+             break;
+             case 'getCurrentTask':
+             account = self.getExistingAccount(extend({}, msg.data, credentials));
+             if (account) {
+             task = _.find(account.tasks, function (item) {
+             return item.pageId === msg.data.pageId
+             }) || null
+             }
+             self.s.sockets.in(room).emit('setTask', task ? {
+             uid: task.uid,
+             settings: task.settings,
+             messages: task.messages,
+             state: task.state
+             } : task);
+             break;
+             default:
+             console.log('default ' + msg.command);
+             }
+             } else {
+             switch (msg.command) {
+             case 'memoryUsage':
+             // console.log(self.accounts);
+             process.send({
+             command: 'setMemoryUsage',
+             data: {
+             processPid: process.pid,
+             memoryUsage: process.memoryUsage(),
+             accounts: _.map(self.accounts, function (account) {
+             return {
+             uid: account.uid,
+             username: account.username,
+             accountId: account.accountId,
+             tasks: _.map(account.tasks, function (task) {
+             return {
+             uid: task.uid,
+             taskName: task.taskName
+             }
+             })
+             }
+             })
+             }
+             });
+             break;
+             case 'sendMemoryUsage':
+             self.s.sockets.in('memoryUsage').emit('memoryUsage', msg.data);
+             break;
+             default:
+             console.log('default1 ' + msg.command);
+             }
+             }
+             });*/
 
             this.initialized = true;
         }

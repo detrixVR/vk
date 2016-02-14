@@ -11,6 +11,8 @@
 
     var hub = new Hub();
 
+    GLOBAL.hub = hub;
+
     let init = function (msg) {
 
         let sn = msg.data;
@@ -153,13 +155,22 @@
     };
 
 
-  /*  process.on('message', function (data) {
+    /*  process.on('message', function (data) {
 
-        intel.debug(`${process.pid}: command: ${data.command}`);
+     intel.debug(`${process.pid}: command: ${data.command}`);
 
-        eval(data.command)(data);
+     eval(data.command)(data);
 
-    });*/
+     });*/
+
+    hub.on('getCurrentTask', function (data, sender, callback) {
+        let account = GLOBAL.Instance.getAccountByCredentials(data);
+        if (account) {
+            let task = account.getTaskByPageId(data);
+            console.log('send');
+            GLOBAL.Instance.Socket.s.sockets.in(`${data.username}:${data.accountId}:${data.pageId}`).emit('setCurrentTask', task);
+        }
+    });
 
 
     hub.on('init', function (data, sender, callback) {

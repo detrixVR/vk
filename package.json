@@ -68,6 +68,7 @@
     "socks5-http-client": "^1.0.2",
     "socks5-https-client": "^1.1.2",
     "socksv5": "0.0.6",
+    "sticky-session": "^1.0.2",
     "underscore": "^1.8.3",
     "vkapi": "^1.0.0",
     "vksdk": "^5.2.1",
