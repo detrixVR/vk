@@ -34,7 +34,7 @@ gulp.task('styles-index', ['concat-libs-css'], wrapPipe(function (success, error
 gulp.task('concat-libs-css', wrapPipe((success, error) => {
     return gulp.src([
         './public/stylesheets/libs/*.css',
-        './public/stylesheets/libs/bootstrap-themes/*.css',
+       // './public/stylesheets/libs/bootstrap-themes/*.css',
     ])
         .pipe(concat('libs.css'))
         .pipe(gulp.dest('./public/stylesheets/'));

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include ../parts/cabinetHead.ejs %>
+</head>
+<body>
+
+
+<div class="layout">
+    <div class="left-menu" data-visible="false" tabindex="1">
+        <div class="menu-content">
+            <input type="text" class="form-control" onkeyup="$('#kozelTimur').trigger('menuSearch', this)">
+        </div>
+
+    </div>
+    <div class="content">
+        <div class="toolbar">
+            <button class="btn btn-default btn-sm" onclick="$('#kozelTimur').trigger('toggleMenu', this)"
+                    data-side="left"><span class="glyphicon glyphicon-th"></span></button>
+            <button class="btn btn-default btn-sm" onclick="$('#kozelTimur').trigger('toggleMenu', this)"
+                    data-side="right"><span class="glyphicon glyphicon-user"></span></button>
+        </div>
+        <div style="height: 100%; padding: 50px 0 0 0;">
+            <div style="height: 100%;overflow: auto">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div style="height: 500px">2</div>
+                        <div style="height: 500px">21</div>
+                        <div style="height: 500px">12212</div>
+                        <div style="height: 500px">1212</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="right-menu" data-visible="false" tabindex="1">
+
+        <div class="menu-content">
+            <div class="menu-toolbar">
+                <div class="input-group">
+                    <input type="text" class="form-control" onkeyup="$('#kozelTimur').trigger('menuSearch', this)">
+
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" onclick="$('#kozelTimur').trigger('menuSearch', this)"><span
+                                    class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-body">
+                <div class="list">
+
+                    <div class="list-elem">1</div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem"></div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem"></div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem"></div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem"></div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem"></div>
+                    <div class="list-elem">1</div>
+                    <div class="list-elem">1</div>
+
+                </div>
+            </div>
+            <div class="menu-footer">
+                <button class="btn btn-default">Выбрать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hidden" id="kozelTimur"></div>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
+
+<script type="template" id="accountListRowTemplate">
+    {{ for(var tag in data) { }}
+        {{=tag}}
+    {{ } }}
+</script>
+
+
+</body>
+</html>

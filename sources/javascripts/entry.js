@@ -7,7 +7,7 @@ import OtherPage     from './pages/other.js';
 
 let other = new OtherPage().init();
 
-
+window._page = other;
 
 
 

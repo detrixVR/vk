@@ -83,10 +83,14 @@ class Page {
             console.log(this.pageId);
             console.log(this.accountId);
 
-           // this.getCurrentTask();
+            // this.getCurrentTask();
+
+            this.initRequester();
 
             this.initialized = true;
         }
+
+        return this;
     }
 
     getCurrentTask() {
@@ -159,6 +163,37 @@ class Page {
 
         return argsParsed;
     }
+
+    initRequester() {
+        this.requester = {
+            accounts: {
+                get: function (options, callback) {
+                    let that = this;
+                    if (!this._cache) {
+                        $.post('/test', options).done(function (data) {
+                            that._cache = data;
+                            return callback(null, data);
+                        }).fail(function (fail) {
+                            return callback(fail);
+                        });
+                    } else {
+                        return callback(null, this._cache);
+                    }
+                },
+                create: function () {
+
+                },
+                delete: function () {
+
+                },
+                patch: function () {
+
+                },
+                _cache: null
+            }
+        }
+    }
+
 }
 
 

@@ -5,14 +5,19 @@ class UI {
 
     constructor(page) {
         this.Page = page;
+
+
     }
 
 
     init() {
         let that = this;
 
+        this.leftMenu = {elem: $('.left-menu'), timeout: null};
+        this.rightMenu = {elem: $('.right-menu'), timeout: null};
+
         _.templateSettings = {
-            evaluate:    /\{\{(.+?)\}\}/g,
+            evaluate: /\{\{(.+?)\}\}/g,
             interpolate: /\{\{=(.+?)\}\}/g,
             escape: /\{\{-(.+?)\}\}/g
         };
@@ -168,7 +173,7 @@ class UI {
         if (!this.initialized) {
             var oldJQueryEventTrigger = jQuery.event.trigger;
             jQuery.event.trigger = function (event, data, elem, onlyHandlers) {
-                if (elem.id === 'kozelTimur') {
+                if (elem && elem.id === 'kozelTimur') {
                     eval('that.' + event + '(data)');
                 }
                 oldJQueryEventTrigger(event, data, elem, onlyHandlers);
@@ -191,6 +196,100 @@ class UI {
     setCurrentTask(task) {
         if (!task) {
             this.overlay();
+        }
+    }
+
+    _hideMenu(menu) {
+        menu.elem.off('focusout').off('focusin');
+        menu.elem.data('visible', false).attr('data-visible', false);
+
+    }
+
+    _getElemData(elem) {
+        return $(elem).data();
+    }
+
+    _loadMenuContent() {
+
+    }
+
+    toggleMenu(elem) {
+        var that = this;
+        var elemData = this._getElemData(elem);
+        if (elemData) {
+            let menu = null;
+            switch (elemData.side) {
+                case 'left':
+                    menu = this.leftMenu;
+                    break;
+                case 'right':
+                    menu = this.rightMenu;
+                    break;
+            }
+            let visible = !menu.elem.data('visible');
+            clearTimeout(menu.timeout);
+            if (visible && !menu.progress) {
+                menu.elem.on('focusout', function (e) {
+                    menu.timeout = setTimeout(function () {
+                        that._hideMenu(menu);
+                    }, 1);
+                });
+                menu.elem.on('focusin', function (e) {
+                    clearTimeout(menu.timeout);
+                });
+                menu.elem.find('input').focus();
+                let $list = menu.elem.find('.list');
+                if (!$list.data('jsp'))
+                    menu.elem.find('.list').jScrollPane();
+                menu.elem.data('visible', true).attr('data-visible', true);
+                menu.progress = true;
+                let menuBody = menu.elem.find('.menu-body');
+                that.Page.UI.progress(menuBody, menu.progress);
+                that.Page.requester.accounts.get(null, function(err, data){
+                    menuBody.html(_.template($('#accountListRowTemplate').html())({data: data}));
+                    menu.progress = false;
+                    that.Page.UI.progress(menuBody, menu.progress );
+                })
+            } else {
+                that._hideMenu(menu);
+            }
+        }
+    }
+
+    progress(elem, bool) {
+        var $elem = $(elem);
+        if (bool) {
+            $elem.css({
+                position: 'relative'
+            });
+            $('<div class="huyax-progress">').appendTo($elem).css({
+                width: $elem.outerWidth(),
+                height: $elem.outerHeight(),
+                position: 'absolute',
+                top: 0,
+                left: 0
+            })
+        } else {
+            $elem.find('.huyax-progress').remove();
+        }
+    }
+
+    menuSearch(elem) {
+        var that = this;
+        var elemData = this._getElemData(elem);
+        if (elemData) {
+            let $elem = $(elem);
+            let $input = $elem.closest('.input-group').find('input');
+            let $list = $('.jspPane', '.list');
+            if ($input.length) {
+                let searchText = $input.val();
+                let listItems = $('.list-elem', $list);
+                listItems.each(function (i, item) {
+                    let $item = $(item);
+                    let textContent = $item.text().toLowerCase();
+                    $item.toggleClass('hidden', !~textContent.indexOf(searchText.toLowerCase()));
+                });
+            }
         }
     }
 

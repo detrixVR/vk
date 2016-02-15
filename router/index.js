@@ -70,6 +70,9 @@ module.exports = function (app) {
 
     app.get('/check', require('./check').get);
 
+    app.get('/test', require('./test').get);
+    app.post('/test', require('./test').post);
+
     app.get('/private', require('./private').get);
     app.post('/private', loadUser.needAuth, require('./private').post);
 

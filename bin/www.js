@@ -30,84 +30,18 @@ let timeout = null;
 
 if (cluster.isMaster) {
 
-    console.log(__dirname);
+  //  console.log(__dirname);
 
-    console.log('Start cluster with %s workers', workers - 1);
+//    console.log('Start cluster with %s workers', workers - 1);
 
 
-    let getInstance = function (data) {
-        return _.find(instances, function (instance) {
-            return (instance.sn === data.sn);
-        })
-    };
 
-    let getAccount = function (data) {
-        let instance = null;
-        let account = _.find(instances, function (ins) {
-            if (ins.sn === data.instanceSn) {
-                instance = ins;
-                return _.find(ins.accounts, function (account) {
-                    return (account.uid === data.uid);
-                });
-            }
-            return false;
-        });
-
-        return {
-            instance: instance,
-            account: account
-        }
-    };
-
-    let getTask = function (data) {
-
-        let instance = null;
-        let account = null;
-        let task = _.find(instances, function (ins) {
-            if (ins.sn === data.instanceSn) {
-                instance = ins;
-                return _.find(ins.accounts, function (ac) {
-                    if (ac.uid === data.accountUid) {
-                        account = ac;
-                        return _.find(ac.tasks, function (task) {
-                            return (task === data.uid);
-                        })
-                    }
-                    return false;
-                });
-            }
-            return false;
-        });
-
-        return {
-            instance: instance,
-            account: account,
-            task: task
-        }
-    };
-
-    let getTaskByData = function (data) {
-        let result = {};
-        result.task = _.find(instances, function (instance) {
-            return _.find(instance.accounts, function (account) {
-                if (account.accountId === data.accountId) {
-                    result.instance = instance;
-                    result.account = account;
-                    return _.find(account.tasks, function (task) {
-                        return (task === task.pageId);
-                    })
-                }
-                return false;
-            });
-        });
-        return result;
-    };
 
     workers--;
 
     for (var i = 0; i < workers; ++i) {
 
-        var worker = cluster.fork();
+       // var worker = cluster.fork();
 
         /*worker.on('message', function (msg) {
 
@@ -260,15 +194,124 @@ if (cluster.isMaster) {
          break;
          }
          })*/
-        worker.on('listening', function (address) {
+        /*worker.on('listening', function (address) {
             console.log(address);
         }).on('disconnect', function () {
             console.log('disconnect');
         }).on('error', function (error) {
             console.error('PARAPAPAPAM');
             console.error(error);
-        });
+        });*/
     }
+
+
+
+    /*
+     setTimeout(function () {
+     // for (var i = 0; i < workersArray.length; i++) {
+     cluster.workers[1].send({command: 'error'});
+     // workersArray[0].send({command: 'shutdown'});
+     // }
+     }, 10000)*/
+
+} else {
+
+
+
+}
+
+
+let normalizePort = function (val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        return val;
+    }
+
+    if (port >= 0) {
+        return port;
+    }
+
+    return false;
+};
+
+var port = normalizePort(process.env.PORT || '5000');
+
+app.set('port', port);
+
+if (!sticky.listen(server, app.get('port'), {workers: 2})) {
+    // Master code
+    server.once('listening', function () {
+        console.log('server started on 5000 port');
+    });
+
+    let getInstance = function (data) {
+        return _.find(instances, function (instance) {
+            return (instance.sn === data.sn);
+        })
+    };
+
+    let getAccount = function (data) {
+        let instance = null;
+        let account = _.find(instances, function (ins) {
+            if (ins.sn === data.instanceSn) {
+                instance = ins;
+                return _.find(ins.accounts, function (account) {
+                    return (account.uid === data.uid);
+                });
+            }
+            return false;
+        });
+
+        return {
+            instance: instance,
+            account: account
+        }
+    };
+
+    let getTask = function (data) {
+
+        let instance = null;
+        let account = null;
+        let task = _.find(instances, function (ins) {
+            if (ins.sn === data.instanceSn) {
+                instance = ins;
+                return _.find(ins.accounts, function (ac) {
+                    if (ac.uid === data.accountUid) {
+                        account = ac;
+                        return _.find(ac.tasks, function (task) {
+                            return (task === data.uid);
+                        })
+                    }
+                    return false;
+                });
+            }
+            return false;
+        });
+
+        return {
+            instance: instance,
+            account: account,
+            task: task
+        }
+    };
+
+    let getTaskByData = function (data) {
+        let result = {};
+        result.task = _.find(instances, function (instance) {
+            return _.find(instance.accounts, function (account) {
+                if (account.accountId === data.accountId) {
+                    result.instance = instance;
+                    result.account = account;
+                    return _.find(account.tasks, function (task) {
+                        return (task === task.pageId);
+                    })
+                }
+                return false;
+            });
+        });
+        return result;
+    };
 
     cluster.on('death', (worker) => {
         console.log('worker %s died. restart...', worker.process.pid);
@@ -293,11 +336,6 @@ if (cluster.isMaster) {
 
         });
 
-        /* worker.send({
-         command: 'init',
-         data: worker.id
-         });*/
-
     });
 
 
@@ -311,7 +349,7 @@ if (cluster.isMaster) {
         }
     });
 
-    let eachWorker = function (callback) {
+    /*let eachWorker = function (callback) {
         for (var id in cluster.workers) {
             callback(cluster.workers[id]);
         }
@@ -323,49 +361,10 @@ if (cluster.isMaster) {
                 command: 'getStatistic'
             });
         });
-    }, 2000);
-
-    /*
-     setTimeout(function () {
-     // for (var i = 0; i < workersArray.length; i++) {
-     cluster.workers[1].send({command: 'error'});
-     // workersArray[0].send({command: 'shutdown'});
-     // }
-     }, 10000)*/
+    }, 2000);*/
 
 } else {
 
-
-
-}
-
-
-// GLOBAL.hub = hub;
-
-let normalizePort = function (val) {
-    var port = parseInt(val, 10);
-
-    if (isNaN(port)) {
-        return val;
-    }
-
-    if (port >= 0) {
-        return port;
-    }
-
-    return false;
-};
-
-var port = normalizePort(process.env.PORT || '5000');
-
-app.set('port', port);
-
-if (!sticky.listen(server, app.get('port')), {workers: 2}) {
-    // Master code
-    server.once('listening', function () {
-        console.log('server started on 5000 port');
-    });
-} else {
     let onError = function (error) {
         if (error.syscall !== 'listen') {
             throw error;

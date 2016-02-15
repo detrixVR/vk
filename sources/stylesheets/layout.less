@@ -1,0 +1,116 @@
+@toolbar-height: 50px;
+@menu-width: 300px;
+
+.layout {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  .left-menu,
+  .right-menu {
+    width: @menu-width;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    background-color: red;
+    padding: @toolbar-height 0 0 0;
+    outline: none;
+
+    .menu-content {
+      height: 100%;
+      width: 100%;
+      position: relative;
+
+      .menu-toolbar,
+      .menu-footer {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        padding: 5px;
+      }
+
+      .menu-toolbar {
+        top: 0;
+      }
+      .menu-footer {
+        bottom: 0;
+      }
+
+      .menu-body {
+        padding: 50px 0 50px 0;
+
+        height: 100%;
+        width: 100%;
+
+        .list {
+          height: 100%;
+          width: 100%;
+          background-color: #004D40;
+          overflow-y: auto;
+          overflow-x: hidden;
+
+          .list-elem {
+            min-height: 30px;
+            background-color: #00ACC1;
+          }
+        }
+      }
+    }
+  }
+
+  .left-menu {
+
+    &[data-visible=true] {
+      left: 0;
+    }
+
+    &[data-visible=false] {
+      left: -@menu-width;
+    }
+
+    -webkit-transition: left 0.5s ease-out 0s;
+    -moz-transition: left 0.5s ease-out 0s;
+    -o-transition: left 0.5s ease-out 0s;
+    transition: left 0.5s ease-out 0s;
+
+  }
+
+  .right-menu {
+
+    &[data-visible=true] {
+      right: 0;
+    }
+
+    &[data-visible=false] {
+      right: -@menu-width;
+    }
+
+    -webkit-transition: right 0.5s ease-out 0s;
+    -moz-transition: right 0.5s ease-out 0s;
+    -o-transition: right 0.5s ease-out 0s;
+    transition: right 0.5s ease-out 0s;
+  }
+
+  .content {
+    width: 100%;
+    height: 100%;
+
+    .toolbar {
+      height: @toolbar-height;
+      background-color: green;
+      z-index: 2;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+  }
+
+  .huyax-progress {
+    background-color: gray;
+    background-image: url(/images/loading.gif);
+    background-repeat: no-repeat;
+    background-position: 50%;
+  }
+
+}
