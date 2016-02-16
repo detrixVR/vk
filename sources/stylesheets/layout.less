@@ -50,8 +50,13 @@
           overflow-x: hidden;
 
           .list-elem {
-            min-height: 30px;
+            min-height: 50px;
             background-color: #00ACC1;
+            margin: 0 0 5px 0;
+
+            &.selected{
+              background-color: #ddd;
+            }
           }
         }
       }
@@ -111,6 +116,27 @@
     background-image: url(/images/loading.gif);
     background-repeat: no-repeat;
     background-position: 50%;
+  }
+
+  .account-info {
+    padding-left: 50px;
+    position: relative;
+    .account-photo {
+      position: absolute;
+      background-repeat: no-repeat;
+      background-size: contain;
+      top: 0;
+      left: 0;
+      width: 50px;
+      height: 50px;
+    }
+    .account-name {
+      font-weight: bold;
+
+    }
+    .account-other {
+
+    }
   }
 
 }

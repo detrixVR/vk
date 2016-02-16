@@ -48,29 +48,10 @@
                 </div>
             </div>
             <div class="menu-body">
-                <div class="list">
-
-                    <div class="list-elem">1</div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem"></div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem"></div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem"></div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem"></div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem"></div>
-                    <div class="list-elem">1</div>
-                    <div class="list-elem">1</div>
-
-                </div>
+                <div class="list"></div>
             </div>
             <div class="menu-footer">
-                <button class="btn btn-default">Выбрать</button>
+                <button class="btn btn-default" onclick="$('#kozelTimur').trigger('getMenuListItem', this)">Выбрать</button>
             </div>
         </div>
     </div>
@@ -82,9 +63,23 @@
 <script src="javascripts/app.js"></script>
 
 <script type="template" id="accountListRowTemplate">
-    {{ for(var tag in data) { }}
-        {{=tag}}
-    {{ } }}
+
+        {{ for(var i = 0; i < data.length; i++) { }}
+        <div class="list-elem" onclick="$('#kozelTimur').trigger('selectMenuListItem', this)" data-id="{{=data[i].id}}">
+            <div class="account-info">
+                <div class="account-photo" style="background-image: url({{=data[i].photo}})"></div>
+                <div class="account-name">
+                    {{=data[i].lastName}} {{=data[i].firstName}}
+                </div>
+                <div class="account-other">
+                    {{=data[i].accountId}}
+                </div>
+            </div>
+        </div>
+
+        {{ } }}
+
+
 </script>
 
 

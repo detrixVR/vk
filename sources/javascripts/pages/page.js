@@ -167,17 +167,36 @@ class Page {
     initRequester() {
         this.requester = {
             accounts: {
+                _accountsFromCache: function (options) {
+                    return this._cache.filter(function (account) {
+                        let bool = true;
+                        for (var k in options) {
+                            bool = options[k] === account[k];
+                        }
+                        return bool;
+                    });
+                },
                 get: function (options, callback) {
                     let that = this;
-                    if (!this._cache) {
+                    let accounts = this._accountsFromCache(options);
+                    if (accounts.length) {
+                        return callback(null, accounts);
+                    } else {
                         $.post('/test', options).done(function (data) {
-                            that._cache = data;
-                            return callback(null, data);
+                            data.forEach(function (item) {
+                                let founded = _.find(that._cache, function (c) {
+                                    return c.id === item.id
+                                });
+                                if (founded) {
+                                    that._cache.splice(that._cache.indexOf(founded), 1, item);
+                                } else {
+                                    that._cache.push(item);
+                                }
+                            });
+                            return callback(null, that._accountsFromCache(options));
                         }).fail(function (fail) {
                             return callback(fail);
                         });
-                    } else {
-                        return callback(null, this._cache);
                     }
                 },
                 create: function () {
@@ -189,7 +208,7 @@ class Page {
                 patch: function () {
 
                 },
-                _cache: null
+                _cache: []
             }
         }
     }

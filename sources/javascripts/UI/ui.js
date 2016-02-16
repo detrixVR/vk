@@ -241,14 +241,18 @@ class UI {
                 let $list = menu.elem.find('.list');
                 if (!$list.data('jsp'))
                     menu.elem.find('.list').jScrollPane();
+                let $pane = menu.elem.find('.jspPane');
                 menu.elem.data('visible', true).attr('data-visible', true);
                 menu.progress = true;
                 let menuBody = menu.elem.find('.menu-body');
+                let menuToolbar = menu.elem.find('.menu-toolbar');
+                menuToolbar.find('input').val('');
                 that.Page.UI.progress(menuBody, menu.progress);
-                that.Page.requester.accounts.get(null, function(err, data){
-                    menuBody.html(_.template($('#accountListRowTemplate').html())({data: data}));
+                that.Page.requester.accounts.get(null, function (err, data) {
+                    $pane.html(_.template($('#accountListRowTemplate').html())({data: data}));
                     menu.progress = false;
-                    that.Page.UI.progress(menuBody, menu.progress );
+                    that.Page.UI.progress(menuBody, menu.progress);
+                    $list.data('jsp').reinitialise();
                 })
             } else {
                 that._hideMenu(menu);
@@ -280,7 +284,7 @@ class UI {
         if (elemData) {
             let $elem = $(elem);
             let $input = $elem.closest('.input-group').find('input');
-            let $list = $('.jspPane', '.list');
+            let $list = $elem.closest('.menu-content').find('.list');
             if ($input.length) {
                 let searchText = $input.val();
                 let listItems = $('.list-elem', $list);
@@ -290,6 +294,28 @@ class UI {
                     $item.toggleClass('hidden', !~textContent.indexOf(searchText.toLowerCase()));
                 });
             }
+        }
+    }
+
+    selectMenuListItem(elem) {
+        var that = this;
+        var elemData = this._getElemData(elem);
+        if (elemData) {
+            let $elem = $(elem);
+            let $list = $elem.closest('.list');
+            $('.list-elem', $list).toggleClass('selected', false);
+            $elem.toggleClass('selected', true);
+
+        }
+    }
+
+    getMenuListItem(elem) {
+        var that = this;
+        var elemData = this._getElemData(elem);
+        if (elemData) {
+            that.Page.requester.accounts.get({id: elemData.id}, function (err, data) {
+                console.log(data);
+            })
         }
     }
 
