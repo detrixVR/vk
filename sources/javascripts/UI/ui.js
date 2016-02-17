@@ -13,8 +13,8 @@ class UI {
     init() {
         let that = this;
 
-        this.leftMenu = {elem: $('.left-menu'), timeout: null};
-        this.rightMenu = {elem: $('.right-menu'), timeout: null};
+        //   this.leftMenu = {elem: $('.left-menu'), timeout: null};
+        // this.rightMenu = {elem: $('.right-menu'), timeout: null};
 
         _.templateSettings = {
             evaluate: /\{\{(.+?)\}\}/g,
@@ -199,67 +199,6 @@ class UI {
         }
     }
 
-    _hideMenu(menu) {
-        menu.elem.off('focusout').off('focusin');
-        menu.elem.data('visible', false).attr('data-visible', false);
-
-    }
-
-    _getElemData(elem) {
-        return $(elem).data();
-    }
-
-    _loadMenuContent() {
-
-    }
-
-    toggleMenu(elem) {
-        var that = this;
-        var elemData = this._getElemData(elem);
-        if (elemData) {
-            let menu = null;
-            switch (elemData.side) {
-                case 'left':
-                    menu = this.leftMenu;
-                    break;
-                case 'right':
-                    menu = this.rightMenu;
-                    break;
-            }
-            let visible = !menu.elem.data('visible');
-            clearTimeout(menu.timeout);
-            if (visible && !menu.progress) {
-                menu.elem.on('focusout', function (e) {
-                    menu.timeout = setTimeout(function () {
-                        that._hideMenu(menu);
-                    }, 1);
-                });
-                menu.elem.on('focusin', function (e) {
-                    clearTimeout(menu.timeout);
-                });
-                menu.elem.find('input').focus();
-                let $list = menu.elem.find('.list');
-                if (!$list.data('jsp'))
-                    menu.elem.find('.list').jScrollPane();
-                let $pane = menu.elem.find('.jspPane');
-                menu.elem.data('visible', true).attr('data-visible', true);
-                menu.progress = true;
-                let menuBody = menu.elem.find('.menu-body');
-                let menuToolbar = menu.elem.find('.menu-toolbar');
-                menuToolbar.find('input').val('');
-                that.Page.UI.progress(menuBody, menu.progress);
-                that.Page.requester.accounts.get(null, function (err, data) {
-                    $pane.html(_.template($('#accountListRowTemplate').html())({data: data}));
-                    menu.progress = false;
-                    that.Page.UI.progress(menuBody, menu.progress);
-                    $list.data('jsp').reinitialise();
-                })
-            } else {
-                that._hideMenu(menu);
-            }
-        }
-    }
-
     progress(elem, bool) {
         var $elem = $(elem);
         if (bool) {
@@ -278,45 +217,49 @@ class UI {
         }
     }
 
-    menuSearch(elem) {
-        var that = this;
-        var elemData = this._getElemData(elem);
-        if (elemData) {
-            let $elem = $(elem);
-            let $input = $elem.closest('.input-group').find('input');
-            let $list = $elem.closest('.menu-content').find('.list');
-            if ($input.length) {
-                let searchText = $input.val();
-                let listItems = $('.list-elem', $list);
-                listItems.each(function (i, item) {
-                    let $item = $(item);
-                    let textContent = $item.text().toLowerCase();
-                    $item.toggleClass('hidden', !~textContent.indexOf(searchText.toLowerCase()));
-                });
-            }
+    _getSideMenu($elem) {
+        switch ($elem.closest('.menu-content').data('side')) {
+            case 'left':
+                return this.Page.leftMenu;
+            case 'right':
+                return this.Page.rightMenu;
         }
     }
 
-    selectMenuListItem(elem) {
-        var that = this;
-        var elemData = this._getElemData(elem);
-        if (elemData) {
-            let $elem = $(elem);
-            let $list = $elem.closest('.list');
-            $('.list-elem', $list).toggleClass('selected', false);
-            $elem.toggleClass('selected', true);
-
+    toggleMenu($elem) {
+        var elemData = $elem.data();
+        switch (elemData.side) {
+            case 'left':
+                this.Page.leftMenu.toggleMenu();
+                break;
+            case 'right':
+                this.Page.rightMenu.toggleMenu();
+                break;
         }
     }
 
-    getMenuListItem(elem) {
-        var that = this;
-        var elemData = this._getElemData(elem);
-        if (elemData) {
-            that.Page.requester.accounts.get({id: elemData.id}, function (err, data) {
-                console.log(data);
-            })
-        }
+    menuSearch($elem) {
+        this._getSideMenu($elem).menuSearch($elem);
+    }
+
+    menuSelectListItem($elem) {
+        this._getSideMenu($elem).menuSelectListItem($elem);
+    }
+
+    menuGetListItem($elem) {
+        this._getSideMenu($elem).menuGetListItem($elem);
+    }
+
+    menuToggleFilter($elem) {
+        this._getSideMenu($elem).menuToggleFilter($elem);
+    }
+
+    navigate($elem) {
+        $('iframe').attr('src', $elem.data('link'));
+    /*, function (result) {
+            console.log('loaded');
+            window.frames[0].document.innerHTML = result
+        })*/
     }
 
     getStatistic() {

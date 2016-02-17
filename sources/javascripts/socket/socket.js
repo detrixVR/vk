@@ -34,6 +34,7 @@ class Socket {
 
                 this.socket.on('setAccountPage', function () {
                     switch (that.Page.pageId) {
+                        case 'test':
                         case 'mainPage':
                         case 'validateProxies':
                         case 'validateAccounts':
@@ -99,7 +100,7 @@ class Socket {
 
                 this.socket.on('connect', function () {
                     console.log('connected');
-                    that.Page.getCurrentTask();
+                   // that.Page.getCurrentTask();
                 });
 
                 this.socket.on('disconnect', function () {

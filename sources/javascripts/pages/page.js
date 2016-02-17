@@ -4,6 +4,7 @@
 //import Page from './page';
 import Socket from '../socket/socket';
 import UI from '../UI/ui';
+import Menu from '../menu/menu.js';
 
 class Page {
 
@@ -17,6 +18,8 @@ class Page {
 
             this.Socket = new Socket(this).init();
             this.UI = new UI(this).init();
+            this.leftMenu = new Menu(this, 'left');
+            this.rightMenu = new Menu(this, 'right');
 
             this.UI.overlay('Соединение...');
 
@@ -26,6 +29,9 @@ class Page {
             switch (parsedURL.path.substring(1)) {
                 case '':
                     this.pageId = 'mainPage';
+                    break;
+                case 'test':
+                    this.pageId = 'test';
                     break;
                 case 'admin':
                     this.pageId = 'adminPanel';
@@ -93,7 +99,7 @@ class Page {
         return this;
     }
 
-    getCurrentTask() {
+    joinToAccount() {
         let self = this;
         var interval = setInterval(function () {
             console.log('try get');
@@ -210,6 +216,13 @@ class Page {
                 },
                 _cache: []
             }
+        }
+    }
+
+    switchAccount(account) {
+        if (account && account.accountId) {
+            this.accountId = account.accountId;
+            this.joinToAccount();
         }
     }
 

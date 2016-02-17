@@ -1,4 +1,5 @@
 import Socket from '../socket/socket.js';
+import Menu from '../menu/menu.js';
 import ui from '../ui'
 import {_} from 'underscore';
 
@@ -16,6 +17,10 @@ class Page {
         this.accountId = null;
         this.pageId = null;
         this.socket = new Socket(this);
+
+        this.leftMenu = new Menu(this, 'left');
+        this.rightMenu = new Menu(this, 'right');
+
         this.ui = ui;
     }
 

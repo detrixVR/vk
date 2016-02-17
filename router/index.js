@@ -69,6 +69,7 @@ module.exports = function (app) {
 
 
     app.get('/check', require('./check').get);
+    app.get('/static', require('./static').get);
 
     app.get('/test', require('./test').get);
     app.post('/test', require('./test').post);
