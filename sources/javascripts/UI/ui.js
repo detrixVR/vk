@@ -5,16 +5,11 @@ class UI {
 
     constructor(page) {
         this.Page = page;
-
-
     }
 
 
     init() {
         let that = this;
-
-        //   this.leftMenu = {elem: $('.left-menu'), timeout: null};
-        // this.rightMenu = {elem: $('.right-menu'), timeout: null};
 
         _.templateSettings = {
             evaluate: /\{\{(.+?)\}\}/g,
@@ -254,12 +249,19 @@ class UI {
         this._getSideMenu($elem).menuToggleFilter($elem);
     }
 
+    drawAccountInfo() {
+        $('#accountInfoHolder').html(_.template($('#accountInfoTemplate').html())(this.Page.account));
+    }
+
     navigate($elem) {
-        $('iframe').attr('src', $elem.data('link'));
-    /*, function (result) {
-            console.log('loaded');
-            window.frames[0].document.innerHTML = result
-        })*/
+        let $iframe = $('#iframe');
+        this.progress($iframe, true);
+        $iframe.load($elem.data('link'), (result) => {
+
+            this.drawAccountInfo();
+
+            this.progress($iframe, false);
+        });
     }
 
     getStatistic() {

@@ -55,6 +55,6 @@ module.exports.post = function (req, res) {
             {id: 1166, accountId: 1114, firstName: 'Имя', lastName: 'Фамилия', photo: 'http://vk.com/images/camera_50.png'},
             {id: 1167, accountId: 1115, firstName: 'Имя', lastName: 'Фамилия', photo: 'http://vk.com/images/camera_50.png'},
         ])
-    }, 5000)
+    }, 1000)
 
 };

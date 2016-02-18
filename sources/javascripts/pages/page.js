@@ -222,6 +222,7 @@ class Page {
     switchAccount(account) {
         if (account && account.accountId) {
             this.accountId = account.accountId;
+            this.account = account;
             this.joinToAccount();
         }
     }
