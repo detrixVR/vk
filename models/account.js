@@ -18,7 +18,11 @@ var schema = new Schema({
         type: String,
         required: true
     },
-
+    info: {
+        type: Object,
+        required: false,
+        default:{}
+    },
     created: {
         type: Date,
         required: false,

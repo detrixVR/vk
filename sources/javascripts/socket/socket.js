@@ -112,7 +112,7 @@ class Socket {
                         notify: data,
                         type: 2
                     })*/
-                    console.log(data);
+                    console.error(data);
                 });
 
                 this.socket.on('reconnect', function () {

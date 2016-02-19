@@ -1,3 +1,6 @@
+
+var Account = require('models/account');
+
 module.exports.get = function (req, res) {
     res.render('workplace/test', {
         user: req.user,
@@ -57,4 +60,33 @@ module.exports.post = function (req, res) {
         ])
     }, 1000)
 
+};
+
+module.exports.put = function (req, res) {
+
+   for (var i = 0; i < 50; i++) {
+       var newAccount = new Account({
+           uid: {
+               type: String,
+               required: true
+           },
+           instance: {
+               type: Number,
+               required: true
+           },
+           username: {
+               type: String,
+               required: true
+           },
+           accountId: {
+               type: String,
+               required: true
+           },
+           info: {
+               type: Object,
+               required: false,
+               default:{}
+           },
+       })
+   }
 };

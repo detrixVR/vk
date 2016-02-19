@@ -98,7 +98,8 @@ class Menu {
                     }
                 }
                 console.log(data);
-            })
+            });
+            this._hideMenu();
         }
     }
 

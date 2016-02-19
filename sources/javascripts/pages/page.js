@@ -10,88 +10,28 @@ class Page {
 
     constructor() {
 
+        this.accountId = null;
+        this.pageId = 'mainPage';
+        this.account = null;
     }
 
 
     init() {
         if (!this.initialized) {
-
-            this.Socket = new Socket(this).init();
             this.UI = new UI(this).init();
-            this.leftMenu = new Menu(this, 'left');
-            this.rightMenu = new Menu(this, 'right');
 
             this.UI.overlay('Соединение...');
 
-            let parsedURL = this.parseUrl(window.location);
-            let parsedQUERY = this.parseQuery(window.location.search);
+            this.Socket = new Socket(this).init();
 
-            switch (parsedURL.path.substring(1)) {
-                case '':
-                    this.pageId = 'mainPage';
-                    break;
-                case 'test':
-                    this.pageId = 'test';
-                    break;
-                case 'admin':
-                    this.pageId = 'adminPanel';
-                    break;
-                case 'proxies':
-                    this.pageId = 'validateProxies';
-                    break;
-                case 'accounts':
-                    this.pageId = 'validateAccounts';
-                    break;
-                case 'peoples':
-                    this.pageId = 'searchPeoples';
-                    break;
-                case 'groups':
-                    this.pageId = 'searchGroups';
-                    break;
-                case 'lists':
-                    this.pageId = 'listCreatingFromPerson';
-
-                    switch (parsedQUERY.type) {
-                        case 'group':
-                            this.pageId = 'listCreatingFromGroup';
-                            break;
-                        case 'audio':
-                            this.pageId = 'listCreatingFromAudio';
-                            break;
-                        case 'video':
-                            this.pageId = 'listCreatingFromVideo';
-                            break;
-                        case 'post':
-                            this.pageId = 'listCreatingFromPost';
-                            break;
-                    }
-                    break;
-                case 'tasks':
-                    this.pageId = 'taskExecution';
-                    break;
-                case 'config':
-
-                    this.pageId = 'configurationClean';
-
-                    switch (parsedQUERY.type) {
-                        case 'copy':
-                            this.pageId = 'configurationCopy';
-                            break;
-                        case 'group':
-                            this.pageId = 'configurationGroup';
-                            break;
-                    }
-                    break;
-            }
-
-            this.accountId = +parsedQUERY.account || 10000000;
-
-            console.log(this.pageId);
-            console.log(this.accountId);
-
-            // this.getCurrentTask();
+            this.leftMenu = new Menu(this, 'left');
+            this.rightMenu = new Menu(this, 'right');
 
             this.initRequester();
+
+            this.UI.drawAccountInfo();
+
+            this.UI._postInit();
 
             this.initialized = true;
         }
@@ -99,7 +39,11 @@ class Page {
         return this;
     }
 
-    joinToAccount() {
+    setInitialAccount() {
+
+    }
+
+    joinAccountPage() {
         let self = this;
         var interval = setInterval(function () {
             console.log('try get');
@@ -223,7 +167,9 @@ class Page {
         if (account && account.accountId) {
             this.accountId = account.accountId;
             this.account = account;
-            this.joinToAccount();
+            this.UI.drawAccountInfo();
+            this.UI._postInit();
+            this.joinAccountPage();
         }
     }
 

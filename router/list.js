@@ -17,7 +17,8 @@ module.exports.post = function (req, res) {
         return (0);
     }
 
-    if (!options.listType || !options.accountId) {
+    if (!options.listType ||
+        (options.listType !== 'account' && options.listType !== 'proxy' && !options.accountId)) {
         res.status(400).json({
             msg: 'Неверные параметры'
         });
@@ -57,7 +58,10 @@ module.exports.put = function (req, res) {
         });
     }
 
-    if (!options.listType || !options.rows || !options.rows.length || !options.accountId) {
+    if (!options.listType ||
+        !options.rows ||
+        !options.rows.length ||
+        (options.listType !== 'account' && options.listType !== 'proxy' && !options.accountId)) {
 
         return res.status(400).json({
             msg: 'Неверные параметры'

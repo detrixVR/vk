@@ -1,0 +1,88 @@
+<div class="row">
+    <div class="col-xs-12">
+        <div class="well well-sm container-fluid">
+            <div class="row">
+
+                <div class="col-xs-6 col-sm-3 col-md-2">
+                    <label class="small control-label" data-toggle="tooltip" data-placement="top" title="" data-original-title="Какой список использовать">Проверять</label>
+                    <select class="selectpicker" data-width="100%" id="targetSelect" data-toggle="tooltip" data-placement="left" title="" data-original-title="Tooltip on left">
+                        <option>Все</option>
+                        <option>Загруженные</option>
+                        <option>Выделенные</option>
+                    </select>
+                </div>
+
+
+
+                <div class="col-xs-6 col-sm-3 col-md-2">
+                    <label class="small control-label"></label>
+
+                    <div class="checkbox">
+                        <input type="checkbox" id="deleteIfWrong" data-settings="true">
+                        <label for="deleteIfWrong">
+                            Удалять невалидные
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-xs-6 col-sm-3 col-md-2">
+                    <label class="small control-label"></label>
+                    <div class="checkbox">
+                        <input type="checkbox" id="checkGetUserInfo" checked/>
+                        <label for="checkGetUserInfo">
+                            Получать информацию
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="well well-sm">
+            <table data-toggle="bootgrid"
+                   data-ajax="true"
+                   data-url="list"
+                   data-list-type="account"
+                   data-selection="true"
+                   data-row-select="true"
+                   data-multi-select="false"
+                   class="table table-condensed table-hover table-striped">
+                <thead>
+                <tr>
+                    <th  data-column-id="_id"
+                         data-visible="false"
+                         data-identifier="true"
+                         data-type="string"
+                         data-visible-in-selection="false">ID</th>
+
+                    <th data-column-id="created"
+                        data-order="1"
+                        data-visible="false"
+                        data-visible-in-selection="false">Created</th>
+
+                    <th  data-column-id="content"
+                         data-editable="true">Прокси</th>
+
+                    <th data-column-id="valid"
+                        data-formatter="status"
+                        data-sortable="true"
+                        data-width="200px">Статус</th>
+
+                    <th data-formatter="commandsAll"
+                        data-sortable="false"
+                        data-width="100px"
+                        data-visible-in-selection="false"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    console.log(_);
+
+</script>

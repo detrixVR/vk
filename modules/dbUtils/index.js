@@ -283,7 +283,7 @@ var putToDbForGrid = function (type, options, next) {
             }
 
             Requester.update({
-                username: req.user.username,
+                username: options.username,
                 _id: item._id
             }, item, {
                 upsert: false
@@ -294,7 +294,7 @@ var putToDbForGrid = function (type, options, next) {
         } else {
 
             var obj = utils.extend({
-                username: req.user.username,
+                username: options.username,
                 accountId: options.accountId
             }, item);
 

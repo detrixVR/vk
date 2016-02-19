@@ -19,20 +19,34 @@
         <div class="toolbar">
             <i class="material-icons" onclick="$('#kozelTimur').trigger('toggleMenu', $(this))"
                data-side="left">reorder</i>
-            <i class="material-icons">settings</i>
-            <i class="material-icons" onclick="$('#kozelTimur').trigger('toggleMenu', $(this))" data-side="right">supervisor_account</i>
-            <i class="material-icons">record_voice_over</i>
-            <i class="material-icons">today</i>
-            <i class="material-icons">http</i>
-            <i class="material-icons">search</i>
-            <i class="material-icons">access_alarm</i>
-            <i class="material-icons">group_add</i>
-            <i class="material-icons" onclick="$('#kozelTimur').trigger('navigate', $(this))"
-               data-link="/static">public</i>
+            <i class="material-icons" onclick="$('#kozelTimur').trigger('navigate', $(this))" data-link="settings"
+               data-free="true">settings</i>
+            <i class="material-icons" onclick="$('#kozelTimur').trigger('navigate', $(this))" data-link="proxies"
+               data-free="true">http</i>
+            <i class="material-icons" onclick="$('#kozelTimur').trigger('navigate', $(this))" data-link="accounts"
+               data-free="true">supervisor_account</i>
         </div>
 
-        <div id="iframe" style="border: none; height: 100%;width: 100%" width="100%" height="100%" scrolling="no">
-
+        <div style="border: none; height: 100%;width: 100%;padding: 5px;">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xs-12 col-md-4">
+                        <div id="accountInfoHolder"></div>
+                    </div>
+                    <div class="col-xs-12 col-md-8">
+                        <div id="taskInfoHolder" style="height: 200px">
+                            <div style="height: 50px;background-color: gray">
+                                <i class="material-icons" id="startPauseTaskButton"
+                                   onclick="$('#kozelTimur').trigger('startPauseTask', $(this))">play_arrow</i>
+                                <i class="material-icons" id="stopTaskButton"
+                                   onclick="$('#kozelTimur').trigger('stopTask', $(this))">stop</i>
+                            </div>
+                            <div style="height: 150px;background-color: lightcoral"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="iframe"></div>
+            </div>
         </div>
 
 
@@ -66,8 +80,6 @@
 
 <div class="hidden" id="kozelTimur"></div>
 
-<script src="javascripts/libs.js"></script>
-<script src="javascripts/app.js"></script>
 
 <script type="template" id="accountListRowTemplate">
 
@@ -90,28 +102,65 @@
 </script>
 
 <script type="template" id="accountInfoTemplate">
+
+    {{ if (!account) { }}
+
+
+    <div><h2>Нет выбран аккаунт</h2>
+
+        <div onclick="$('#kozelTimur').trigger('toggleMenu', $(this))" data-side="right">
+            <i class="material-icons">supervisor_account</i> Выбрать
+        </div>
+        <div onclick="$('#kozelTimur').trigger('navigate', $(this))" data-link="accounts" data-free="true">
+            <i class="material-icons">group_add</i> Добавить
+        </div>
+    </div>
+
+
+    {{ } else { }}
+
+
     <div style="width: 100%;height: 200px">
         <div style="height:200px;background-color: gray">
 
             <div style="padding: 5px">
-                <div style="width:100px;    border-radius: 4px;margin: 0 auto 0 auto;height:100px;background-position:50%;background-repeat:no-repeat;background-image: url(http://vk.com/images/camera_100.png)">
+                <a href="http://vk.com/id{{=account.accountId}}" target="_blank">
+                    <div style="width:100px;    border-radius: 4px;margin: 0 auto 0 auto;height:100px;background-position:50%;background-repeat:no-repeat;background-image: url(http://vk.com/images/camera_100.png)">
                     </div>
+                </a>
             </div>
-            <div style="text-align: center;color:white"><h2>Imya Familiya</h2></div>
+            <div style="text-align: center;color:white">
+                <h2>{{=account.firstName}} {{=account.lastName}}</h2>
+            </div>
             <div style="text-align: center;">
-                <i class="material-icons">build</i>
-                <i class="material-icons">delete</i>
-                <i class="material-icons">content_copy</i>
-                <i class="material-icons">cloud_download</i>
+                <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title="Настроить">build</i>
+                <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title="Чистить">delete</i>
+                <i class="material-icons" data-toggle="tooltip" data-placement="bottom"
+                   title="Копировать">content_copy</i>
+                <i class="material-icons" data-toggle="tooltip" data-placement="bottom"
+                   title="Скачать">cloud_download</i>
+                <i class="material-icons" data-toggle="tooltip" data-placement="bottom" title="Говорилка">record_voice_over</i>
+                <i class="material-icons">today</i>
+
+                <i class="material-icons">search</i>
+                <i class="material-icons">access_alarm</i>
+                <i class="material-icons">group_add</i>
+                <i class="material-icons" onclick="$('#kozelTimur').trigger('toggleMenu', $(this))" data-side="right">compare_arrows</i>
+                <i class="material-icons" onclick="$('#kozelTimur').trigger('navigate', $(this))" data-link="static">public</i>
             </div>
 
         </div>
     </div>
 
 
-    </div>
+    {{ } }}
 
 </script>
+
+<%- include ../templates/modalInput.ejs %>
+
+<script src="javascripts/libs.js"></script>
+<script src="javascripts/app.js"></script>
 
 
 </body>

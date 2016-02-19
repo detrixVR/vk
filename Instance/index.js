@@ -95,6 +95,15 @@ class Instance {
         })
     }
 
+    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
+        console.log(data);
+        /*if (data.pageId === 'proxies' || data.pageId === 'accounts') {
+
+        } else */if (!data.accountId) {
+            return this.Socket.s.sockets.in(`${data.username}`).emit('error', 'Не выбран аккаунт')
+        }
+    }
+
     save(callback) {
         let self = this;
 

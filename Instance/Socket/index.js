@@ -118,6 +118,7 @@ class Socket {
                                             if (err) {
                                                 intel.error('Невозможно создать аккаунт');
                                             } else {
+                                                //socket.join(`${user.username}:${user.pageId}`);
                                                 socket.join(self.getUserNameString(user));
                                                 socket.emit('setAccountPage');
                                             }
@@ -127,8 +128,8 @@ class Socket {
                         }
 
                         switch (command) {
-                            case 'createTask':
-                            case 'startPauseTask':
+                            //case 'createTask':
+                          //  case 'startPauseTask':
                             case 'getCurrentTask':
                             case 'getCurrentTasks':
                             case 'stopTask':
@@ -138,6 +139,14 @@ class Socket {
                                  });*/
                                 console.log(roomsWhereUserIs)
                                 return self.hub.requestMaster(command, extend({}, user, data));
+                        }
+
+                        switch (command) {
+                            case 'createTask':
+                                return self.Instance.createTask(extend({}, user, data));
+                            case 'startPauseTask':
+                               // console.log(roomsWhereUserIs)
+                                return self.Instance.startPauseTask(extend({}, user, data));
                         }
 
                         switch (command) {

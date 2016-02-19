@@ -349,6 +349,10 @@ if (!sticky.listen(server, app.get('port'), {workers: 2})) {
         }
     });
 
+    hub.on('startPauseTask', function (data, sender, callback) {
+        console.log(data);
+    });
+
     /*let eachWorker = function (callback) {
         for (var id in cluster.workers) {
             callback(cluster.workers[id]);
