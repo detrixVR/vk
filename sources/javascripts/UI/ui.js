@@ -542,64 +542,6 @@ class UI {
                 } else {
 
                     this.Page.pageId = link;
-                  /*  switch (link) {
-                        case '':
-                            this.Page.pageId = 'mainPage';
-                            break;
-                        case 'test':
-                            this.Page.pageId = 'mainPage';
-                            break;
-                        case 'admin':
-                            this.Page.pageId = 'adminPanel';
-                            break;
-                        case 'proxies':
-                            this.Page.pageId = 'validateProxies';
-                            break;
-                        case 'accounts':
-                            this.Page.pageId = 'validateAccounts';
-                            break;
-                        case 'peoples':
-                            this.Page.pageId = 'searchPeoples';
-                            break;
-                        case 'groups':
-                            this.Page.pageId = 'searchGroups';
-                            break;
-                        case 'lists':
-                            this.Page.pageId = 'listCreatingFromPerson';
-
-                            switch (parsedQUERY.type) {
-                                case 'group':
-                                    this.Page.pageId = 'listCreatingFromGroup';
-                                    break;
-                                case 'audio':
-                                    this.Page.pageId = 'listCreatingFromAudio';
-                                    break;
-                                case 'video':
-                                    this.Page.pageId = 'listCreatingFromVideo';
-                                    break;
-                                case 'post':
-                                    this.Page.pageId = 'listCreatingFromPost';
-                                    break;
-                            }
-                            break;
-                        case 'tasks':
-                            this.Page.pageId = 'taskExecution';
-                            break;
-                        case 'config':
-
-                            this.pageId = 'configurationClean';
-
-                            switch (parsedQUERY.type) {
-                                case 'copy':
-                                    this.Page.pageId = 'configurationCopy';
-                                    break;
-                                case 'group':
-                                    this.Page.pageId = 'configurationGroup';
-                                    break;
-                            }
-                            break;
-                    }
-*/
                     this.Page.joinAccountPage();
                 }
 
@@ -725,7 +667,8 @@ class UI {
         let uid = $elem.data('uid');
         this.Page.Socket.socket.emit('startPauseTask', $.extend({
             uid: uid,
-            pageId: this.Page.pageId
+            pageId: this.Page.pageId,
+            start: $elem.data('start')
         }, (uid ? {} : {settings: this.getSettings()})));
     }
 

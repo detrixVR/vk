@@ -109,7 +109,7 @@ class Socket {
                                             }
                                         }
                                         user.pageId = data.pageId;
-                                        user.accountId = data.accountId;
+                                        user.accountId = data.accountId || 1;
 
                                         self.Instance.addAccount({
                                             username: user.username,

@@ -7,7 +7,7 @@ var extend = require('extend'),
     utils = require('modules/utils'),
     settings = require('newsocket/tasks/settings'),
     uuid = require('node-uuid'),
-    Task = require('newsocket/Classes/Task'),
+    Task = require('Instance/Task'),
     async = require('async'),
     intel = require('intel'),
     _ = require('underscore');
@@ -58,21 +58,31 @@ class Account {
      }));
      this.tasks.push(newTask);
      }
-     }
+     }*/
 
-     startPauseTask(data) {
-     let task = this.getExistingTask(data);
-     if (task) {
-     task.start();
-     } else {
-     var newTask = new Task(this, extend({}, data, {
-     uid: uuid.v1()
-     }));
-     this.tasks.push(newTask);
-     newTask.start();
-     }
-     }
+    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
+        console.log(data);
+        let task;
+        if (data.pageId) {
+            task = this._getTaskByPageId(data);
+        } else {
+            task = this._getTaskByUid(data);
+        }
+        if (task) {
+            console.log('start')
+            task.start();
+        } else {
+            var newTask = new Task(this, extend({}, data, {
+                uid: uuid.v1()
+            }));
+            this.tasks.push(newTask);
+            if (data.start) {
+                newTask.start();
+            }
+        }
+    }
 
+    /*
      stopTask(data) {
      console.log('stopTask');
      let task = this.getExistingTask(data);
@@ -137,7 +147,7 @@ class Account {
         }
     }
 
-    getTaskByPageId(data) {
+    _getTaskByPageId(data) {
         return _.find(this.tasks, function (item) {
             return item.pageId === data.pageId;
         })

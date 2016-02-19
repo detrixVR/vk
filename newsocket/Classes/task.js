@@ -11,7 +11,7 @@ class Task {
     constructor(Account, data) {
         this.Account = Account;
         this.accountUid = Account.uid;
-        this.room = this.Account.Socket.getUserNameString(data);
+        this.room = this.Account.Instance.Socket.getUserNameString(data);
         this.username = data.username;
         this.accountId = data.accountId;
         this.pageId = data.pageId;

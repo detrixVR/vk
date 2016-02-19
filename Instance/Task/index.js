@@ -1,22 +1,20 @@
 "use strict";
-var extend = require('extend');
-var dbTask = require('../../models/task').Task;
-var utils = require('modules/utils');
-
-var tasks = require('newsocket/tasks');
-var settings = require('newsocket/tasks/settings');
+var extend = require('extend'),
+    dbTask = require('models/task'),
+    utils = require('modules/utils'),
+    tasks = require('newsocket/tasks'),
+    intel = require('intel'),
+    settings = require('newsocket/tasks/settings');
 
 class Task {
 
     constructor(Account, options) {
-
 
         this.Account = Account;
 
         let defaults = {
             uid: null,
             pageId: null,
-           // taskName: null,
             settings: [],
             messages: [],
             initLoop: 0,
@@ -27,9 +25,7 @@ class Task {
 
 
         this.uid = defaults.uid;
-        // this.room = this.Account.Socket.getUserNameString(data);
-        this.username = defaults.username;
-        this.accountId = defaults.accountId;
+        this.room = this.Account.Instance.Socket.getUserNameString(options);
         this.settings = defaults.settings;
         this.messages = defaults.messages;
         this.pageId = defaults.pageId;
@@ -38,6 +34,8 @@ class Task {
         this.initState = defaults.state;
 
         this.state = 0;//defaults.state;
+
+        intel.debug(`Создан новый task: [${this.room}]`);
     }
 
 
@@ -48,12 +46,7 @@ class Task {
             {
                 this.state = 1;
 
-
-                let splitArray = this.taskName.split('_');
-
-                console.log(this.taskName);
-
-                switch (splitArray[0]) {
+                switch (this.pageId) {
                     case 'gridRefreshItem':
                     case 'searchPeoples':
                     case 'searchGroups':

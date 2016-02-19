@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
     <%- include ../parts/cabinetHead.ejs %>
 </head>
@@ -37,7 +37,7 @@
                         <div id="taskInfoHolder" style="height: 200px">
                             <div style="height: 50px;background-color: gray">
                                 <i class="material-icons" id="startPauseTaskButton"
-                                   onclick="$('#kozelTimur').trigger('startPauseTask', $(this))">play_arrow</i>
+                                   onclick="$('#kozelTimur').trigger('startPauseTask', $(this))" data-start="true">play_arrow</i>
                                 <i class="material-icons" id="stopTaskButton"
                                    onclick="$('#kozelTimur').trigger('stopTask', $(this))">stop</i>
                             </div>

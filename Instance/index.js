@@ -78,7 +78,7 @@ class Instance {
 
             return newAccount.init(callback)
         } else {
-            intel.debug(`Существующий аккаунт:${data.accountId}`);
+            intel.debug(`Существующий аккаунт: ${data.username}:${data.accountId}`);
             return callback();
         }
     }
@@ -95,12 +95,25 @@ class Instance {
         })
     }
 
-    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
-        console.log(data);
-        /*if (data.pageId === 'proxies' || data.pageId === 'accounts') {
+    sendError(credetials, error) {
+        this.Socket.s.sockets.in(this.Socket.getUserNameString(credetials)).emit('error', error)
+    }
 
-        } else */if (!data.accountId) {
-            return this.Socket.s.sockets.in(`${data.username}`).emit('error', 'Не выбран аккаунт')
+    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
+        if (!data.pageId && !data.uid) {
+            return this.sendError(data, 'wrong parametres');
+        } else {
+            if (!data.accountId) {
+                return this.sendError(data, 'Не выбран аккаунт');
+            } else {
+                let account = this.getAccountByCredentials(data);
+                if (!account) {
+                    intel.error('account not found');
+                    return this.sendError(data, 'account not found');
+                } else {
+                    account.startPauseTask(data);
+                }
+            }
         }
     }
 
