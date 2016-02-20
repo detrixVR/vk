@@ -66,17 +66,17 @@ class Instance {
         if (!account) {
             data.uid = uuid.v1();
             let newAccount = new Account(self, data);
-            this.accounts.push(newAccount);
-
-            process.send({
-                command: 'accountReady', data: {
-                    instanceSn: self.sn,
-                    uid: newAccount.uid,
-                    tasks: []
+            return newAccount.init((err) => {
+                if (err) {
+                    return callback(err);
+                } else {
+                    this.accounts.push(newAccount);
+                    return GLOBAL.hub.requestMaster('accountReady', {
+                        instanceSn: self.sn,
+                        uid: newAccount.uid,
+                        tasks: []}, callback);
                 }
-            });
-
-            return newAccount.init(callback)
+            })
         } else {
             intel.debug(`Существующий аккаунт: ${data.username}:${data.accountId}`);
             return callback();
@@ -111,7 +111,7 @@ class Instance {
                     intel.error('account not found');
                     return this.sendError(data, 'account not found');
                 } else {
-                    account.startPauseTask(data);
+                    return account.startPauseTask(data);
                 }
             }
         }

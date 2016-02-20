@@ -31,16 +31,17 @@ class Task {
         this.pageId = defaults.pageId;
 
         this.initLoop = defaults.initLoop || 0;
-        this.initState = defaults.state;
+       // this.initState = defaults.initState;
 
-        this.state = 0;//defaults.state;
+        this.state = 0;
 
         intel.debug(`Создан новый task: [${this.room}]`);
     }
 
 
-    start() {
+    start(callback) {
 
+        console.log(this.getState())
         switch (this.getState()) {
             case 0:
             {
@@ -50,11 +51,11 @@ class Task {
                     case 'gridRefreshItem':
                     case 'searchPeoples':
                     case 'searchGroups':
+                    case 'proxies':
 
-                        let error = utils.validateSettings(this.settings, settings[splitArray[0]]);
+                        let error = utils.validateSettings(this.settings, settings[this.pageId]);
 
                         if (error) {
-                            console.error(error);
 
                             this.pushMesssage(utils.createMsg({
                                 msg: error.msg,
@@ -64,10 +65,10 @@ class Task {
                             }));
 
                             this.stop(() => {
-                                return (0);
+                                return callback(new Error('validate error'));
                             });
                         } else {
-                            eval(tasks[splitArray[0]])(this, (err, cbData) => {
+                            eval(tasks[this.pageId])(this, (err, cbData) => {
 
                                 if (err) {
 
@@ -90,16 +91,18 @@ class Task {
                                 }
 
                             });
+                            return callback();
                         }
 
 
                         break;
                     default:
 
+                        console.log('dssss')
                         this.pushMesssage(utils.createMsg({msg: 'Неизвестный процесс'}));
 
                         this.stop(() => {
-                            return (0);
+                            return callback(new Error('Неизвестный процесс'));
                         });
                 }
             }
@@ -124,14 +127,14 @@ class Task {
     }
 
     sendState() {
-        this.Account.Socket.s.sockets.in(this.room).emit('setTaskState', {
+        this.Account.Instance.Socket.s.sockets.in(this.room).emit('setTaskState', {
             taskName: this.taskName,
             state: this.getState()
         });
     }
 
     sendMessage(msg) {
-        this.Account.Socket.s.sockets.in(this.room).emit('printEvent', extend({}, {
+        this.Account.Instance.Socket.s.sockets.in(this.room).emit('printEvent', extend({}, {
             uid: this.uid
         }, {
             msg: msg
@@ -139,7 +142,7 @@ class Task {
     }
 
     sendEvent(data) {
-        this.Account.Socket.s.sockets.in(this.room).emit(data.eventName, extend({}, {
+        this.Account.Instance.Socket.s.sockets.in(this.room).emit(data.eventName, extend({}, {
             taskName: this.taskName
         }, data));
     }
@@ -154,11 +157,9 @@ class Task {
 
         this.sendState();
 
-        this.Account.justStopTask({
-            uid: this.uid
-        });
+        this.Account.justStopTask(this);
 
-        this.save(function () {
+        this.save(() => {
             return callback();
         });
     }
@@ -179,18 +180,18 @@ class Task {
 
         if (!this.initialized) {
 
-            switch (this.initState) {
-                case 1:
-                    this.start();
+            switch (this.state) {
+                case 0:
+                    this.start(callback);
                     break;
-                case 2:
+                case 1:
                     this.pause();
                     break;
                 default:
                     return callback(new Error('task wrong state'));
             }
 
-            return callback();
+            //  return callback();
 
             this.initialized = true;
         }

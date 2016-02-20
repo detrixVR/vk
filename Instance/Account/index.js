@@ -60,27 +60,6 @@ class Account {
      }
      }*/
 
-    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
-        console.log(data);
-        let task;
-        if (data.pageId) {
-            task = this._getTaskByPageId(data);
-        } else {
-            task = this._getTaskByUid(data);
-        }
-        if (task) {
-            console.log('start')
-            task.start();
-        } else {
-            var newTask = new Task(this, extend({}, data, {
-                uid: uuid.v1()
-            }));
-            this.tasks.push(newTask);
-            if (data.start) {
-                newTask.start();
-            }
-        }
-    }
 
     /*
      stopTask(data) {
@@ -90,17 +69,10 @@ class Account {
      task.justStop();
      }
      }
-
-     justStopTask(data) {
-
-     console.log('JustStop');
-     var task = this.getExistingTask(data);
-     if (task) {
-     this.tasks.splice(this.tasks.indexOf(task), 1);
-
-     console.log(this.tasks);
-     }
-     }*/
+     */
+    justStopTask(Task) {
+        this.tasks.splice(this.tasks.indexOf(Task), 1);
+    }
 
     init(callback) {
         let self = this;
@@ -124,26 +96,38 @@ class Account {
     }
 
     addTask(data) {
-        let self = this;
-        let task = this.getTaskByPageId(data);
-        if (task) {
-            let newTask = new Task(self, data);
-            this.tasks.push(newTask);
-            newTask.init(function (err) {
-                if (err) {
-                    intel.error('Невозможно создать таск');
-                } else {
-                    process.send({
-                        command: 'taskReady', data: {
-                            instanceSn: self.Account.Instance.sn,
-                            accountUid: self.Account.uid,
-                            uid: newTask.uid
-                        }
-                    });
-                }
-            })
+
+        data.state = data.start ? 0 : 1;
+
+        let newTask = new Task(this, data);
+        newTask.init((err) => {
+            if (err) {
+                intel.error(err);
+            } else {
+                this.tasks.push(newTask);
+                GLOBAL.hub.requestMaster('taskReady', {
+                    instanceSn: this.Instance.sn,
+                    accountUid: this.uid,
+                    uid: newTask.uid
+                });
+            }
+        })
+
+    }
+
+    startPauseTask(data) { //username: 'huyax', pageId: 'mainPage', settings: {}
+        console.log(data);
+        let task;
+        if (data.pageId) {
+            task = this._getTaskByPageId(data);
         } else {
-            intel.warning('Попытка добавить существующий таск');
+            task = this._getTaskByUid(data);
+        }
+        if (task) {
+            console.log('start');
+            task.start();
+        } else {
+            this.addTask(data);
         }
     }
 

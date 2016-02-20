@@ -1,6 +1,6 @@
 "use strict";
 
-let utils = require('../../../modules/utils');
+let utils = require('modules/utils');
 
 let searchGroups = {
     city: {
@@ -351,9 +351,25 @@ let gridRefreshItem = {
     }
 };
 
+let proxies = {
+    targetSelect: {
+        name: 'targetSelect',
+        validate: function (value, settings) {
+           return false;
+        }
+    },
+    deleteIfWrong: {
+        name: 'deleteIfWrong',
+        validate: function (value, settings) {
+            return false;
+        }
+    }
+};
+
 module.exports = {
     searchGroups: searchGroups,
     searchPeoples: searchPeoples,
     listCreatingFromPerson: listCreatingFromPerson,
-    gridRefreshItem: gridRefreshItem
+    gridRefreshItem: gridRefreshItem,
+    proxies: proxies
 };

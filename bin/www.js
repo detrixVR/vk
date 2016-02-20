@@ -338,6 +338,25 @@ if (!sticky.listen(server, app.get('port'), {workers: 2})) {
 
     });
 
+    hub.on('startPauseTask', function (data, sender, callback) {
+        let result = getTaskByData(data);
+        if (result.instance && result.account && result.task) {
+            return hub.sendToWorker(cluster.workers[result.instance.sn], 'startPauseTask', data);
+        } else {
+            console.log('master startPauseTask');
+            return hub.sendToWorker(sender, 'startPauseTask', data);
+        }
+    });
+
+    hub.on('stopTask', function (data, sender, callback) {
+        let result = getTaskByData(data);
+        if (result.instance && result.account && result.task) {
+            return hub.sendToWorker(cluster.workers[result.instance.sn], 'stopTask', data);
+        } else {
+            console.log('master stopTask');
+            return hub.sendToWorker(sender, 'stopTask', data);
+        }
+    });
 
     hub.on('getCurrentTask', function (data, sender, callback) {
         let result = getTaskByData(data);
@@ -349,9 +368,30 @@ if (!sticky.listen(server, app.get('port'), {workers: 2})) {
         }
     });
 
-    hub.on('startPauseTask', function (data, sender, callback) {
-        console.log(data);
+    hub.on('accountReady', function (data, sender, callback) {
+        let result = getAccount(data);
+        if (result.instance && !result.account) {
+            result.instance.accounts.push({
+                uid: data.uid,
+                tasks: data.tasks
+            });
+            return callback();
+        } else {
+            return callback(new Error('master add account error'));
+        }
     });
+
+    hub.on('taskReady', function (data, sender, callback) {
+        let result = getTask(data);
+        if (result.instance && result.account && !result.task) {
+            result.account.tasks.push({
+                uid: data.uid
+            });
+        } else {
+            intel.error('Невозможно добавить таск');
+        }
+    });
+
 
     /*let eachWorker = function (callback) {
         for (var id in cluster.workers) {

@@ -103,26 +103,7 @@
 
     };
 
-    let getCurrentTask = function (msg) {
-        // console.log(msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId);
-        let room = msg.data.username + ':' + msg.data.accountId + ':' + msg.data.pageId;
-        if (msg.data && msg.data.account && msg.data.task) { // uids: { instance, account, task }
-            let account = GLOBAL.Instance.getAccountByUid(msg.data.account.uid);
-            if (account) {
-                account.getCurrentTask(msg.data.task, function (err, task) {
-                    if (err) {
-                        intel.error(err);
-                    } else {
-                        GLOBAL.Instance.Socket.s.sockets.in(room).emit('setCurrentTask', task);
-                    }
-                });
-            } else {
-                intel.error('Не найден аккаунт при поиске существующего таска')
-            }
-        } else {
-            GLOBAL.Instance.Socket.s.sockets.in(room).emit('setCurrentTask', null);
-        }
-    };
+
 
     let setStatistic = function (statistic) {
         GLOBAL.Instance.Socket.s.sockets.in('huyax:10000000:adminPanel').emit('setStatistic', statistic);
@@ -163,15 +144,22 @@
 
      });*/
 
+    hub.on('stopTask', function (data, sender, callback) {
+        return GLOBAL.Instance.stopTask(data);
+    });
+
+    hub.on('startPauseTask', function (data, sender, callback) {
+        return GLOBAL.Instance.startPauseTask(data);
+    });
+
     hub.on('getCurrentTask', function (data, sender, callback) {
         let account = GLOBAL.Instance.getAccountByCredentials(data);
         if (account) {
-            let task = account.getTaskByPageId(data);
+            let task = account._getTaskByPageId(data);
             console.log('send');
             GLOBAL.Instance.Socket.s.sockets.in(`${data.username}:${data.accountId}:${data.pageId}`).emit('setCurrentTask', task);
         }
     });
-
 
     hub.on('init', function (data, sender, callback) {
 

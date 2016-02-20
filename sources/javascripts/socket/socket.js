@@ -34,7 +34,7 @@ class Socket {
 
                 this.socket.on('setAccountPage', function () {
                     switch (that.Page.pageId) {
-                        case 'test':
+                        case 'proxies':
                         case 'mainPage':
                         case 'validateProxies':
                         case 'validateAccounts':

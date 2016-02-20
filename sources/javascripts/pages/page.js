@@ -9,12 +9,10 @@ import Menu from '../menu/menu.js';
 class Page {
 
     constructor() {
-
-        this.accountId = null;
+        this.accountId = 1;
         this.pageId = 'mainPage';
         this.account = null;
     }
-
 
     init() {
         if (!this.initialized) {

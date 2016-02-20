@@ -462,9 +462,15 @@ class UI {
         }
     }
 
+    _applySettings(settings) {
+        console.log(settings)
+    }
+
     setCurrentTask(task) {
         if (!task) {
             this.overlay();
+        } else {
+            this.applySettings(task.settings);
         }
     }
 
